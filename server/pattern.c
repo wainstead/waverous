@@ -169,7 +169,7 @@ free_pattern(Pattern p)
 
     if (buf) {
 	free(buf->buffer);
-	free(buf->fastmap);
+	myfree(buf->fastmap, M_PATTERN);
 	myfree(buf, M_PATTERN);
     }
 }
@@ -177,6 +177,9 @@ free_pattern(Pattern p)
 char rcsid_pattern[] = "$Id";
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.2  1997/03/03 04:19:16  nop
+ * GNU Indent normalization
+ *
  * Revision 1.1.1.1  1997/03/03 03:45:01  nop
  * LambdaMOO 1.8.0p5
  *
