@@ -865,7 +865,9 @@ emergency_mode()
     }
 
     printf("Bye.  (%s)\n\n", start_ok ? "continuing" : "saving database");
+#if NETWORK_PROTOCOL != NP_SINGLE
     fclose(stdout);
+#endif
 
     free_stream(s);
     in_emergency_mode = 0;
@@ -1215,8 +1217,10 @@ main(int argc, char **argv)
 		this_program, db_usage_string(), network_usage_string());
 	exit(1);
     }
+#if NETWORK_PROTOCOL != NP_SINGLE
     if (!emergency)
 	fclose(stdout);
+#endif
     if (log_file)
 	fclose(stderr);
 
@@ -1737,10 +1741,14 @@ register_server(void)
 		      bf_buffered_output_length, TYPE_OBJ);
 }
 
-char rcsid_server[] = "$Id: server.c,v 1.5.10.3 2004-05-20 19:57:11 wrog Exp $";
+char rcsid_server[] = "$Id: server.c,v 1.5.10.4 2004-05-21 23:02:56 wrog Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5.10.3  2004/05/20 19:57:11  wrog
+ * fixed flushing issues w.r.t. emergency mode;
+ * close stdout and stderr when we are not using them
+ *
  * Revision 1.5.10.2  2003/06/11 10:40:16  wrog
  * added binary argument to new_input_task()
  *
