@@ -1518,21 +1518,24 @@ do {    						    	\
 	    {
 		Var time;
 		unsigned id = 0, f_index;
+		double when;
 
 		time = POP();
 		f_index = READ_BYTES(bv, bc.numbytes_fork);
 		if (op == OP_FORK_WITH_ID)
 		    id = READ_BYTES(bv, bc.numbytes_var_name);
-		if (time.type != TYPE_INT) {
+		if (time.type != TYPE_INT && time.type != TYPE_FLOAT) {
 		    free_var(time);
 		    RAISE_ERROR(E_TYPE);
-		} else if (time.v.num < 0) {
-		    free_var(time);
+		}
+		when = time.type == TYPE_INT ? time.v.num : *time.v.fnum;
+	        free_var(time);
+		if(when < 0) {
 		    RAISE_ERROR(E_INVARG);
 		} else {
 		    enum error e;
 
-		    e = enqueue_forked_task2(RUN_ACTIV, f_index, time.v.num,
+		    e = enqueue_forked_task2(RUN_ACTIV, f_index, when,
 			op == OP_FORK_WITH_ID ? id : -1);
 		    if (e != E_NONE)
 			RAISE_ERROR(e);
@@ -2464,19 +2467,24 @@ bf_raise(Var arglist, Byte next, void *vdata, Objid progr)
 static package
 bf_suspend(Var arglist, Byte next, void *vdata, Objid progr)
 {
-    static int seconds;
+    static double seconds, *secondsp = NULL;
     int nargs = arglist.v.list[0].v.num;
 
-    if (nargs >= 1)
-	seconds = arglist.v.list[1].v.num;
-    else
-	seconds = -1;
+    if (nargs >= 1) {
+	seconds = arglist.v.list[1].type == TYPE_INT ?	
+				arglist.v.list[1].v.num :
+				*arglist.v.list[1].v.fnum;
+	secondsp = &seconds;
+    } else {
+	secondsp = NULL;
+    }
     free_var(arglist);
 
     if (nargs >= 1 && seconds < 0)
 	return make_error_pack(E_INVARG);
-    else
-	return make_suspend_pack(enqueue_suspended_task, &seconds);
+    else {
+	return make_suspend_pack(enqueue_suspended_task, secondsp);
+    }
 }
 
 static package
@@ -2619,7 +2627,7 @@ register_execute(void)
 				      bf_call_function_write,
 				      TYPE_STR);
     register_function("raise", 1, 3, bf_raise, TYPE_ANY, TYPE_STR, TYPE_ANY);
-    register_function("suspend", 0, 1, bf_suspend, TYPE_INT);
+    register_function("suspend", 0, 1, bf_suspend, TYPE_NUMERIC);
     register_function("read", 0, 2, bf_read, TYPE_OBJ, TYPE_ANY);
 
     register_function("seconds_left", 0, 0, bf_seconds_left);
@@ -2874,10 +2882,14 @@ read_activ(activation * a, int which_vector)
 }
 
 
-char rcsid_execute[] = "$Id: execute.c,v 1.13 2002-08-18 09:47:26 bjj Exp $";
+char rcsid_execute[] = "$Id: execute.c,v 1.13.4.1 2002-08-29 03:02:41 xythian Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.13  2002/08/18 09:47:26  bjj
+ * Finally made free_activation() take a pointer after noticing how !$%^&
+ * much time it was taking in a particular profiling run.
+ *
  * Revision 1.12  2001/03/12 05:10:54  bjj
  * Split out call_verb and call_verb2.  The latter must only be called with
  * strings that are already MOO strings (str_ref-able).
