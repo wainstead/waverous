@@ -957,7 +957,7 @@ server_new_connection(server_listener sl, network_handle nh, int outbound)
     h->print_messages = (!outbound && l->print_messages);
 
     if (!outbound)
-	new_input_task(h->tasks, "");
+	new_input_task(h->tasks, "", 0);
 
     oklog("%s: #%d on %s\n",
 	  outbound ? "CONNECT" : "ACCEPT",
@@ -988,7 +988,7 @@ server_receive_line(server_handle sh, const char *line)
     shandle *h = (shandle *) sh.ptr;
 
     h->last_activity_time = time(0);
-    new_input_task(h->tasks, line);
+    new_input_task(h->tasks, line, h->binary);
 }
 
 void
@@ -1727,10 +1727,13 @@ register_server(void)
 		      bf_buffered_output_length, TYPE_OBJ);
 }
 
-char rcsid_server[] = "$Id: server.c,v 1.5.10.1 2003-06-07 12:59:04 wrog Exp $";
+char rcsid_server[] = "$Id: server.c,v 1.5.10.2 2003-06-11 10:40:16 wrog Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5.10.1  2003/06/07 12:59:04  wrog
+ * introduced connection_option macros
+ *
  * Revision 1.5  1998/12/29 06:56:32  nop
  * Fixed leak in onc().
  *
