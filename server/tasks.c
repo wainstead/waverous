@@ -304,17 +304,6 @@ dequeue_input_task(tqueue * tq)
     return t;
 }
 
-static task *
-dequeue_any_task(tqueue * tq)
-{
-    task *t = dequeue_input_task(tq);
-
-    if (t)
-	return t;
-    else
-	return dequeue_bg_task(tq);
-}
-
 static void
 free_task(task * t, int strong)
 {				/* for FORKED tasks, strong == 1 means free the rt_env also.
@@ -575,11 +564,11 @@ do_login_task(tqueue * tq, char *command)
 	}
 	if (dead_tq) {		/* Copy over tasks from old queue for player */
 	    tq->num_bg_tasks = dead_tq->num_bg_tasks;
-	    while ((t = dequeue_any_task(dead_tq)) != 0) {
-		if (t->kind == TASK_INPUT)
-		    free_task(t, 0);
-		else		/* FORKED or SUSPENDED */
-		    enqueue_bg_task(tq, t);
+	    while ((t = dequeue_input_task(dead_tq)) != 0) {
+		free_task(t, 0);
+	    }
+	    while ((t = dequeue_bg_task(dead_tq)) != 0) {
+		enqueue_bg_task(tq, t);
 	    }
 	    dead_tq->player = NOTHING;	/* it'll be freed by run_ready_tasks */
 	    dead_tq->num_bg_tasks = 0;
@@ -984,10 +973,11 @@ run_ready_tasks(void)
 		did_one = 1;
 	    }
 	    while (!did_one) {	/* Loop over tasks, looking for runnable one */
-		if (tq->hold_input && !tq->reading)
+		t = (!tq->hold_input || tq->reading)
+		    ? dequeue_input_task(tq)
+		    : 0;
+		if (!t)
 		    t = dequeue_bg_task(tq);
-		else
-		    t = dequeue_any_task(tq);
 		if (!t)
 		    break;
 
@@ -1988,10 +1978,13 @@ register_tasks(void)
     register_function("flush_input", 1, 2, bf_flush_input, TYPE_OBJ, TYPE_ANY);
 }
 
-char rcsid_tasks[] = "$Id: tasks.c,v 1.10.2.2 2003-06-07 12:59:04 wrog Exp $";
+char rcsid_tasks[] = "$Id: tasks.c,v 1.10.2.3 2003-06-07 14:34:14 wrog Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.10.2.2  2003/06/07 12:59:04  wrog
+ * introduced connection_option macros
+ *
  * Revision 1.10.2.1  2003/06/04 21:28:59  wrog
  * removed useless arguments from resume_from_previous_vm(), do_forked_task();
  * replaced current_task_kind with is_fg argument for do_task();
