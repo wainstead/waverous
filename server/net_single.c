@@ -221,12 +221,16 @@ network_process_io(int timeout)
     return got_some;
 }
 
-char rcsid_net_single[] = "$Id: net_single.c,v 1.2.12.1 2003-06-07 12:59:04 wrog Exp $";
+char rcsid_net_single[] = "$Id: net_single.c,v 1.2.12.2 2003-06-07 13:03:55 wrog Exp $";
 
-/* $Log: not supported by cvs2svn $
-/* Revision 1.2  1997/03/03 04:19:07  nop
-/* GNU Indent normalization
 /*
+ * $Log: not supported by cvs2svn $
+ * Revision 1.2.12.1  2003/06/07 12:59:04  wrog
+ * introduced connection_option macros
+ *
+ * Revision 1.2  1997/03/03 04:19:07  nop
+ * GNU Indent normalization
+ *
  * Revision 1.1.1.1  1997/03/03 03:45:02  nop
  * LambdaMOO 1.8.0p5
  *
