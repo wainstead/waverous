@@ -23,6 +23,9 @@
 #include "config.h"
 #include "execute.h"
 
+#define MAX(A, B) ((A) > (B) ? (A) : (B))
+#define MIN(A, B) ((A) < (B) ? (A) : (B))
+
 #define Arraysize(x) (sizeof(x) / sizeof(*x))
 
 extern int mystrcasecmp(const char *, const char *);
@@ -54,6 +57,9 @@ extern const char *binary_to_raw_bytes(const char *binary, int *rawlen);
 #endif
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.2  1997/03/03 04:19:37  nop
+ * GNU Indent normalization
+ *
  * Revision 1.1.1.1  1997/03/03 03:45:04  nop
  * LambdaMOO 1.8.0p5
  *
