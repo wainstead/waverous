@@ -75,6 +75,22 @@ typedef enum {
 
 typedef struct Var Var;
 
+/* Experimental.  On the Alpha, DEC cc allows us to specify certain
+ * pointers to be 32 bits, but only if we compile and link with "-taso
+ * -xtaso" in CFLAGS, which limits us to a 31-bit address space.  This
+ * could be a win if your server is thrashing.  Running JHM's db, SIZE
+ * went from 50M to 42M.  No doubt these pragmas could be applied
+ * elsewhere as well, but I know this at least manages to load and run
+ * a non-trivial db.
+ */
+
+/* #define SHORT_ALPHA_VAR_POINTERS 1 */
+
+#ifdef SHORT_ALPHA_VAR_POINTERS
+#pragma pointer_size save
+#pragma pointer_size short
+#endif
+
 struct Var {
     union {
 	const char *str;	/* STR */
@@ -87,11 +103,21 @@ struct Var {
     var_type type;
 };
 
+#ifdef SHORT_ALPHA_VAR_POINTERS
+#pragma pointer_size restore
+#endif
+
 extern Var zero;		/* useful constant */
 
 #endif				/* !Structures_h */
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.2.2.1  1997/03/20 18:07:52  bjj
+ * Add a flag to the in-memory type identifier so that inlines can cheaply
+ * identify Vars that need actual work done to ref/free/dup them.  Add the
+ * appropriate inlines to utils.h and replace old functions in utils.c with
+ * complex_* functions which only handle the types with external storage.
+ *
  * Revision 1.2  1997/03/03 04:19:29  nop
  * GNU Indent normalization
  *
