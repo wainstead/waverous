@@ -32,6 +32,7 @@
 #include "opcode.h"
 #include "options.h"
 #include "parse_cmd.h"
+#include "parser.h"
 #include "server.h"
 #include "storage.h"
 #include "streams.h"
@@ -39,6 +40,7 @@
 #include "sym_table.h"
 #include "tasks.h"
 #include "timers.h"
+#include "unparse.h"
 #include "utils.h"
 #include "version.h"
 
@@ -511,7 +513,7 @@ push_activation(void)
 }
 
 void
-free_activation(activation *ap, char data_too)
+free_activation(activation * ap, char data_too)
 {
     Var *i;
 
@@ -978,7 +980,7 @@ do {    						    	\
 			res = list;
 		    else {
 			res = var_dup(list);
-		        free_var(list);
+			free_var(list);
 		    }
 		    PUSH(listset(res, value, index.v.num));
 		} else {	/* TYPE_STR */
@@ -1533,7 +1535,7 @@ do {    						    	\
 		    enum error e;
 
 		    e = enqueue_forked_task2(RUN_ACTIV, f_index, time.v.num,
-			op == OP_FORK_WITH_ID ? id : -1);
+					op == OP_FORK_WITH_ID ? id : -1);
 		    if (e != E_NONE)
 			RAISE_ERROR(e);
 		}
@@ -1753,8 +1755,8 @@ do {    						    	\
 			    free_var(POP());	/* replace list with error code */
 			    PUSH_ERROR(e);
 			    for (i = 1; i <= nargs; i++) {
-			        SKIP_BYTES(bv, bc.numbytes_var_name);
-			        SKIP_BYTES(bv, bc.numbytes_label);
+				SKIP_BYTES(bv, bc.numbytes_var_name);
+				SKIP_BYTES(bv, bc.numbytes_label);
 			    }
 			} else {
 			    nopt_avail = len - nreq;
@@ -2010,7 +2012,7 @@ do {    						    	\
 		}
 	    }
 	    break;
-#endif /* BYTECODE_REDUCE_REF */
+#endif				/* BYTECODE_REDUCE_REF */
 
 	case OP_PUT:
 	case OP_PUT + 1:
@@ -2717,13 +2719,13 @@ read_rt_env(const char ***old_names, Var ** rt_env, int *old_size)
 
 Var *
 reorder_rt_env(Var * old_rt_env, const char **old_names,
-	       int old_size, Program * prog)
+	       int old_size, Names * new_names)
 {
     /* reorder old_rt_env, which is aligned according to old_names, 
-       to align to prog->var_names -- return the new rt_env
-       after freeing old_rt_env and old_names */
+       to align to new_names -- return the new rt_env
+       after freeing old_rt_env and old_names and new_names */
 
-    unsigned size = prog->num_var_names;
+    unsigned size = new_names->size;
     Var *rt_env = new_rt_env(size);
 
     unsigned i;
@@ -2732,7 +2734,7 @@ reorder_rt_env(Var * old_rt_env, const char **old_names,
 	int slot;
 
 	for (slot = 0; slot < old_size; slot++) {
-	    if (mystrcasecmp(old_names[slot], prog->var_names[i]) == 0)
+	    if (mystrcasecmp(old_names[slot], new_names->names[i]) == 0)
 		break;
 	}
 
@@ -2744,17 +2746,134 @@ reorder_rt_env(Var * old_rt_env, const char **old_names,
     for (i = 0; i < old_size; i++)
 	free_str(old_names[i]);
     myfree((void *) old_names, M_NAMES);
+    free_names(new_names);
 
     return rt_env;
 }
 
+int
+regenerate_error_pc(Program * prog, int which_vector, unsigned pc)
+{
+    Bytecodes *bc = (which_vector == MAIN_VECTOR
+		     ? &prog->main_vector
+		     : &prog->fork_vectors[which_vector]);
+    Byte *bv, *error_bv, *target_bv;
+    enum Opcode op;
+
+    if (!pc)
+	return -1;
+
+    bv = bc->vector;
+    target_bv = bv + pc;
+    error_bv = bv;
+
+    while (bv < target_bv) {
+	error_bv = bv;
+	op = *bv++;
+
+	switch (op) {
+
+	case OP_IF_QUES:
+	case OP_IF:
+	case OP_WHILE:
+	case OP_EIF:
+	case OP_JUMP:
+	case OP_AND:
+	case OP_OR:
+	    SKIP_BYTES(bv, bc->numbytes_label);
+	    break;
+
+	case OP_FOR_LIST:
+	case OP_FOR_RANGE:
+	    SKIP_BYTES(bv, bc->numbytes_var_name);
+	    SKIP_BYTES(bv, bc->numbytes_label);
+	    break;
+
+	case OP_IMM:
+	    SKIP_BYTES(bv, bc->numbytes_literal);
+	    break;
+
+	case OP_G_PUT:
+	case OP_G_PUSH:
+	    SKIP_BYTES(bv, bc->numbytes_var_name);
+	    break;
+
+	case OP_FORK:
+	    SKIP_BYTES(bv, bc->numbytes_fork);
+	    break;
+
+	case OP_FORK_WITH_ID:
+	    SKIP_BYTES(bv, bc->numbytes_fork);
+	    SKIP_BYTES(bv, bc->numbytes_var_name);
+	    break;
+
+	case OP_BI_FUNC_CALL:
+	    SKIP_BYTES(bv, 1);	/* 1 == numbytes of func_id */
+	    break;
+
+	case OP_EXTENDED:
+	    {
+		register enum Extended_Opcode eop = *bv;
+		bv++;
+		switch (eop) {
+		case EOP_LENGTH:
+		    SKIP_BYTES(bv, bc->numbytes_stack);
+		    break;
+
+		case EOP_SCATTER:
+		    {
+			int nargs = READ_BYTES(bv, 1);
+			SKIP_BYTES(bv, 2);	/* nreq, rest */
+			SKIP_BYTES(bv, nargs * (bc->numbytes_var_name +
+						bc->numbytes_label));
+			SKIP_BYTES(bv, bc->numbytes_label);
+		    }
+		    break;
+
+		case EOP_PUSH_LABEL:
+		case EOP_TRY_FINALLY:
+		case EOP_END_CATCH:
+		case EOP_END_EXCEPT:
+		    SKIP_BYTES(bv, bc->numbytes_label);
+		    break;
+
+		case EOP_TRY_EXCEPT:
+		    SKIP_BYTES(bv, 1);
+		    break;
+
+		case EOP_WHILE_ID:
+		    SKIP_BYTES(bv, bc->numbytes_var_name);
+		    SKIP_BYTES(bv, bc->numbytes_label);
+		    break;
+
+		case EOP_EXIT_ID:
+		    READ_BYTES(bv, bc->numbytes_var_name);	/* ignore id */
+		    /* fall thru */
+		case EOP_EXIT:
+		    SKIP_BYTES(bv, bc->numbytes_stack);
+		    SKIP_BYTES(bv, bc->numbytes_label);
+		    break;
+
+		default:
+		}
+	    }
+	    break;
+
+	default:
+	}
+    }
+    if (bv != target_bv)
+	errlog("REGENERATE_ERROR_PC: Bad PC for suspended task.\n");
+    return error_bv - bc->vector;
+}
+
 void
-write_activ(activation a)
+write_activ(activation a, int which_vector)
 {
     register Var *v;
 
     dbio_printf("language version %u\n", a.prog->version);
-    dbio_write_program(a.prog);
+    dbio_write_active_program(a.prog, which_vector, a.error_pc, a.pc);
     write_rt_env(a.prog->var_names, a.rt_env, a.prog->num_var_names);
 
     dbio_printf("%d rt_stack slots in use\n",
@@ -2766,7 +2885,14 @@ write_activ(activation a)
     write_activ_as_pi(a);
     dbio_write_var(a.temp);
 
-    dbio_printf("%u %u %u\n", a.pc, a.bi_func_pc, a.error_pc);
+    if (a.prog->version < DBV_InlinePC) {
+	/* We should never need to do this.
+	 */
+	errlog("WRITE_ACTIV: Verb wasn't upgraded\n");
+	dbio_printf("%u %u %u\n", a.pc, a.bi_func_pc, a.error_pc);
+    } else {
+	dbio_printf("%u\n", a.bi_func_pc);
+    }
     if (a.bi_func_pc != 0) {
 	dbio_write_string(name_func_by_num(a.bi_func_id));
 	write_bi_func_data(a.bi_func_data, a.bi_func_id);
@@ -2776,7 +2902,7 @@ write_activ(activation a)
 static int
 check_pc_validity(Program * prog, int which_vector, unsigned pc)
 {
-    Bytecodes *bc = (which_vector == -1
+    Bytecodes *bc = (which_vector == MAIN_VECTOR
 		     ? &prog->main_vector
 		     : &prog->fork_vectors[which_vector]);
 
@@ -2788,8 +2914,11 @@ check_pc_validity(Program * prog, int which_vector, unsigned pc)
 		|| bc->vector[pc - 2] == OP_BI_FUNC_CALL));
 }
 
+static int
+ upgrade_activ(activation * a, int *which_vector, int is_root);
+
 int
-read_activ(activation * a, int which_vector)
+read_activ(activation * a, int *which_vector, int is_root)
 {
     DB_Version version;
     Var *old_rt_env;
@@ -2799,6 +2928,7 @@ read_activ(activation * a, int which_vector)
     const char *func_name;
     int max_stack;
     char c;
+    Names *orig_names;
 
     if (dbio_input_version < DBV_Float)
 	version = dbio_input_version;
@@ -2810,8 +2940,9 @@ read_activ(activation * a, int which_vector)
 	       version);
 	return 0;
     }
-    if (!(a->prog = dbio_read_program(version,
-				      0, (void *) "suspended task"))) {
+    if (!(a->prog = dbio_read_active_program(version,
+					     0, (void *) "suspended task",
+				   &orig_names, which_vector, &a->pc))) {
 	errlog("READ_ACTIV: Malformed program\n");
 	return 0;
     }
@@ -2819,11 +2950,11 @@ read_activ(activation * a, int which_vector)
 	errlog("READ_ACTIV: Malformed runtime environment\n");
 	return 0;
     }
-    a->rt_env = reorder_rt_env(old_rt_env, old_names, old_size, a->prog);
+    a->rt_env = reorder_rt_env(old_rt_env, old_names, old_size, orig_names);
 
-    max_stack = (which_vector == MAIN_VECTOR
+    max_stack = (*which_vector == MAIN_VECTOR
 		 ? a->prog->main_vector.max_stack
-		 : a->prog->fork_vectors[which_vector].max_stack);
+		 : a->prog->fork_vectors[*which_vector].max_stack);
     alloc_rt_stack(a, max_stack);
 
     if (dbio_scanf("%d rt_stack slots in use\n", &stack_in_use) != 1) {
@@ -2840,19 +2971,34 @@ read_activ(activation * a, int which_vector)
     }
     a->temp = dbio_read_var();
 
-    if (dbio_scanf("%u %u%c", &a->pc, &i, &c) != 3) {
-	errlog("READ_ACTIV: bad pc, next. stack_in_use = %d\n", stack_in_use);
-	return 0;
-    }
-    a->bi_func_pc = i;
+    if (version < DBV_InlinePC) {
+	if (dbio_scanf("%u %u%c", &a->pc, &i, &c) != 3) {
+	    errlog("READ_ACTIV: bad pc, next. stack_in_use = %d\n", stack_in_use);
+	    return 0;
+	}
+	a->bi_func_pc = i;
 
-    if (c == '\n')
-	a->error_pc = a->pc;
-    else if (dbio_scanf("%u\n", &a->error_pc) != 1) {
-	errlog("READ_ACTIV: no error pc.\n");
+	if (c == '\n') {
+	    /* do nothing -- we'll clean this up below */
+	} else if (dbio_scanf("%u\n", &a->error_pc) != 1) {
+	    errlog("READ_ACTIV: no error pc.\n");
+	    return 0;
+	} else if (a->error_pc != a->pc) {
+	    /*
+	     * if they are equal this database must have been read and
+	     * rewritten by an old server that incorrectly set them
+	     * equal if error_pc was missing
+	     */
+	    goto have_error_pc;
+	}
+    } else if (dbio_scanf("%u\n", &a->bi_func_pc) != 1) {
+	errlog("READ_ACTIV: bad builtin function pc.\n");
 	return 0;
     }
-    if (!check_pc_validity(a->prog, which_vector, a->pc)) {
+    a->error_pc = regenerate_error_pc(a->prog, *which_vector, a->pc);
+
+  have_error_pc:
+    if (!check_pc_validity(a->prog, *which_vector, a->pc)) {
 	errlog("READ_ACTIV: Bad PC for suspended task.\n");
 	return 0;
     }
@@ -2870,14 +3016,112 @@ read_activ(activation * a, int which_vector)
 	    return 0;
 	}
     }
+    if (version < current_version)
+	return upgrade_activ(a, which_vector, is_root);
+
     return 1;
 }
 
+static void
+stream_receiver(void *data, const char *line)
+{
+    Stream *s = data;
 
-char rcsid_execute[] = "$Id: execute.c,v 1.13 2002-08-18 09:47:26 bjj Exp $";
+    stream_add_string(s, line);
+    stream_add_char(s, '\n');
+}
+
+static void
+unparse_for_upgrade(Stream * s, Program * p, int f_index, int pc)
+{
+    unparse_program2(p, stream_receiver, s, 1, 0, MAIN_VECTOR, f_index, pc);
+}
+
+static void
+spc_error(void *data, const char *msg)
+{
+    errlog("PARSER: Error upgrading suspended tasks:\n");
+    errlog("           %s\n", msg);
+}
+
+static void
+spc_warning(void *data, const char *msg)
+{
+    oklog("PARSER: Warning upgrading suspended tasks:\n");
+    oklog("           %s\n", msg);
+}
+
+static int
+spc_getc(void *data)
+{
+    char **s = data;
+
+    if (**s)
+	return *((*s)++);
+    return EOF;
+}
+
+static Parser_Client string_parser_client =
+{spc_error, spc_warning, spc_getc};
+
+static Program *
+reparse_for_upgrade(Stream * s, DB_Version old_version, Names ** orig_names, int *pc_vector, int *pc, int is_root)
+{
+    char *contents;
+
+    contents = stream_contents(s);
+    /* root activations must be treated carefully -- they may be disembodied fork vectors */
+    return parse_program(old_version, string_parser_client, &contents, (is_root ? PARSE_FORK : PARSE_VERB), orig_names, pc_vector, pc);
+}
+
+static int
+upgrade_activ(activation * a, int *which_vector, int is_root)
+{
+    Stream *s = new_stream(8000);
+    Program *new_prog;
+    Names *orig_names;
+
+    unparse_for_upgrade(s, a->prog, *which_vector, a->error_pc);
+    new_prog = reparse_for_upgrade(s, a->prog->version, &orig_names, which_vector, &(a->pc), is_root);
+    free_stream(s);
+    /* reparsing might order the variable names differently, so: */
+    a->rt_env = reorder_rt_env(a->rt_env, a->prog->var_names, a->prog->num_var_names, orig_names);
+    /* reorder frees a->prog->var_names early--need a dummy to free in free_program */
+    a->prog->var_names = mymalloc(0, M_NAMES);
+    a->prog->num_var_names = 0;
+    free_program(a->prog);
+    a->prog = new_prog;
+    a->error_pc = regenerate_error_pc(a->prog, *which_vector, a->pc);
+
+    return 1;
+}
+
+char rcsid_execute[] = "$Id: execute.c,v 1.13.6.7 2002-10-29 01:00:13 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.13.6.6  2002/10/27 22:48:12  xplat
+ * Changes to support PCs located in vectors other than MAIN_VECTOR.
+ *
+ * Revision 1.13.6.5  2002/09/17 15:35:04  xplat
+ * GNU indent normalization.
+ *
+ * Revision 1.13.6.4  2002/09/17 15:04:00  xplat
+ * Updated to INLINEPC_updater_1 in trunk.
+ *
+ * Revision 1.13.6.3  2002/09/15 06:28:32  xplat
+ * Fixed bugs revealed by smoke test.
+ *
+ * Revision 1.13.6.2  2002/09/12 16:08:07  xplat
+ * Ben-derived bugfixes.
+ *
+ * Revision 1.13.6.1  2002/09/12 05:57:40  xplat
+ * Changes for inline PC saving and patch tags in the on-disk DB.
+ *
+ * Revision 1.13  2002/08/18 09:47:26  bjj
+ * Finally made free_activation() take a pointer after noticing how !$%^&
+ * much time it was taking in a particular profiling run.
+ *
  * Revision 1.12  2001/03/12 05:10:54  bjj
  * Split out call_verb and call_verb2.  The latter must only be called with
  * strings that are already MOO strings (str_ref-able).

@@ -22,6 +22,7 @@
 #include "program.h"
 #include "structures.h"
 #include "version.h"
+#include "sym_table.h"
 
 /*********** Input ***********/
 
@@ -61,6 +62,16 @@ extern Var dbio_read_var(void);
 extern Program *dbio_read_program(DB_Version version,
 				  const char *(*fmtr) (void *),
 				  void *data);
+extern Program *dbio_read_active_program(DB_Version version,
+					 const char *(*fmtr) (void *),
+					 void *data,
+					 Names ** original_names,
+					 int *pc_vector,
+					 int *pc);
+extern Program *dbio_read_forked_program(DB_Version version,
+					 const char *(*fmtr) (void *),
+					 void *data,
+					 Names ** original_names);
 				/* FMTR is called with DATA to produce a human-
 				 * understandable identifier for the program
 				 * being read, for use in any error/warning
@@ -94,10 +105,20 @@ extern void dbio_write_string(const char *);
 extern void dbio_write_var(Var);
 
 extern void dbio_write_program(Program *);
+extern void dbio_write_active_program(Program * prog, int pc_vector, int error_pc, int pc);
 extern void dbio_write_forked_program(Program * prog, int f_index);
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4.6.2  2002/09/17 15:35:04  xplat
+ * GNU indent normalization.
+ *
+ * Revision 1.4.6.1  2002/09/12 05:57:40  xplat
+ * Changes for inline PC saving and patch tags in the on-disk DB.
+ *
+ * Revision 1.4  1998/12/14 13:17:35  nop
+ * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
+ *
  * Revision 1.3  1998/02/19 07:36:16  nop
  * Initial string interning during db load.
  *

@@ -19,10 +19,16 @@
 #include "program.h"
 #include "version.h"
 
-extern Program *generate_code(Stmt *, DB_Version);
+extern Program *generate_code(Stmt *, DB_Version, int *, int *);
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3.6.1  2002/09/12 05:57:40  xplat
+ * Changes for inline PC saving and patch tags in the on-disk DB.
+ *
+ * Revision 1.3  1998/12/14 13:17:31  nop
+ * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
+ *
  * Revision 1.2  1997/03/03 04:18:25  nop
  * GNU Indent normalization
  *

@@ -81,6 +81,15 @@ struct Expr_Catch {
     Expr *except;
 };
 
+enum Hot_Pos {
+    HOT_DEFAULT, HOT_ASSIGN
+};
+
+struct Expr_Hot {
+    Expr *expr;
+    enum Hot_Pos pos;
+};
+
 enum Expr_Kind {
     EXPR_VAR, EXPR_ID,
     EXPR_PROP, EXPR_VERB,
@@ -92,6 +101,7 @@ enum Expr_Kind {
     EXPR_EQ, EXPR_NE, EXPR_LT, EXPR_LE, EXPR_GT, EXPR_GE,
     EXPR_IN, EXPR_LIST, EXPR_COND,
     EXPR_CATCH, EXPR_LENGTH, EXPR_SCATTER,
+    EXPR_HOT,
     SizeOf_Expr_Kind		/* The last element is also the number of elements... */
 };
 
@@ -104,6 +114,7 @@ union Expr_Data {
     struct Expr_Range range;
     struct Expr_Cond cond;
     struct Expr_Catch catch;
+    struct Expr_Hot hot;
     Expr *expr;
     Arg_List *list;
     Scatter *scatter;
@@ -215,6 +226,9 @@ extern void free_stmt(Stmt *);
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  1998/12/14 13:17:28  nop
+ * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
+ *
  * Revision 1.2  1997/03/03 04:18:22  nop
  * GNU Indent normalization
  *

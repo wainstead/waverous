@@ -102,7 +102,33 @@ read_jump(unsigned numbytes_label, Byte ** p, int *is_hot)
     return label;
 }
 
-#define HOT(is_hot, n)		(node = n, is_hot ? (hot_node = node) : node)
+static int marking_pc = 0;
+
+static Expr *
+hot_assign(Expr * e)
+{
+    Expr *wrapper;
+
+    wrapper = alloc_expr(EXPR_HOT);
+    wrapper->e.hot.expr = e;
+    wrapper->e.hot.pos = HOT_ASSIGN;
+    return wrapper;
+}
+
+static Expr *
+hot_wrapper(Expr * e)
+{
+    Expr *wrapper;
+
+    if (!marking_pc)
+	return e;
+    wrapper = alloc_expr(EXPR_HOT);
+    wrapper->e.hot.expr = e;
+    wrapper->e.hot.pos = HOT_DEFAULT;
+    return wrapper;
+}
+
+#define HOT(is_hot, n)		(node = (n), (is_hot) ? (hot_node = node) : node)
 #define HOT1(is_hot, kid, n)	HOT(is_hot || hot_node == kid, n)
 #define HOT2(is_hot, kid1, kid2, n) \
 				HOT1(is_hot || hot_node == kid1, kid2, n)
@@ -120,6 +146,28 @@ read_jump(unsigned numbytes_label, Byte ** p, int *is_hot)
 #define HOT_POS(is_hot, n, pos)	\
 		if (is_hot) { hot_node = n; hot_position = pos; }
 #define HOT_BOTTOM(is_hot, n)	HOT_POS(is_hot, n, BOTTOM)
+
+#define HOTX(is_hot, n)		(node = (n), (is_hot) ? (hot_node = hot_wrapper(node))\
+                                                      : node)
+#define WARMX(is_hot, is_warm, n) \
+                                (node = (n), (is_hot) ? (hot_node = hot_wrapper(node))\
+                                                      : ((is_warm) ? (hot_node = node)\
+                                                                   : node))
+#define HOTX1(is_hot, kid, n)	WARMX(is_hot, hot_node == kid, n)
+#define HOTX2(is_hot, kid1, kid2, n) \
+				WARMX(is_hot, hot_node == kid1 || hot_node == kid2, n)
+#define HOTX3(is_hot, kid1, kid2, kid3, n) \
+				WARMX(is_hot, hot_node == kid1 || hot_node == kid2 \
+				           || hot_node == kid3, n)
+#define HOTX4(is_hot, kid1, kid2, kid3, kid4, n) \
+				WARMX(is_hot, hot_node == kid1 || hot_node == kid2 \
+				           || hot_node == kid3 || hot_node == kid4, n)
+
+#define HOTX_OP(n)		HOTX(op_hot, n)
+#define HOTX_OP1(kid, n)	HOTX1(op_hot, kid, n)
+#define HOTX_OP2(kid1, kid2, n)	HOTX2(op_hot, kid1, kid2, n)
+#define HOTX_OP3(kid1, kid2, kid3, n)	\
+				HOTX3(op_hot, kid1, kid2, kid3, n)
 
 #define DECOMPILE(bc, start, end, stmt_sink, arm_sink)	\
 	    (ptr = decompile(bc, start, end, stmt_sink, arm_sink))
@@ -140,6 +188,7 @@ decompile(Bytecodes bc, Byte * start, Byte * end, Stmt ** stmt_sink,
     enum Expr_Kind kind;
     void *node;
     int asgn_hot = 0;
+    static Expr **next_base;
 
     if (stmt_sink)
 	*stmt_sink = 0;
@@ -153,25 +202,25 @@ decompile(Bytecodes bc, Byte * start, Byte * end, Stmt ** stmt_sink,
 	if (IS_PUSH_n(op)) {
 	    e = alloc_expr(EXPR_ID);
 	    e->e.id = PUSH_n_INDEX(op);
-	    push_expr(HOT_OP(e));
+	    push_expr(HOTX_OP(e));
 	    continue;
 #ifdef BYTECODE_REDUCE_REF
 	} else if (IS_PUSH_CLEAR_n(op)) {
 	    e = alloc_expr(EXPR_ID);
 	    e->e.id = PUSH_CLEAR_n_INDEX(op);
-	    push_expr(HOT_OP(e));
+	    push_expr(HOTX_OP(e));
 	    continue;
-#endif /* BYTECODE_REDUCE_REF */
+#endif				/* BYTECODE_REDUCE_REF */
 	} else if (IS_PUT_n(op)) {
 	    e = alloc_expr(EXPR_ID);
 	    e->e.id = PUT_n_INDEX(op);
 	    e = alloc_binary(EXPR_ASGN, e, pop_expr());
-	    push_expr(HOT_OP1(e->e.bin.rhs, e));
+	    push_expr(HOTX_OP1(e->e.bin.rhs, e));
 	    continue;
 	} else if (IS_OPTIM_NUM_OPCODE(op)) {
 	    e = alloc_var(TYPE_INT);
 	    e->e.var.v.num = OPCODE_TO_OPTIM_NUM(op);
-	    push_expr(HOT_OP(e));
+	    push_expr(HOTX_OP(e));
 	    continue;
 	}
 	switch (op) {
@@ -317,16 +366,23 @@ decompile(Bytecodes bc, Byte * start, Byte * end, Stmt ** stmt_sink,
 	case OP_IMM:
 	    e = alloc_expr(EXPR_VAR);
 	    e->e.var = var_ref(READ_LITERAL());
-	    push_expr(HOT_OP(e));
+	    push_expr(HOTX_OP(e));
 	    break;
 	case OP_G_PUSH:
 	    e = alloc_expr(EXPR_ID);
 	    e->e.id = READ_ID();
-	    push_expr(HOT_OP(e));
+	    push_expr(HOTX_OP(e));
 	    break;
 	case OP_AND:
 	case OP_OR:
 	    {
+		/***
+	         *** In the case of OP_AND and OP_OR it is not
+	         *** possible to infer pc from error_pc; therefore
+	         *** they do not use HOTX.  Luckily we never need
+	         *** resume from them.
+	         ***/
+
 		unsigned done = READ_LABEL();
 
 		e = pop_expr();
@@ -342,7 +398,7 @@ decompile(Bytecodes bc, Byte * start, Byte * end, Stmt ** stmt_sink,
 	case OP_NOT:
 	    e = alloc_expr(op == OP_NOT ? EXPR_NOT : EXPR_NEGATE);
 	    e->e.expr = pop_expr();
-	    push_expr(HOT_OP1(e->e.expr, e));
+	    push_expr(HOTX_OP1(e->e.expr, e));
 	    break;
 	case OP_GET_PROP:
 	case OP_PUSH_GET_PROP:
@@ -390,7 +446,7 @@ decompile(Bytecodes bc, Byte * start, Byte * end, Stmt ** stmt_sink,
 	  finish_binary:
 	    e = pop_expr();
 	    e = alloc_binary(kind, pop_expr(), e);
-	    push_expr(HOT_OP2(e->e.bin.lhs, e->e.bin.rhs, e));
+	    push_expr(HOTX_OP2(e->e.bin.lhs, e->e.bin.rhs, e));
 	    break;
 	case OP_RANGE_REF:
 	    {
@@ -401,7 +457,7 @@ decompile(Bytecodes bc, Byte * start, Byte * end, Stmt ** stmt_sink,
 		e->e.range.base = pop_expr();
 		e->e.range.from = e2;
 		e->e.range.to = e1;
-		push_expr(HOT_OP3(e1, e2, e->e.range.base, e));
+		push_expr(HOTX_OP3(e1, e2, e->e.range.base, e));
 	    }
 	    break;
 	case OP_BI_FUNC_CALL:
@@ -414,7 +470,7 @@ decompile(Bytecodes bc, Byte * start, Byte * end, Stmt ** stmt_sink,
 		e->e.call.args = a->e.list;
 		dealloc_node(a);
 		e->e.call.func = READ_BYTES(1);
-		push_expr(HOT_OP1(a, e));
+		push_expr(HOTX_OP1(a, e));
 	    }
 	    break;
 	case OP_CALL_VERB:
@@ -426,7 +482,7 @@ decompile(Bytecodes bc, Byte * start, Byte * end, Stmt ** stmt_sink,
 		    panic("Missing arglist for CALL_VERB in DECOMPILE!");
 		e = alloc_verb(pop_expr(), e2, a->e.list);
 		dealloc_node(a);
-		push_expr(HOT_OP3(e->e.verb.obj, a, e2, e));
+		push_expr(HOTX_OP3(e->e.verb.obj, a, e2, e));
 	    }
 	    break;
 	case OP_IF_QUES:
@@ -462,15 +518,36 @@ decompile(Bytecodes bc, Byte * start, Byte * end, Stmt ** stmt_sink,
 		Expr *index = pop_expr();
 
 		e = alloc_binary(EXPR_INDEX, pop_expr(), index);
-		push_expr(HOT3(op_hot || asgn_hot,
-			       e->e.bin.lhs, index, rvalue,
-			       alloc_binary(EXPR_ASGN, e, rvalue)));
+		push_expr(HOT3(op_hot || asgn_hot, e->e.bin.lhs, index,
+			    rvalue, alloc_binary(EXPR_ASGN, e, rvalue)));
+		if (marking_pc) {
+		    if (op_hot)
+			expr_stack[top_expr_stack]->e.bin.lhs = hot_assign(e);
+		    next_base = &(e->e.bin.lhs);
+		}
 	    }
 	  finish_indexed_assignment:
 	    /* The remainder of this complex assignment code sequence is
-	     * useless for the purpose of decompilation.
+	     * useless for the purpose of decompilation--unless we need
+	     * to locate the PC exactly.
 	     */
 	    asgn_hot = 0;
+	    if (marking_pc) {
+		while (*ptr == OP_INDEXSET) {
+		    if (ptr == hot_byte) {
+			*next_base = hot_assign(*next_base);
+			hot_node = expr_stack[top_expr_stack];
+		    }
+		    next_base = &(next_base[0]->e.bin.lhs);
+		    ptr++;
+		}
+		if (ptr == hot_byte) {
+		    *next_base = hot_assign(*next_base);
+		    hot_node = expr_stack[top_expr_stack];
+		}
+		ptr++;
+		next_base = 0;
+	    }
 	    while (*ptr != OP_PUSH_TEMP) {
 		if (ptr == hot_byte)	/* it's our assignment expression */
 		    hot_node = expr_stack[top_expr_stack];
@@ -482,7 +559,7 @@ decompile(Bytecodes bc, Byte * start, Byte * end, Stmt ** stmt_sink,
 	    e = alloc_expr(EXPR_ID);
 	    e->e.id = READ_ID();
 	    e = alloc_binary(EXPR_ASGN, e, pop_expr());
-	    push_expr(HOT_OP1(e->e.bin.rhs, e));
+	    push_expr(HOTX_OP1(e->e.bin.rhs, e));
 	    break;
 	case OP_PUT_PROP:
 	    {
@@ -490,11 +567,14 @@ decompile(Bytecodes bc, Byte * start, Byte * end, Stmt ** stmt_sink,
 
 		e = pop_expr();
 		e = alloc_binary(EXPR_PROP, pop_expr(), e);
-		push_expr(HOT_OP3(e->e.bin.lhs, e->e.bin.rhs, rvalue,
-				  alloc_binary(EXPR_ASGN, e, rvalue)));
+		push_expr(HOTX_OP3(e->e.bin.lhs, e->e.bin.rhs, rvalue,
+				   alloc_binary(EXPR_ASGN, e, rvalue)));
 	    }
 	    break;
 	case OP_MAKE_EMPTY_LIST:
+	    /* List construction operators would need extra syntax to
+	     * support PC marking.  Luckily they aren't resumable.
+	     */
 	    e = alloc_expr(EXPR_LIST);
 	    e->e.list = 0;
 	    push_expr(HOT_OP(e));
@@ -549,18 +629,25 @@ decompile(Bytecodes bc, Byte * start, Byte * end, Stmt ** stmt_sink,
 				       e->e.range.base, e->e.range.from,
 				       e->e.range.to, rvalue,
 				    alloc_binary(EXPR_ASGN, e, rvalue)));
+			if (marking_pc) {
+			    if (op_hot)
+				expr_stack[top_expr_stack]->e.bin.lhs = hot_assign(e);
+			    next_base = &(e->e.range.base);
+			}
 		    }
 		    goto finish_indexed_assignment;
 		case EOP_LENGTH:
 		    READ_STACK();
 		    e = alloc_expr(EXPR_LENGTH);
-		    push_expr(HOT_OP(e));
+		    push_expr(HOTX_OP(e));
 		    break;
 		case EOP_EXP:
 		    kind = EXPR_EXP;
 		    goto finish_binary;
 		case EOP_SCATTER:
 		    {
+			/* Can't resume inside scatter machinery either. 
+			 */
 			Scatter *sc, **scp;
 			int nargs = *ptr++;
 			int rest = (ptr++, *ptr++);	/* skip nreq */
@@ -625,6 +712,8 @@ decompile(Bytecodes bc, Byte * start, Byte * end, Stmt ** stmt_sink,
 		    break;
 		case EOP_CATCH:
 		    {
+			/* `' also does not support resumption
+			 */
 			Expr *label_expr = pop_expr();
 			Expr *codes = pop_expr();
 			Expr *try_expr, *default_expr = 0;
@@ -813,7 +902,7 @@ decompile(Bytecodes bc, Byte * start, Byte * end, Stmt ** stmt_sink,
 }
 
 static Stmt *
-program_to_tree(Program * prog, int vector, int pc_vector, int pc)
+program_to_tree(Program * prog, int vector, int pc_vector, int pc, int mark_pc)
 {
     Stmt *result;
     Bytecodes bc;
@@ -833,6 +922,7 @@ program_to_tree(Program * prog, int vector, int pc_vector, int pc)
 
     hot_node = 0;
     hot_position = (pc == bc.size - 1 ? DONE : TOP);
+    marking_pc = mark_pc;
 
     sum = program->main_vector.max_stack;
     for (i = 0; i < program->fork_vectors_size; i++)
@@ -854,9 +944,15 @@ program_to_tree(Program * prog, int vector, int pc_vector, int pc)
 }
 
 Stmt *
+decompile_for_resume(Program * prog, int vector, int pc_vector, int pc)
+{
+    return program_to_tree(prog, vector, pc_vector, pc, 1);
+}
+
+Stmt *
 decompile_program(Program * prog, int vector)
 {
-    return program_to_tree(prog, vector, MAIN_VECTOR, -1);
+    return program_to_tree(prog, vector, MAIN_VECTOR, -1, 0);
 }
 
 static int
@@ -975,7 +1071,7 @@ find_line_number(Program * prog, int vector, int pc)
     if (prog->cached_lineno_pc == pc && prog->cached_lineno_vec == vector)
 	return prog->cached_lineno;
 
-    tree = program_to_tree(prog, MAIN_VECTOR, vector, pc);
+    tree = program_to_tree(prog, MAIN_VECTOR, vector, pc, 0);
 
     lineno = prog->first_lineno;
     find_hot_node(tree);
@@ -990,10 +1086,25 @@ find_line_number(Program * prog, int vector, int pc)
     return lineno;
 }
 
-char rcsid_decompile[] = "$Id: decompile.c,v 1.5 1999-08-11 08:23:40 bjj Exp $";
+char rcsid_decompile[] = "$Id: decompile.c,v 1.5.6.5 2002-10-27 22:48:12 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5.6.4  2002/09/17 15:35:04  xplat
+ * GNU indent normalization.
+ *
+ * Revision 1.5.6.3  2002/09/17 15:03:56  xplat
+ * Updated to INLINEPC_updater_1 in trunk.
+ *
+ * Revision 1.5.6.2  2002/09/12 07:20:50  xplat
+ * Early comments from Ben.
+ *
+ * Revision 1.5.6.1  2002/09/12 05:57:40  xplat
+ * Changes for inline PC saving and patch tags in the on-disk DB.
+ *
+ * Revision 1.5  1999/08/11 08:23:40  bjj
+ * Lineno computation could be wrong for forked vectors.
+ *
  * Revision 1.4  1998/12/14 13:17:40  nop
  * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
  *

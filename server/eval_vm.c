@@ -87,7 +87,7 @@ write_vm(vm the_vm)
 		the_vm->func_id, the_vm->max_stack_size);
 
     for (i = 0; i <= the_vm->top_activ_stack; i++)
-	write_activ(the_vm->activ_stack[i]);
+	write_activ(the_vm->activ_stack[i], i == 0 ? the_vm->root_activ_vector : MAIN_VECTOR);
 }
 
 vm
@@ -95,6 +95,7 @@ read_vm(int task_id)
 {
     unsigned i, top, func_id, max;
     int vector;
+    int pc_vector;
     char c;
     vm the_vm;
 
@@ -111,19 +112,27 @@ read_vm(int task_id)
     the_vm->root_activ_vector = vector;
     the_vm->func_id = func_id;
 
-    for (i = 0; i <= top; i++)
+    for (i = 0; i <= top; i++) {
+	pc_vector = (i == 0) ? vector : MAIN_VECTOR;
 	if (!read_activ(&the_vm->activ_stack[i],
-			i == 0 ? vector : MAIN_VECTOR)) {
+			&pc_vector, i == 0)) {
 	    errlog("READ_VM: Bad activ number %d\n", i);
 	    return 0;
 	}
+	if (i == 0)
+	    the_vm->root_activ_vector = pc_vector;
+    }
     return the_vm;
 }
 
-char rcsid_eval_vm[] = "$Id: eval_vm.c,v 1.4 2002-08-18 09:47:26 bjj Exp $";
+char rcsid_eval_vm[] = "$Id: eval_vm.c,v 1.4.6.1 2002-10-27 22:48:12 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2002/08/18 09:47:26  bjj
+ * Finally made free_activation() take a pointer after noticing how !$%^&
+ * much time it was taking in a particular profiling run.
+ *
  * Revision 1.3  1998/12/14 13:17:46  nop
  * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
  *

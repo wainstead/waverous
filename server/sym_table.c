@@ -39,7 +39,7 @@ new_names(unsigned max_size)
     return names;
 }
 
-static Names *
+Names *
 copy_names(Names * old)
 {
     Names *new = new_names(old->size);
@@ -53,25 +53,28 @@ copy_names(Names * old)
 }
 
 int
-first_user_slot(DB_Version version)
+first_user_slot(DB_Version version, int upgrading)
 {
     int count = 16;		/* DBV_Prehistory count */
 
-    if (version >= DBV_Float)
+    if (version >= DBV_Float || upgrading)
 	count += 2;
 
     return count;
 }
 
 Names *
-new_builtin_names(DB_Version version)
+new_builtin_names(DB_Version version, int upgrading)
 {
     static Names *builtins[Num_DB_Versions];
+    static Names *ubuiltins[Num_DB_Versions];
 
-    if (builtins[version] == 0) {
-	Names *bi = new_names(first_user_slot(version));
+    Names **my_builtins = upgrading ? ubuiltins : builtins;
 
-	builtins[version] = bi;
+    if (my_builtins[version] == 0) {
+	Names *bi = new_names(first_user_slot(version, upgrading));
+
+	my_builtins[version] = bi;
 	bi->size = bi->max_size;
 
 	bi->names[SLOT_NUM] = str_dup("NUM");
@@ -94,9 +97,13 @@ new_builtin_names(DB_Version version)
 	if (version >= DBV_Float) {
 	    bi->names[SLOT_INT] = str_dup("INT");
 	    bi->names[SLOT_FLOAT] = str_dup("FLOAT");
+	} else if (upgrading) {
+	    /* nameless so they won't match anything */
+	    bi->names[SLOT_INT] = str_dup("");
+	    bi->names[SLOT_FLOAT] = str_dup("");
 	}
     }
-    return copy_names(builtins[version]);
+    return copy_names(my_builtins[version]);
 }
 
 int
@@ -146,10 +153,13 @@ free_names(Names * names)
     myfree(names, M_NAMES);
 }
 
-char rcsid_sym_table[] = "$Id: sym_table.c,v 1.3 1998-12-14 13:19:05 nop Exp $";
+char rcsid_sym_table[] = "$Id: sym_table.c,v 1.3.6.1 2002-09-12 05:57:40 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  1998/12/14 13:19:05  nop
+ * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
+ *
  * Revision 1.2  1997/03/03 04:19:29  nop
  * GNU Indent normalization
  *

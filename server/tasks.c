@@ -418,7 +418,7 @@ end_programming(tqueue * tq)
 	    s.nerrors = 0;
 	    s.input = stream_contents(tq->program_stream);
 
-	    program = parse_program(current_version, client, &s);
+	    program = parse_program(current_version, client, &s, PARSE_VERB, 0, 0, 0);
 
 	    sprintf(buf, "%d error(s).", s.nerrors);
 	    notify(player, buf);
@@ -1238,6 +1238,7 @@ read_task_queue(void)
 	Var *rt_env, *old_rt_env;
 	const char **old_names;
 	activation a;
+	Names *orig_names;
 
 	if (dbio_scanf("%d %d %d %d%c",
 		       &dummy, &first_lineno, &st, &id, &c) != 5
@@ -1254,12 +1255,12 @@ read_task_queue(void)
 	    errlog("READ_TASK_QUEUE: Bad env, count = %d.\n", count);
 	    return 0;
 	}
-	if (!(program = dbio_read_program(dbio_input_version,
-					  0, (void *) "forked task"))) {
+	if (!(program = dbio_read_forked_program(dbio_input_version,
+			      0, (void *) "forked task", &orig_names))) {
 	    errlog("READ_TASK_QUEUE: Bad program, count = %d.\n", count);
 	    return 0;
 	}
-	rt_env = reorder_rt_env(old_rt_env, old_names, old_size, program);
+	rt_env = reorder_rt_env(old_rt_env, old_names, old_size, orig_names);
 	program->first_lineno = first_lineno;
 
 	enqueue_ft(program, a, rt_env, MAIN_VECTOR, start_time, id);
@@ -1423,7 +1424,7 @@ bf_task_id(Var arglist, Byte next, void *vdata, Objid progr)
 }
 
 static int
-activation_bytes(activation *ap)
+activation_bytes(activation * ap)
 {
     int total = sizeof(activation);
     Var *v;
@@ -2009,10 +2010,25 @@ register_tasks(void)
     register_function("flush_input", 1, 2, bf_flush_input, TYPE_OBJ, TYPE_ANY);
 }
 
-char rcsid_tasks[] = "$Id: tasks.c,v 1.9 2001-07-31 06:33:22 bjj Exp $";
+char rcsid_tasks[] = "$Id: tasks.c,v 1.9.6.5 2002-10-29 01:00:28 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.9.6.4  2002/10/27 22:48:12  xplat
+ * Changes to support PCs located in vectors other than MAIN_VECTOR.
+ *
+ * Revision 1.9.6.3  2002/09/17 15:35:06  xplat
+ * GNU indent normalization.
+ *
+ * Revision 1.9.6.2  2002/09/17 15:04:07  xplat
+ * Updated to INLINEPC_updater_1 in trunk.
+ *
+ * Revision 1.9.6.1  2002/09/12 05:57:40  xplat
+ * Changes for inline PC saving and patch tags in the on-disk DB.
+ *
+ * Revision 1.9  2001/07/31 06:33:22  bjj
+ * Fixed some bugs in the reporting of forked task sizes.
+ *
  * Revision 1.8  2001/07/27 23:06:20  bjj
  * Run through indent, oops.
  *
