@@ -17,21 +17,24 @@
 
 #include "structures.h"
 
-extern Var		new_float(double);
-extern enum error	become_integer(Var, int *, int);
+extern Var new_float(double);
+extern enum error become_integer(Var, int *, int);
 
-extern int		do_equals(Var, Var);
-extern int		compare_integers(int, int);
-extern Var		compare_numbers(Var, Var);
+extern int do_equals(Var, Var);
+extern int compare_integers(int, int);
+extern Var compare_numbers(Var, Var);
 
-extern Var		do_add(Var, Var);
-extern Var		do_subtract(Var, Var);
-extern Var		do_multiply(Var, Var);
-extern Var		do_divide(Var, Var);
-extern Var		do_modulus(Var, Var);
-extern Var		do_power(Var, Var);
+extern Var do_add(Var, Var);
+extern Var do_subtract(Var, Var);
+extern Var do_multiply(Var, Var);
+extern Var do_divide(Var, Var);
+extern Var do_modulus(Var, Var);
+extern Var do_power(Var, Var);
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.1.1.1  1997/03/03 03:45:04  nop
+ * LambdaMOO 1.8.0p5
+ *
  * Revision 1.1  1996/02/08  07:28:25  pavel
  * Initial revision
  *

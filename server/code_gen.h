@@ -15,13 +15,16 @@
     Pavel@Xerox.Com
  *****************************************************************************/
 
-#include "ast.h" 
+#include "ast.h"
 #include "program.h"
 #include "version.h"
 
-extern Program	*generate_code(Stmt *, DB_Version);
+extern Program *generate_code(Stmt *, DB_Version);
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.1.1.1  1997/03/03 03:45:02  nop
+ * LambdaMOO 1.8.0p5
+ *
  * Revision 2.2  1996/02/08  06:28:58  pavel
  * Made generate_code() version-dependent.  Updated copyright notice for 1996.
  * Release 1.8.0beta1.

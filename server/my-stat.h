@@ -26,9 +26,9 @@
 #if NDECL_FSTAT
 #include "my-types.h"
 
-extern int	stat(const char *, struct stat *);
-extern int	fstat(int, struct stat *);
-extern int	mkfifo(const char *, mode_t);
+extern int stat(const char *, struct stat *);
+extern int fstat(int, struct stat *);
+extern int mkfifo(const char *, mode_t);
 #endif
 
 #if !HAVE_MKFIFO
@@ -37,6 +37,9 @@ extern int mknod(const char *file, int mode, int dev);
 #endif
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.1.1.1  1997/03/03 03:45:05  nop
+ * LambdaMOO 1.8.0p5
+ *
  * Revision 2.3  1996/02/08  06:02:22  pavel
  * Updated copyright notice for 1996.  Release 1.8.0beta1.
  *

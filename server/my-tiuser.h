@@ -20,22 +20,25 @@
 #include <tiuser.h>
 
 #if NDECL_T_OPEN
-extern int	t_accept(int, int, struct t_call *);
-extern void    *t_alloc(int, int, int);
-extern int	t_bind(int, struct t_bind *, struct t_bind *);
-extern int	t_close(int);
-extern int	t_connect(int, struct t_call *, struct t_call *);
-extern int	t_listen(int, struct t_call *);
-extern int	t_open(const char *, int, struct t_info *);
+extern int t_accept(int, int, struct t_call *);
+extern void *t_alloc(int, int, int);
+extern int t_bind(int, struct t_bind *, struct t_bind *);
+extern int t_close(int);
+extern int t_connect(int, struct t_call *, struct t_call *);
+extern int t_listen(int, struct t_call *);
+extern int t_open(const char *, int, struct t_info *);
 
-extern int	t_errno;
+extern int t_errno;
 #endif
 
 #if NDECL_T_ERRLIST
-extern char    *t_errlist[];
+extern char *t_errlist[];
 #endif
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.1.1.1  1997/03/03 03:45:05  nop
+ * LambdaMOO 1.8.0p5
+ *
  * Revision 2.1  1996/02/08  06:00:32  pavel
  * Updated copyright notice for 1996.  Release 1.8.0beta1.
  *
