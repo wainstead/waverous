@@ -30,7 +30,7 @@
 #if NDECL_TIME
 #include "my-types.h"
 
-extern time_t	time(time_t *);
+extern time_t time(time_t *);
 #endif
 
 #if defined(MACH) && defined(CMU)
@@ -41,17 +41,20 @@ extern time_t	time(time_t *);
 #if HAVE_STRFTIME && NDECL_STRFTIME
 #include "my-types.h"
 
-extern size_t	strftime(char *s, size_t smax, const char *fmt,
-			 const struct tm *tp);
+extern size_t strftime(char *s, size_t smax, const char *fmt,
+		       const struct tm *tp);
 #endif
 
 #if HAVE_TZNAME && NDECL_TZNAME
-extern char    *tzname;
+extern char *tzname;
 #endif
 
-#endif /* !My_Time_H */
+#endif				/* !My_Time_H */
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.1.1.1  1997/03/03 03:45:05  nop
+ * LambdaMOO 1.8.0p5
+ *
  * Revision 2.1  1996/02/08  06:00:41  pavel
  * *** empty log message ***
  *
