@@ -53,6 +53,17 @@
 #define OUT_OF_BAND_PREFIX "#$#"
 
 /******************************************************************************
+ * If OUT_OF_BAND_QUOTE_PREFIX is defined as a non-empty string, then any
+ * lines of input from any player that begin with that prefix will be
+ * stripped of that prefix and processed normally (whether to be parsed a
+ * command or given to a pending read()ing task), even if the resulting line
+ * begins with OUT_OF_BAND_PREFIX.  This provides a means of quoting lines
+ * that would otherwise spawn #0:do_out_of_band_command tasks
+ */
+
+#define OUT_OF_BAND_QUOTE_PREFIX "#$\""
+
+/******************************************************************************
  * The following constants define the execution limits placed on all MOO tasks.
  *
  * DEFAULT_MAX_STACK_DEPTH is the default maximum depth allowed for the MOO
@@ -370,6 +381,9 @@
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.8.10.1  2003/06/01 12:42:30  wrog
+ * added cmdline options -a (source address) +O/-O (enable/disable outbound network)
+ *
  * Revision 1.8  2001/01/29 09:08:40  bjj
  * Made STRING_INTERNING optional via options.h.
  *
