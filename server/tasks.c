@@ -44,7 +44,14 @@
 #include "version.h"
 
 typedef enum {
-    TASK_INPUT, TASK_FORKED, TASK_SUSPENDED
+    /* Input Tasks */
+    TASK_INBAND,	/* vanilla in-band */
+    TASK_OOB,		/* out-of-band unless disable_oob */
+    TASK_QUOTED,	/* in-band; needs unquote unless disable-oob */
+    TASK_BINARY,	/* in-band; binary mode string */
+    /* Background Tasks */
+    TASK_FORKED,
+    TASK_SUSPENDED,
 } task_kind;
 
 typedef struct forked_task {
@@ -65,6 +72,7 @@ typedef struct suspended_task {
 typedef struct {
     char *string;
     int length;
+    struct task *next_itail;	/* see tqueue.first_itail */ 
 } input_task;
 
 typedef struct task {
@@ -92,7 +100,8 @@ typedef struct tqueue {
      * negative `player' slots) are treated specially: they are passed to a
      * particular verb on the system object.  If that verb returns a valid
      * player object number, then that is used as the new player number for the
-     * connection.
+     * connection.  (Note that none of this applies to tasks that are being
+     * read() or that are being handled as out-of-band commands.)
      *
      * The `connected' field is true iff this queue has an associated open
      * network connection.  Queues without such connections may nonetheless
@@ -106,9 +115,22 @@ typedef struct tqueue {
     Objid handler;
     int connected;
     task *first_input, **last_input;
+    task *first_itail, **last_itail;
+    /* The input queue alternates between contiguous sequences of TASK_OOBs
+     * and sequences of non-TASK_OOBs; the "itail queue" is the queue of all
+     * sequence-ending tasks threaded along the next_itail pointers.
+     * first_itail is null iff first_input is null
+     * When the queue is nonempty,
+     *   last_itail points to the penultimate .next_itail pointer slot
+     *   unlike last_input which always points to the final (null)
+     *   .next pointer slot
+     * For tasks not at the end of a sequence,
+     *   the next_itail field is ignored and may be garbage.
+     */
     int total_input_length;
     int last_input_task_id;
     int input_suspended;
+
     task *first_bg, **last_bg;
     int usage;			/* a kind of inverted priority */
     int num_bg_tasks;		/* in either here or waiting_tasks */
@@ -120,6 +142,7 @@ typedef struct tqueue {
 
     /* booleans */
     char hold_input;		/* input tasks must wait for read() */
+    char disable_oob;		/* treat all input lines as inband */
     char reading;		/* some task is blocked on read() */
     vm reading_vm;
 } tqueue;
@@ -218,8 +241,9 @@ find_tqueue(Objid player, int create_if_not_found)
     tq->handler = 0;
     tq->connected = 0;
 
-    tq->first_input = tq->first_bg = 0;
+    tq->first_input = tq->first_itail = tq->first_bg = 0;
     tq->last_input = &(tq->first_input);
+    tq->last_itail = &(tq->first_itail);
     tq->last_bg = &(tq->first_bg);
     tq->total_input_length = tq->input_suspended = 0;
 
@@ -229,6 +253,7 @@ find_tqueue(Objid player, int create_if_not_found)
 
     tq->reading = 0;
     tq->hold_input = 0;
+    tq->disable_oob = 0;
     tq->num_bg_tasks = 0;
     tq->last_input_task_id = 0;
 
@@ -282,23 +307,70 @@ dequeue_bg_task(tqueue * tq)
     return t;
 }
 
+static char oob_quote_prefix[] = OUT_OF_BAND_QUOTE_PREFIX;
+#define oob_quote_prefix_length (sizeof(oob_quote_prefix) - 1)
+
+enum dequeue_how { DQ_FIRST = -1, DQ_OOB = 0, DQ_INBAND = 1 };
+
 static task *
-dequeue_input_task(tqueue * tq)
+dequeue_input_task(tqueue * tq, enum dequeue_how how)
 {
-    task *t = tq->first_input;
+    task *t;
+    task **pt, **pitail;
+
+    if (tq->disable_oob) {
+	if (how == DQ_OOB)
+	    return 0;
+	how = DQ_FIRST;
+    }
+
+    if (!tq->first_input)
+	return 0;
+    else if (how == (tq->first_input->kind == TASK_OOB)) {
+	pt     = &(tq->first_itail->next);
+	pitail = &(tq->first_itail->t.input.next_itail);
+    }
+    else {
+	pt     = &(tq->first_input);
+	pitail = &(tq->first_itail);
+    }
+    t = *pt;
 
     if (t) {
-	tq->first_input = t->next;
+	*pt = t->next;
 	if (t->next == 0)
-	    tq->last_input = &(tq->first_input);
+	    tq->last_input = pt;
 	else
 	    t->next = 0;
+
+	if (t == *pitail) {
+	    *pitail = 0;
+	    if (t->t.input.next_itail) {
+		tq->first_itail = t->t.input.next_itail;
+		t->t.input.next_itail = 0;
+	    }
+	    if (*(tq->last_itail) == 0)
+		tq->last_itail = &(tq->first_itail);
+	}
+
 	tq->total_input_length -= t->t.input.length;
 	if (tq->input_suspended
 	    && tq->connected
 	    && tq->total_input_length < INPUT_LOWAT) {
 	    server_resume_input(tq->player);
 	    tq->input_suspended = 0;
+	}
+
+	if (t->kind == TASK_OOB) {
+	    if (tq->disable_oob)
+		t->kind = TASK_INBAND;
+	}
+	else if (t->kind == TASK_QUOTED) {
+	    if (!tq->disable_oob) 
+		memmove(t->t.input.string,
+			t->t.input.string + oob_quote_prefix_length, 
+			1 + strlen(t->t.input.string + oob_quote_prefix_length));
+	    t->kind = TASK_INBAND;
 	}
     }
     return t;
@@ -309,7 +381,13 @@ free_task(task * t, int strong)
 {				/* for FORKED tasks, strong == 1 means free the rt_env also.
 				   for SUSPENDED tasks, strong == 1 means free the vm also. */
     switch (t->kind) {
-    case TASK_INPUT:
+    default:
+	panic("Unknown task kind in free_task()");
+	break;
+    case TASK_BINARY:
+    case TASK_INBAND:
+    case TASK_QUOTED:
+    case TASK_OOB:
 	free_str(t->t.input.string);
 	break;
     case TASK_FORKED:
@@ -564,7 +642,7 @@ do_login_task(tqueue * tq, char *command)
 	}
 	if (dead_tq) {		/* Copy over tasks from old queue for player */
 	    tq->num_bg_tasks = dead_tq->num_bg_tasks;
-	    while ((t = dequeue_input_task(dead_tq)) != 0) {
+	    while ((t = dequeue_input_task(dead_tq, DQ_FIRST)) != 0) {
 		free_task(t, 0);
 	    }
 	    while ((t = dequeue_bg_task(dead_tq)) != 0) {
@@ -643,6 +721,17 @@ free_task_queue(task_queue q)
 	       if (!tq->hold_input && tq->first_input)			\
 		   ensure_usage(tq);					\
 	   })								\
+									\
+    DEFINE(disable-oob, _, TYPE_INT, num,				\
+	   tq->disable_oob,						\
+	   {								\
+	       tq->disable_oob = is_true(value);			\
+	       /* Anything to be done? */				\
+	       if (!tq->disable_oob && tq->first_input			\
+		   && (tq->first_itail->next				\
+		       || tq->first_input->kind == TASK_OOB))		\
+		   ensure_usage(tq);					\
+	   })								\
 
 int
 tasks_set_connection_option(task_queue q, const char *option, Var value)
@@ -665,25 +754,52 @@ tasks_connection_options(task_queue q, Var list)
 #undef TASK_CO_TABLE
 
 static void
-enqueue_input_task(tqueue * tq, const char *input, int at_front)
+enqueue_input_task(tqueue * tq, const char *input, int at_front, int binary)
 {
+    static char oob_prefix[] = OUT_OF_BAND_PREFIX;
     task *t;
 
     t = (task *) mymalloc(sizeof(task), M_TASK);
-    t->kind = TASK_INPUT;
+    if (binary)
+	t->kind = TASK_BINARY;
+    else if (oob_quote_prefix_length > 0
+	     && strncmp(oob_quote_prefix, input, oob_quote_prefix_length) == 0)
+	t->kind = TASK_QUOTED;
+    else if (sizeof(oob_prefix) > 1
+	     && strncmp(oob_prefix, input, sizeof(oob_prefix) - 1) == 0)
+	t->kind = TASK_OOB;
+    else
+	t->kind = TASK_INBAND;
+
     t->t.input.string = str_dup(input);
     tq->total_input_length += (t->t.input.length = strlen(input));
 
+    t->t.input.next_itail = 0;
     if (at_front && tq->first_input) {	/* if nothing there, front == back */
 	t->next = tq->first_input;
 	tq->first_input = t;
-    } else {
+
+	if ((tq->first_input->kind == TASK_OOB) != (t->kind == TASK_OOB)) {
+	    t->t.input.next_itail = tq->first_itail;
+	    tq->first_itail = t;
+	    if (tq->last_itail == &(tq->first_itail))
+		tq->last_itail = &(t->t.input.next_itail);
+	}
+    }
+    else {
+	if (tq->first_input && (((*(tq->last_itail))->kind == TASK_OOB)
+				!= (t->kind == TASK_OOB)))
+	    tq->last_itail = &((*(tq->last_itail))->t.input.next_itail);
+	*(tq->last_itail) = t;
+
 	*(tq->last_input) = t;
 	tq->last_input = &(t->next);
 	t->next = 0;
     }
 
-    if (!tq->hold_input || tq->reading)		/* Anything to do with this line? */
+    /* Anything to do with this line? */
+    if (!tq->hold_input || tq->reading
+	|| (!tq->disable_oob && t->kind == TASK_OOB))
 	ensure_usage(tq);
 
     if (!tq->input_suspended
@@ -703,7 +819,8 @@ flush_input(tqueue * tq, int show_messages)
 
 	if (show_messages)
 	    notify(tq->player, ">> Flushing the following pending input:");
-	while ((t = dequeue_input_task(tq)) != 0) {
+	while ((t = dequeue_input_task(tq, DQ_FIRST)) != 0) {
+	    /* TODO*** flush only non-TASK_OOB tasks ??? */
 	    if (show_messages) {
 		stream_printf(s, ">>     %s", t->t.input.string);
 		notify(tq->player, reset_stream(s));
@@ -717,7 +834,7 @@ flush_input(tqueue * tq, int show_messages)
 }
 
 void
-new_input_task(task_queue q, const char *input)
+new_input_task(task_queue q, const char *input, int binary)
 {
     tqueue *tq = q.ptr;
 
@@ -725,7 +842,7 @@ new_input_task(task_queue q, const char *input)
 	flush_input(tq, 1);
 	return;
     }
-    enqueue_input_task(tq, input, 0);
+    enqueue_input_task(tq, input, 0/*at-rear*/, binary);
 }
 
 static void
@@ -879,7 +996,7 @@ read_input_now(Objid connection)
     if (!tq || is_out_of_input(tq)) {
 	r.type = TYPE_ERR;
 	r.v.err = E_INVARG;
-    } else if (!(t = dequeue_input_task(tq))) {
+    } else if (!(t = dequeue_input_task(tq, DQ_INBAND))) {
 	r.type = TYPE_INT;
 	r.v.num = 0;
     } else {
@@ -956,7 +1073,6 @@ run_ready_tasks(void)
     {
 	int did_one = 0;
 	time_t start = time(0);
-	static char oob_prefix[] = OUT_OF_BAND_PREFIX;
 
 	while (active_tqueues && !did_one) {
 	    /* Loop over tqueues, looking for a task */
@@ -973,22 +1089,25 @@ run_ready_tasks(void)
 		did_one = 1;
 	    }
 	    while (!did_one) {	/* Loop over tasks, looking for runnable one */
-		t = (!tq->hold_input || tq->reading)
-		    ? dequeue_input_task(tq)
-		    : 0;
+		t = dequeue_input_task(tq, ((tq->hold_input && !tq->reading)
+					    ? DQ_OOB
+					    : DQ_FIRST));
 		if (!t)
 		    t = dequeue_bg_task(tq);
 		if (!t)
 		    break;
 
 		switch (t->kind) {
-		case TASK_INPUT:
-		    if (sizeof(oob_prefix) > 1
-			&& !strncmp(oob_prefix, t->t.input.string,
-				    sizeof(oob_prefix) - 1)) {
-			do_out_of_band_command(tq, t->t.input.string);
-			did_one = 1;
-		    } else if (tq->reading) {
+		default:
+		    panic("Unexpected task kind in run_ready_tasks()");
+		    break;
+		case TASK_OOB:
+		    do_out_of_band_command(tq, t->t.input.string);
+		    did_one = 1;
+		    break;
+		case TASK_BINARY:
+		case TASK_INBAND:
+		    if (tq->reading) {
 			Var v;
 
 			tq->reading = 0;
@@ -1940,7 +2059,7 @@ bf_force_input(Var arglist, Byte next, void *vdata, Objid progr)
 	return make_error_pack(E_PERM);
     }
     tq = find_tqueue(conn, 1);
-    enqueue_input_task(tq, line, at_front);
+    enqueue_input_task(tq, line, at_front, 0/*non-binary*/);
     free_var(arglist);
     return no_var_pack();
 }
@@ -1978,10 +2097,13 @@ register_tasks(void)
     register_function("flush_input", 1, 2, bf_flush_input, TYPE_OBJ, TYPE_ANY);
 }
 
-char rcsid_tasks[] = "$Id: tasks.c,v 1.10.2.3 2003-06-07 14:34:14 wrog Exp $";
+char rcsid_tasks[] = "$Id: tasks.c,v 1.10.2.4 2003-06-11 10:57:27 wrog Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.10.2.3  2003/06/07 14:34:14  wrog
+ * removed dequeue_any_task()
+ *
  * Revision 1.10.2.2  2003/06/07 12:59:04  wrog
  * introduced connection_option macros
  *
