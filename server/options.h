@@ -215,9 +215,21 @@
  * x rather than make a copy and append to that.  If it *does* have to copy,
  * the next time (if it's in a loop) it will have the only reference to the
  * copy and then it can take advantage.
- ****************************************************************************** 
- */
-#define BYTECODE_REDUCE_REF
+ *
+ * NOTE WELL    NOTE WELL    NOTE WELL    NOTE WELL    NOTE WELL    
+ *
+ * This option affects the length of certain bytecode sequences.
+ * Suspended tasks in a database from a server built with this option
+ * are not guaranteed to work with a server built without this option,
+ * and vice versa.  It is safe to flip this switch only if there are
+ * no suspended tasks in the database you are loading.  (It might work
+ * anyway, but hey, it's your database.)  This restriction will be
+ * lifted in a future version of the server software.
+ *
+ * NOTE WELL    NOTE WELL    NOTE WELL    NOTE WELL    NOTE WELL    
+ *
+ ****************************************************************************** */
+/* #define BYTECODE_REDUCE_REF */
 
 /******************************************************************************
  * This package comes with a copy of the implementation of malloc() from GNU
@@ -319,6 +331,9 @@
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  1999/08/09 04:09:54  nop
+ * Turn up the buffer sizes a notch.  They're still really too small...
+ *
  * Revision 1.4  1998/12/14 13:18:41  nop
  * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
  *
