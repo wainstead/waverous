@@ -2800,6 +2800,8 @@ regenerate_error_pc(Program *prog, int which_vector, unsigned pc)
 
 	case OP_FORK:
 	    SKIP_BYTES(bv, bc->numbytes_fork);
+	    break;
+
 	case OP_FORK_WITH_ID:
 	    SKIP_BYTES(bv, bc->numbytes_fork);
 	    SKIP_BYTES(bv, bc->numbytes_var_name);
@@ -3085,6 +3087,7 @@ upgrade_activ(activation * a, int which_vector)
     a->rt_env = reorder_rt_env(a->rt_env, a->prog->var_names, a->prog->num_var_names, orig_names);
     /* reorder frees a->prog->var_names early--need a dummy to free in free_program */
     a->prog->var_names = mymalloc(0, M_NAMES);
+    a->prog->num_var_names = 0;
     free_program(a->prog);
     a->prog = new_prog;
     a->error_pc = regenerate_error_pc(a->prog, which_vector, a->pc);
@@ -3092,10 +3095,13 @@ upgrade_activ(activation * a, int which_vector)
     return 1;
 }
 
-char rcsid_execute[] = "$Id: execute.c,v 1.13.6.1 2002-09-12 05:57:40 xplat Exp $";
+char rcsid_execute[] = "$Id: execute.c,v 1.13.6.2 2002-09-12 16:08:07 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.13.6.1  2002/09/12 05:57:40  xplat
+ * Changes for inline PC saving and patch tags in the on-disk DB.
+ *
  * Revision 1.13  2002/08/18 09:47:26  bjj
  * Finally made free_activation() take a pointer after noticing how !$%^&
  * much time it was taking in a particular profiling run.
@@ -3349,4 +3355,3 @@ char rcsid_execute[] = "$Id: execute.c,v 1.13.6.1 2002-09-12 05:57:40 xplat Exp 
  * Revision 1.1  1992/07/20  23:23:12  pavel
  * Initial RCS-controlled version.
  */
-
