@@ -331,8 +331,8 @@ struct vc_entry {
 #ifdef RONG
     int generation;
 #endif
-    Objid oid_key;    /* Note that we proceed up the parent tree until we hit
-                         an object with verbs on it */
+    Objid oid_key;		/* Note that we proceed up the parent tree
+				   until we hit an object with verbs on it */
     Objid definer;
     char *verbname;
     Verbdef *verbdef;
@@ -344,63 +344,66 @@ static int vc_size = 0;
 
 #define DEFAULT_VC_SIZE 721
 
-void 
-db_priv_affected_callable_verb_lookup(void) {
+void
+db_priv_affected_callable_verb_lookup(void)
+{
     int i;
     vc_entry *vc, *vc_next;
-    
-    if (vc_table == NULL) 
-        return;
+
+    if (vc_table == NULL)
+	return;
 
     db_verb_generation++;
 
     for (i = 0; i < vc_size; i++) {
-        vc = vc_table[i];
-        while (vc) {
-            vc_next = vc->next;
-            free_str(vc->verbname);
-            myfree(vc, M_VC_ENTRY);
-            vc = vc_next;
-        }
-        vc_table[i] = NULL;
+	vc = vc_table[i];
+	while (vc) {
+	    vc_next = vc->next;
+	    free_str(vc->verbname);
+	    myfree(vc, M_VC_ENTRY);
+	    vc = vc_next;
+	}
+	vc_table[i] = NULL;
     }
 }
 
-static void 
-make_vc_table(int size) {
+static void
+make_vc_table(int size)
+{
     int i;
 
     vc_size = size;
     vc_table = mymalloc(size * sizeof(vc_entry *), M_VC_TABLE);
     for (i = 0; i < size; i++) {
-        vc_table[i] = NULL;
+	vc_table[i] = NULL;
     }
 }
 
 #define VC_CACHE_STATS_MAX 16
-void 
-db_log_cache_stats(void) {
+void
+db_log_cache_stats(void)
+{
     int i, depth, histogram[VC_CACHE_STATS_MAX + 1];
     vc_entry *vc;
-    
+
     for (i = 0; i < VC_CACHE_STATS_MAX + 1; i++) {
-        histogram[i] = 0;
+	histogram[i] = 0;
     }
 
     for (i = 0; i < vc_size; i++) {
-        depth = 0;
-        for (vc = vc_table[i]; vc; vc = vc->next)
-            depth++;
-        if (depth > VC_CACHE_STATS_MAX)
-            depth = VC_CACHE_STATS_MAX;
-        histogram[depth]++;
+	depth = 0;
+	for (vc = vc_table[i]; vc; vc = vc->next)
+	    depth++;
+	if (depth > VC_CACHE_STATS_MAX)
+	    depth = VC_CACHE_STATS_MAX;
+	histogram[depth]++;
     }
 
     oklog("Verb cache stat summary: %d hits, %d misses, %d generations\n",
-          verbcache_hit, verbcache_miss, db_verb_generation);
+	  verbcache_hit, verbcache_miss, db_verb_generation);
     oklog("Depth   Count\n");
     for (i = 0; i < VC_CACHE_STATS_MAX + 1; i++)
-        oklog("%-5d   %-5d\n", i, histogram[i]);
+	oklog("%-5d   %-5d\n", i, histogram[i]);
     oklog("---\n");
 }
 
@@ -420,61 +423,63 @@ db_find_callable_verb(Objid oid, const char *verb)
     vc_entry *vc;
 
     if (vc_table == NULL)
-        make_vc_table(DEFAULT_VC_SIZE);
+	make_vc_table(DEFAULT_VC_SIZE);
 
     for (o = dbpriv_find_object(oid); o; o = dbpriv_find_object(o->parent)) {
-        if (o->verbdefs != NULL)
-            break;
+	if (o->verbdefs != NULL)
+	    break;
     }
 
     if (o) {
-        first_parent_with_verbs = o->id;
+	first_parent_with_verbs = o->id;
     } else {
-        first_parent_with_verbs = NOTHING;
+	first_parent_with_verbs = NOTHING;
     }
 
-    hash = str_hash(verb) ^ (~first_parent_with_verbs); /* ewww, but who cares */
+    hash = str_hash(verb) ^ (~first_parent_with_verbs);		/* ewww, but who cares */
     bucket = hash % vc_size;
 
     for (vc = vc_table[bucket]; vc; vc = vc->next) {
-        if (hash == vc->hash
-            && first_parent_with_verbs == vc->oid_key
-            && !mystrcasecmp(verb, vc->verbname)) {
-            /* we haaave a winnaaah */
-            verbcache_hit++;
+	if (hash == vc->hash
+	    && first_parent_with_verbs == vc->oid_key
+	    && !mystrcasecmp(verb, vc->verbname)) {
+	    /* we haaave a winnaaah */
+	    verbcache_hit++;
 
-            h.verbdef = vc->verbdef;
-            h.definer = vc->definer;
-            vh.ptr = &h;
-            return vh;
-        }
+	    h.verbdef = vc->verbdef;
+	    h.definer = vc->definer;
+	    vh.ptr = &h;
+	    return vh;
+	}
     }
-    
+
     /* A swing and a miss. */
     verbcache_miss++;
+#else
+    o = dbpriv_find_object(oid);
 #endif
 
-    for (o = dbpriv_find_object(oid); o; o = dbpriv_find_object(o->parent))
-        if ((v = find_verbdef_by_name(o, verb, 1)) != 0) {
+    for ( /* from above */ ; o; o = dbpriv_find_object(o->parent))
+	if ((v = find_verbdef_by_name(o, verb, 1)) != 0) {
 #ifdef VERB_CACHE
-            vc_entry *new_vc = mymalloc(sizeof(vc_entry), M_VC_ENTRY);
+	    vc_entry *new_vc = mymalloc(sizeof(vc_entry), M_VC_ENTRY);
 
-            new_vc->hash = hash;
-            new_vc->oid_key = first_parent_with_verbs;
-            new_vc->definer = o->id;
-            new_vc->verbname = str_dup(verb);
-            new_vc->verbdef = v;
+	    new_vc->hash = hash;
+	    new_vc->oid_key = first_parent_with_verbs;
+	    new_vc->definer = o->id;
+	    new_vc->verbname = str_dup(verb);
+	    new_vc->verbdef = v;
 
-            new_vc->next = vc_table[bucket];
-            vc_table[bucket] = new_vc;
-#endif            
-            
-            h.definer = o->id;
-            h.verbdef = v;
-            vh.ptr = &h;
-            
-            return vh;
-        }
+	    new_vc->next = vc_table[bucket];
+	    vc_table[bucket] = new_vc;
+#endif
+
+	    h.definer = o->id;
+	    h.verbdef = v;
+	    vh.ptr = &h;
+
+	    return vh;
+	}
     vh.ptr = 0;
 
     return vh;
@@ -690,9 +695,12 @@ db_verb_allows(db_verb_handle h, Objid progr, db_verb_flag flag)
 }
 
 
-char rcsid_db_verbs[] = "$Id: db_verbs.c,v 1.2.2.1 1997-03-20 07:26:03 nop Exp $";
+char rcsid_db_verbs[] = "$Id: db_verbs.c,v 1.2.2.2 1997-03-22 22:54:36 bjj Exp $";
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.2.2.1  1997/03/20 07:26:03  nop
+ * First pass at the new verb cache.  Some ugly code inside.
+ *
  * Revision 1.2  1997/03/03 04:18:31  nop
  * GNU Indent normalization
  *
