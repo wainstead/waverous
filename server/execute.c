@@ -1353,26 +1353,18 @@ do {    						    	\
 		    db_prop_handle h;
 
 		    h = db_find_property(obj.v.obj, propname.v.str, &prop);
-		    if (!h.ptr) {
-			free_var(propname);
-			free_var(obj);
+		    free_var(propname);
+		    free_var(obj);
+		    if (!h.ptr)
 			PUSH_ERROR(E_PROPNF);
-		    } else if (h.built_in
+		    else if (h.built_in
 			 ? bi_prop_protected(h.built_in, RUN_ACTIV.progr)
-		    : !db_property_allows(h, RUN_ACTIV.progr, PF_READ)) {
-			free_var(propname);
-			free_var(obj);
+		      : !db_property_allows(h, RUN_ACTIV.progr, PF_READ))
 			PUSH_ERROR(E_PERM);
-		    } else if (h.built_in) {
-			free_var(propname);
-			free_var(obj);
-
+		    else if (h.built_in)
 			PUSH(prop);	/* it's already freshly allocated */
-		    } else {
-			free_var(propname);
-			free_var(obj);
+		    else
 			PUSH_REF(prop);
-		    }
 		}
 	    }
 	    break;
@@ -1486,15 +1478,13 @@ do {    						    	\
 			}
 		    }
 
+		    free_var(propname);
+		    free_var(obj);
 		    if (err == E_NONE) {
 			db_set_property_value(h, var_ref(rhs));
-			free_var(propname);
-			free_var(obj);
 			PUSH(rhs);
 		    } else {
 			free_var(rhs);
-			free_var(propname);
-			free_var(obj);
 			PUSH_ERROR(err);
 		    }
 		}
@@ -2828,9 +2818,13 @@ read_activ(activation * a, int which_vector)
 }
 
 
-char rcsid_execute[] = "$Id: execute.c,v 1.6.2.1 1997-05-23 07:03:44 nop Exp $";
+char rcsid_execute[] = "$Id: execute.c,v 1.6.2.2 1997-05-24 07:08:37 bjj Exp $";
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.6.2.1  1997/05/23 07:03:44  nop
+ * Failure during property lookups/stores sometimes fails to free the string
+ * containing the property name.  (PUSH_ERROR() may return immediately.)
+ *
  * Revision 1.6  1997/03/08 06:25:39  nop
  * 1.8.0p6 merge by hand.
  *
