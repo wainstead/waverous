@@ -1375,11 +1375,12 @@ re_search_2(bufp, string1, size1, string2, size2, pos, range, regs,
 	range = -range;
     } else
 	dir = 1;
-    if (anchor == 2)
+    if (anchor == 2) {
 	if (pos != 0)
 	    return -1;
 	else
 	    range = 0;
+    }
     for (; range >= 0; range--, pos += dir) {
 	if (fastmap) {
 	    if (dir == 1) {	/* searching forwards */
@@ -1642,6 +1643,9 @@ char rcsid_regexpr[] = "$Id";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  1998/12/14 13:18:56  nop
+ * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
+ *
  * Revision 1.2  1997/03/03 04:19:22  nop
  * GNU Indent normalization
  *
