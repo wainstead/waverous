@@ -345,7 +345,7 @@ fi
 rm -f conftest*
 
 dnl ***************************************************************************
-AC_MSG_CHECKING([for incompatibility between <sys/ioctl.h> and <stropts.h>"])
+AC_MSG_CHECKING([for incompatibility between <sys/ioctl.h> and <stropts.h>])
 AC_TRY_CPP([
 #include <sys/ioctl.h>
 #include <stropts.h>
@@ -498,6 +498,9 @@ echo "----------------------------------------------------------------------"
 AC_OUTPUT
 
 # $Log: not supported by cvs2svn $
+# Revision 1.1.2.2  2004/07/16 01:49:48  xplat
+# fix for double occurrence of -g.
+#
 # Revision 1.1.2.1  2004/07/13 02:06:37  xplat
 # Initial autoconf2.50 integration (may need work).  Also, make dist tarballs
 # using gzip instead of compress.
