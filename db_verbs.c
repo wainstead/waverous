@@ -194,12 +194,13 @@ db_unparse_prep(db_prep_spec prep)
 #define OBJMASK    0x3
 #define PERMMASK   0xF
 
-void
+int
 db_add_verb(Objid oid, const char *vnames, Objid owner, unsigned flags,
 	    db_arg_spec dobj, db_prep_spec prep, db_arg_spec iobj)
 {
     Object *o = dbpriv_find_object(oid);
     Verbdef *v, *newv;
+    int count;
 
     db_priv_affected_callable_verb_lookup();
 
@@ -211,10 +212,13 @@ db_add_verb(Objid oid, const char *vnames, Objid owner, unsigned flags,
     newv->next = 0;
     newv->program = 0;
     if (o->verbdefs) {
-	for (v = o->verbdefs; v->next; v = v->next);
+	for (v = o->verbdefs, count = 2; v->next; v = v->next, ++count);
 	v->next = newv;
-    } else
+    } else {
 	o->verbdefs = newv;
+	count = 1;
+    }
+    return count;
 }
 
 static Verbdef *
@@ -756,10 +760,13 @@ db_verb_allows(db_verb_handle h, Objid progr, db_verb_flag flag)
 }
 
 
-char rcsid_db_verbs[] = "$Id: db_verbs.c,v 1.5 1998-12-14 13:17:39 nop Exp $";
+char rcsid_db_verbs[] = "$Id: db_verbs.c,v 1.6 2001-01-29 08:38:44 bjj Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  1998/12/14 13:17:39  nop
+ * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
+ *
  * Revision 1.4  1997/09/07 23:58:37  nop
  * Bump up cache size to 7507, since lambdamoo has been running with that
  * for months.
