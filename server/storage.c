@@ -114,6 +114,36 @@ str_dup(const char *s)
     return r;
 }
 
+void *
+myrealloc(void *ptr, unsigned size, Memory_Type type)
+{
+    int offs = refcount_overhead(type);
+    static char msg[100];
+
+#ifdef USE_GNU_MALLOC
+    {
+	extern unsigned malloc_real_size(void *ptr);
+	extern unsigned malloc_size(void *ptr);
+
+	alloc_size[type] -= malloc_size(ptr);
+	alloc_real_size[type] -= malloc_real_size(ptr);
+#endif
+
+    ptr = realloc((char *) ptr - offs, size + offs);
+    if (!ptr) {
+	sprintf(msg, "memory re-allocation (size %u) failed!", size);
+	panic(msg);
+    }
+
+#ifdef USE_GNU_MALLOC
+	alloc_size[type] += malloc_size(ptr);
+	alloc_real_size[type] += malloc_real_size(ptr);
+    }
+#endif
+
+    return (char *)ptr + offs;
+}
+
 void
 myfree(void *ptr, Memory_Type type)
 {
@@ -188,9 +218,14 @@ memory_usage(void)
     return r;
 }
 
-char rcsid_storage[] = "$Id: storage.c,v 1.3.2.1 1997-03-20 18:59:26 bjj Exp $";
+char rcsid_storage[] = "$Id: storage.c,v 1.3.2.2 1997-03-21 15:19:23 bjj Exp $";
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.3.2.1  1997/03/20 18:59:26  bjj
+ * Allocate refcounts with objects that can be addref()'d (strings, lists,
+ * floats).  Use macros to manipulate those counts.  This completely replaces
+ * the external hash table addref and friends.
+ *
  * Revision 1.3  1997/03/03 06:32:10  bjj
  * str_dup("") now returns the same empty string to every caller
  *

@@ -20,6 +20,7 @@
 
 #include "config.h"
 #include "structures.h"
+#include "ref_count.h"
 
 typedef enum Memory_Type {
     M_AST_POOL, M_AST, M_PROGRAM, M_PVAL, M_NETWORK, M_STRING, M_VERBDEF,
@@ -39,15 +40,25 @@ typedef enum Memory_Type {
 
 extern char *str_dup(const char *);
 extern const char *str_ref(const char *);
-extern void free_str(const char *);
 extern Var memory_usage(void);
 
 extern void myfree(void *where, Memory_Type type);
 extern void *mymalloc(unsigned size, Memory_Type type);
+extern void *myrealloc(void *where, unsigned size, Memory_Type type);
+
+extern inline void
+free_str(const char *s)
+{
+    if (delref(s) == 0)
+	myfree((void *) s, M_STRING);
+}
 
 #endif				/* Storage_h */
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.2.2.1  1997/03/20 07:26:04  nop
+ * First pass at the new verb cache.  Some ugly code inside.
+ *
  * Revision 1.2  1997/03/03 04:19:27  nop
  * GNU Indent normalization
  *
