@@ -202,7 +202,7 @@ call_bi_func(unsigned n, Var arglist, Byte func_pc,
 	/* if (caller() != SYSTEM_OBJECT && server_flag_option(f->protect_str)) { */
 	if (caller() != SYSTEM_OBJECT && f->protected) {
 	    /* Try calling #0:bf_FUNCNAME(@ARGS) instead */
-	    enum error e = call_verb(SYSTEM_OBJECT, f->verb_str, arglist, 0);
+	    enum error e = call_verb2(SYSTEM_OBJECT, f->verb_str, arglist, 0);
 
 	    if (e == E_NONE)
 		return tail_call_pack();
@@ -464,10 +464,15 @@ register_functions(void)
     register_function("load_server_options", 0, 0, bf_load_server_options);
 }
 
-char rcsid_functions[] = "$Id: functions.c,v 1.6 2001-03-12 03:25:16 bjj Exp $";
+char rcsid_functions[] = "$Id: functions.c,v 1.7 2001-03-12 05:10:54 bjj Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2001/03/12 03:25:16  bjj
+ * Added new package type BI_KILL which kills the task calling the builtin.
+ * Removed the static int task_killed in execute.c which wa tested on every
+ * loop through the interpreter to see if the task had been killed.
+ *
  * Revision 1.5  1998/12/14 13:17:53  nop
  * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
  *
