@@ -1187,7 +1187,7 @@ stmt_to_code(Stmt * stmt, GState * gstate)
     bbd[n_bbd++] = 0;
     bbd[n_bbd++] = state.num_bytes;
     for (fixup = state.fixups, fix_i = 0; fix_i < state.num_fixups; ++fix_i, ++fixup)
-	if (fixup->kind == FIXUP_LABEL)
+	if (fixup->kind == FIXUP_LABEL || fixup->kind == FIXUP_FORK)
 	    bbd[n_bbd++] = fixup->pc;
     qsort(bbd, n_bbd, sizeof(*bbd), bbd_cmp);
 
@@ -1330,10 +1330,13 @@ generate_code(Stmt * stmt, DB_Version version)
     return prog;
 }
 
-char rcsid_code_gen[] = "$Id: code_gen.c,v 1.7 1999-08-11 07:51:03 bjj Exp $";
+char rcsid_code_gen[] = "$Id: code_gen.c,v 1.8 1999-08-12 05:40:09 bjj Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  1999/08/11 07:51:03  bjj
+ * Fix problem with last checkin which prevented compiling without B_R_R, duh.
+ *
  * Revision 1.6  1999/07/15 01:34:11  bjj
  * Bug fixes to v1.2.2.2, BYTECODE_REDUCE_REF.  Code analysis now takes
  * into account what opcodes are running under try/catch protection and
