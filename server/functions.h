@@ -87,9 +87,14 @@ extern int read_bi_func_data(Byte f_id, void **bi_func_state,
 			     Byte * bi_func_pc);
 extern Byte *pc_for_bi_func_data(void);
 
+extern void load_server_options(void);
+
 #endif
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.2  1997/03/03 04:18:42  nop
+ * GNU Indent normalization
+ *
  * Revision 1.1.1.1  1997/03/03 03:45:03  nop
  * LambdaMOO 1.8.0p5
  *

@@ -1235,6 +1235,8 @@ main(int argc, char **argv)
     if (!db_load())
 	exit(1);
 
+    load_server_options();
+
     SRANDOM(time(0));
 
     parent_pid = getpid();
@@ -1731,9 +1733,12 @@ register_server(void)
 		      bf_buffered_output_length, TYPE_OBJ);
 }
 
-char rcsid_server[] = "$Id: server.c,v 1.2 1997-03-03 04:19:24 nop Exp $";
+char rcsid_server[] = "$Id: server.c,v 1.3 1997-03-03 05:03:52 nop Exp $";
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.2  1997/03/03 04:19:24  nop
+ * GNU Indent normalization
+ *
  * Revision 1.1.1.1  1997/03/03 03:45:01  nop
  * LambdaMOO 1.8.0p5
  *
