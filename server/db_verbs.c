@@ -325,6 +325,7 @@ db_find_command_verb(Objid oid, const char *verb,
 int db_verb_generation = 0;
 
 int verbcache_hit = 0;
+int verbcache_neg_hit = 0;
 int verbcache_miss = 0;
 
 typedef struct vc_entry vc_entry;
@@ -336,9 +337,8 @@ struct vc_entry {
 #endif
     Objid oid_key;		/* Note that we proceed up the parent tree
 				   until we hit an object with verbs on it */
-    Objid definer;
     char *verbname;
-    Verbdef *verbdef;
+    handle h;
     struct vc_entry *next;
 };
 
@@ -404,14 +404,16 @@ db_verb_cache_stats(void)
 	histogram[depth]++;
     }
 
-    v = new_list(4);
+    v = new_list(5);
     v.v.list[1].type = TYPE_INT;
     v.v.list[1].v.num = verbcache_hit;
     v.v.list[2].type = TYPE_INT;
-    v.v.list[2].v.num = verbcache_miss;
+    v.v.list[2].v.num = verbcache_neg_hit;
     v.v.list[3].type = TYPE_INT;
-    v.v.list[3].v.num = db_verb_generation;
-    vv = (v.v.list[4] = new_list(VC_CACHE_STATS_MAX + 1));
+    v.v.list[3].v.num = verbcache_miss;
+    v.v.list[4].type = TYPE_INT;
+    v.v.list[4].v.num = db_verb_generation;
+    vv = (v.v.list[5] = new_list(VC_CACHE_STATS_MAX + 1));
     for (i = 0; i < VC_CACHE_STATS_MAX + 1; i++) {
 	vv.v.list[i + 1].type = TYPE_INT;
 	vv.v.list[i + 1].v.num = histogram[i];
@@ -453,7 +455,11 @@ db_find_callable_verb(Objid oid, const char *verb)
 {
     Object *o;
     Verbdef *v;
+#ifdef VERB_CACHE
+    vc_entry *new_vc;
+#else
     static handle h;
+#endif
     db_verb_handle vh;
 
 #ifdef VERB_CACHE
@@ -483,11 +489,13 @@ db_find_callable_verb(Objid oid, const char *verb)
 	    && first_parent_with_verbs == vc->oid_key
 	    && !mystrcasecmp(verb, vc->verbname)) {
 	    /* we haaave a winnaaah */
-	    verbcache_hit++;
-
-	    h.verbdef = vc->verbdef;
-	    h.definer = vc->definer;
-	    vh.ptr = &h;
+	    if (vc->h.verbdef) {
+		verbcache_hit++;
+		vh.ptr = &vc->h;
+	    } else {
+		verbcache_neg_hit++;
+		vh.ptr = 0;
+	    }
 	    return vh;
 	}
     }
@@ -498,27 +506,39 @@ db_find_callable_verb(Objid oid, const char *verb)
     o = dbpriv_find_object(oid);
 #endif
 
+#ifdef VERB_CACHE
+    /*
+     * Add the entry to the verbcache whether we find it or not.  This means
+     * we do "negative caching", keeping track of failed lookups so that
+     * repeated failures hit the cache instead of going through a lookup.
+     */
+    new_vc = mymalloc(sizeof(vc_entry), M_VC_ENTRY);
+
+    new_vc->hash = hash;
+    new_vc->oid_key = first_parent_with_verbs;
+    new_vc->verbname = str_dup(verb);
+    new_vc->h.verbdef = NULL;
+    new_vc->next = vc_table[bucket];
+    vc_table[bucket] = new_vc;
+#endif
+
     for ( /* from above */ ; o; o = dbpriv_find_object(o->parent))
 	if ((v = find_verbdef_by_name(o, verb, 1)) != 0) {
 #ifdef VERB_CACHE
-	    vc_entry *new_vc = mymalloc(sizeof(vc_entry), M_VC_ENTRY);
-
-	    new_vc->hash = hash;
-	    new_vc->oid_key = first_parent_with_verbs;
-	    new_vc->definer = o->id;
-	    new_vc->verbname = str_dup(verb);
-	    new_vc->verbdef = v;
-
-	    new_vc->next = vc_table[bucket];
-	    vc_table[bucket] = new_vc;
-#endif
-
+	    new_vc->h.definer = o->id;
+	    new_vc->h.verbdef = v;
+	    vh.ptr = &new_vc->h;
+#else
 	    h.definer = o->id;
 	    h.verbdef = v;
 	    vh.ptr = &h;
-
+#endif
 	    return vh;
 	}
+    /*
+     * note that the verbcache has cleared h.verbdef, so it defaults to a
+     * "miss" cache if the for loop doesn't win
+     */
     vh.ptr = 0;
 
     return vh;
@@ -734,9 +754,12 @@ db_verb_allows(db_verb_handle h, Objid progr, db_verb_flag flag)
 }
 
 
-char rcsid_db_verbs[] = "$Id: db_verbs.c,v 1.2.2.3 1997-05-29 11:56:21 nop Exp $";
+char rcsid_db_verbs[] = "$Id: db_verbs.c,v 1.2.2.4 1997-06-05 08:38:37 bjj Exp $";
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.2.2.3  1997/05/29 11:56:21  nop
+ * Added Jason Maltzen's builtin to return a list version of cache stats.
+ *
  * Revision 1.2.2.2  1997/03/22 22:54:36  bjj
  * Tiny tweak to db_find_callable_verb to avoid recomputing the first parent
  * with verbdefs.  Also hit it with indent, which made these diffs bigger than
