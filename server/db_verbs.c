@@ -704,7 +704,9 @@ db_set_verb_program(db_verb_handle vh, Program * program)
 {
     handle *h = (handle *) vh.ptr;
 
-    db_priv_affected_callable_verb_lookup();
+    /* Not necessary, since this was only here to cope with nonprogrammed verbs, and that turns out to be handled properly in modern servers. */
+
+    /* db_priv_affected_callable_verb_lookup(); */
 
     if (h) {
 	if (h->verbdef->program)
@@ -754,9 +756,15 @@ db_verb_allows(db_verb_handle h, Objid progr, db_verb_flag flag)
 }
 
 
-char rcsid_db_verbs[] = "$Id: db_verbs.c,v 1.2.2.4 1997-06-05 08:38:37 bjj Exp $";
+char rcsid_db_verbs[] = "$Id: db_verbs.c,v 1.2.2.5 1997-07-07 01:41:20 nop Exp $";
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.2.2.4  1997/06/05 08:38:37  bjj
+ * Tweak nop's verbcache by moving an actual handle into vc_entry to avoid the
+ * copy after the lookup.  Also, keep verbs that aren't found in the cache so
+ * repeated calls to nonexistant verbs benefit from caching as well (need to
+ * watch the new field in verb_cache_stats()[2] to see how often this is useful).
+ *
  * Revision 1.2.2.3  1997/05/29 11:56:21  nop
  * Added Jason Maltzen's builtin to return a list version of cache stats.
  *
