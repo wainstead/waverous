@@ -3071,7 +3071,7 @@ reparse_for_upgrade(Stream * s, DB_Version old_version, Names ** orig_names, int
 
     contents = stream_contents(s);
     /* root activations must be treated carefully -- they may be disembodied fork vectors */
-    return parse_program(old_version, string_parser_client, &contents, (is_root ? PMODE_FORK : PMODE_VERB), orig_names, pc_vector, pc);
+    return parse_program(old_version, string_parser_client, &contents, (is_root ? PARSE_FORK : PARSE_VERB), orig_names, pc_vector, pc);
 }
 
 static int
@@ -3096,10 +3096,13 @@ upgrade_activ(activation * a, int *which_vector, int is_root)
     return 1;
 }
 
-char rcsid_execute[] = "$Id: execute.c,v 1.13.6.6 2002-10-27 22:48:12 xplat Exp $";
+char rcsid_execute[] = "$Id: execute.c,v 1.13.6.7 2002-10-29 01:00:13 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.13.6.6  2002/10/27 22:48:12  xplat
+ * Changes to support PCs located in vectors other than MAIN_VECTOR.
+ *
  * Revision 1.13.6.5  2002/09/17 15:35:04  xplat
  * GNU indent normalization.
  *

@@ -30,9 +30,9 @@ typedef struct {
 } Parser_Client;
 
 typedef enum {
-    PMODE_COMPAT,
-    PMODE_VERB,
-    PMODE_FORK
+    PARSE_COMPAT,
+    PARSE_VERB,
+    PARSE_FORK
 } Parser_Mode;
 
 extern Program *parse_program(DB_Version, Parser_Client, void *,
@@ -43,6 +43,9 @@ extern Program *parse_list_as_program(Var code, Var * errors);
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3.6.2  2002/10/27 22:48:12  xplat
+ * Changes to support PCs located in vectors other than MAIN_VECTOR.
+ *
  * Revision 1.3.6.1  2002/09/12 05:57:40  xplat
  * Changes for inline PC saving and patch tags in the on-disk DB.
  *

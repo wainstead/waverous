@@ -1139,7 +1139,7 @@ parse_program(DB_Version version, Parser_Client c, void *data,
     lineno = 1;
     client = c;
     client_data = data;
-    local_names = new_builtin_names(version, mode != PMODE_COMPAT);
+    local_names = new_builtin_names(version, mode != PARSE_COMPAT);
     dollars_ok = 0;
     loop_stack = 0;
     language_version = version;
@@ -1166,7 +1166,7 @@ parse_program(DB_Version version, Parser_Client c, void *data,
         if (original_names)
             *original_names = copy_names(local_names);
 
-	if (must_rename_keywords && (mode != PMODE_COMPAT)) {
+	if (must_rename_keywords && (mode != PARSE_COMPAT)) {
 	    /* One or more new keywords were used as identifiers in this code,
 	     * possibly as local variable names (but maybe only as property or
 	     * verb names).  Such local variables must be renamed to avoid a
@@ -1191,7 +1191,7 @@ parse_program(DB_Version version, Parser_Client c, void *data,
 	    }
 	}
 
-	if ((mode != PMODE_COMPAT) && (version < DBV_Float)) {
+	if ((mode != PARSE_COMPAT) && (version < DBV_Float)) {
 	    int bad_slot;
 	    const char *name;
 
@@ -1225,7 +1225,7 @@ parse_program(DB_Version version, Parser_Client c, void *data,
 	    local_names->names[SLOT_INT] = str_dup("INT");
 	}
 
-	prog = generate_code(prog_start, (mode == PMODE_COMPAT) ? version : current_version, pc_vector, pc);
+	prog = generate_code(prog_start, (mode == PARSE_COMPAT) ? version : current_version, pc_vector, pc);
 	prog->num_var_names = local_names->size;
 	prog->var_names = local_names->names;
 
@@ -1289,16 +1289,19 @@ parse_list_as_program(Var code, Var *errors)
     state.cur_string = 1;
     state.cur_char = 0;
     state.errors = new_list(0);
-    program = parse_program(current_version, list_parser_client, &state, PMODE_VERB, 0, 0, 0);
+    program = parse_program(current_version, list_parser_client, &state, PARSE_VERB, 0, 0, 0);
     *errors = state.errors;
 
     return program;
 }
 
-char rcsid_parser[] = "$Id: parser.y,v 1.2.6.3 2002-10-27 22:48:12 xplat Exp $";
+char rcsid_parser[] = "$Id: parser.y,v 1.2.6.4 2002-10-29 01:00:24 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2.6.3  2002/10/27 22:48:12  xplat
+ * Changes to support PCs located in vectors other than MAIN_VECTOR.
+ *
  * Revision 1.2.6.2  2002/09/15 06:28:32  xplat
  * Fixed bugs revealed by smoke test.
  *
