@@ -80,7 +80,7 @@ mplex_add_writer(int fd)
 int
 mplex_wait(unsigned timeout)
 {
-    int result = poll(ports, max_fd + 1, timeout * 1000);
+    int result = poll(ports, max_fd + 1, timeout / 1000);
 
     if (result < 0) {
 	if (errno != EINTR)
@@ -102,9 +102,12 @@ mplex_is_writable(int fd)
     return fd <= max_fd && (ports[fd].revents & POLLOUT) != 0;
 }
 
-char rcsid_net_mp_poll[] = "$Id: net_mp_poll.c,v 1.2 1997-03-03 04:19:04 nop Exp $";
+char rcsid_net_mp_poll[] = "$Id: net_mp_poll.c,v 1.2.6.1 2002-08-29 03:01:54 xythian Exp $";
 
 /* $Log: not supported by cvs2svn $
+/* Revision 1.2  1997/03/03 04:19:04  nop
+/* GNU Indent normalization
+/*
  * Revision 1.1.1.1  1997/03/03 03:45:02  nop
  * LambdaMOO 1.8.0p5
  *

@@ -422,6 +422,7 @@ static void
 main_loop(void)
 {
     int i;
+    int res;
 
     /* First, notify DB of disconnections for all checkpointed connections */
     for (i = 1; i <= checkpointed_connections.v.list[0].v.num; i++) {
@@ -443,8 +444,8 @@ main_loop(void)
 	 * We only care about three cases (== 0, == 1, and > 1), so we can
 	 * map a `never' result from the task subsystem into 2.
 	 */
-	int task_seconds = next_task_start();
-	int seconds_left = task_seconds < 0 ? 2 : task_seconds;
+	int task_useconds = next_task_start();
+	int useconds_left = task_useconds < 0 ? 1000000 : task_useconds;
 	shandle *h, *nexth;
 
 	if (checkpoint_requested != CHKPT_OFF) {
@@ -469,10 +470,7 @@ main_loop(void)
 	}
 #endif
 
-	if (!network_process_io(seconds_left ? 1 : 0) && seconds_left > 1)
-	    db_flush(FLUSH_ONE_SECOND);
-	else
-	    db_flush(FLUSH_IF_FULL);
+	res = network_process_io(useconds_left);
 
 	run_ready_tasks();
 
@@ -1735,10 +1733,13 @@ register_server(void)
 		      bf_buffered_output_length, TYPE_OBJ);
 }
 
-char rcsid_server[] = "$Id: server.c,v 1.5 1998-12-29 06:56:32 nop Exp $";
+char rcsid_server[] = "$Id: server.c,v 1.5.4.1 2002-08-29 03:01:37 xythian Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  1998/12/29 06:56:32  nop
+ * Fixed leak in onc().
+ *
  * Revision 1.4  1998/12/14 13:18:57  nop
  * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
  *

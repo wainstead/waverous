@@ -136,10 +136,11 @@ mplex_wait(unsigned timeout)
 		}
 	    }
 	}
-
+	
+	timeout -= 1000000;
 	if (got_one)
 	    break;
-	else if (timeout-- > 0)
+	else if (timeout > 0)
 	    sleep(1);
     }
 
@@ -158,9 +159,12 @@ mplex_is_writable(int fd)
     return (fd < rw_size) ? writable[fd] : 0;
 }
 
-char rcsid_net_mp_fake[] = "$Id: net_mp_fake.c,v 1.2 1997-03-03 04:19:03 nop Exp $";
+char rcsid_net_mp_fake[] = "$Id: net_mp_fake.c,v 1.2.6.1 2002-08-29 03:01:54 xythian Exp $";
 
 /* $Log: not supported by cvs2svn $
+/* Revision 1.2  1997/03/03 04:19:03  nop
+/* GNU Indent normalization
+/*
  * Revision 1.1.1.1  1997/03/03 03:45:02  nop
  * LambdaMOO 1.8.0p5
  *

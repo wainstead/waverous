@@ -484,6 +484,12 @@ network_usage_string(void)
     return proto_usage_string();
 }
 
+void
+receive_but_ignore(int sig)
+{
+	;
+}
+
 int
 network_initialize(int argc, char **argv, Var * desc)
 {
@@ -494,7 +500,7 @@ network_initialize(int argc, char **argv, Var * desc)
     get_pocket_descriptors();
 
     /* we don't care about SIGPIPE, we notice it in mplex_wait() and write() */
-    signal(SIGPIPE, SIG_IGN);
+    signal(SIGPIPE, receive_but_ignore);
 
     return 1;
 }
@@ -722,10 +728,13 @@ network_shutdown(void)
 	close_nlistener(all_nlisteners);
 }
 
-char rcsid_net_multi[] = "$Id: net_multi.c,v 1.3 1998-12-14 13:18:31 nop Exp $";
+char rcsid_net_multi[] = "$Id: net_multi.c,v 1.3.4.1 2002-08-29 03:01:54 xythian Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  1998/12/14 13:18:31  nop
+ * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
+ *
  * Revision 1.2  1997/03/03 04:19:05  nop
  * GNU Indent normalization
  *
