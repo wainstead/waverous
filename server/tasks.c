@@ -792,16 +792,6 @@ enqueue_ft(Program * program, activation a, Var * rt_env,
 
     t->kind = TASK_FORKED;
     t->t.forked.program = program;
-    /* The next two lines were not present before 1.8.2.  a.rt_env/prog
-     * were never accessed and were eventually overwritten by
-     * forked.rt_env/program in do_forked_task().  Makes no sense to store
-     * it two places, but here we are.
-     * Setting it in the activation simplifies forked_task_bytes()
-     */
-    a.rt_env = rt_env;
-    a.prog = program;
-    a.base_rt_stack = NULL;
-    a.top_rt_stack = NULL;
     t->t.forked.a = a;
     t->t.forked.rt_env = rt_env;
     t->t.forked.f_index = f_index;
@@ -1422,49 +1412,12 @@ bf_task_id(Var arglist, Byte next, void *vdata, Objid progr)
     return make_var_pack(r);
 }
 
-static int
-activation_bytes(activation *ap)
-{
-    int total = sizeof(activation);
-    Var *v;
-    int i;
-
-    /* The MOO Way [tm] is double-billing to avoid the possibility
-     * of not billing at all, so the size of the prog is counted here
-     * even though it will be shared unless the verb was reprogrammed.
-     */
-    total += program_bytes(ap->prog);
-    for (i = 0; i < ap->prog->num_var_names; ++i)
-	total += value_bytes(ap->rt_env[i]);
-    if (ap->top_rt_stack) {
-	for (v = ap->top_rt_stack - 1; v >= ap->base_rt_stack; v--)
-	    total += value_bytes(*v);
-    }
-    /* XXX ignore bi_func_data, it's an opaque type. */
-    total += value_bytes(ap->temp) - sizeof(Var);
-    total += strlen(ap->verb) + 1;
-    total += strlen(ap->verbname) + 1;
-    return total;
-}
-
-static int
-forked_task_bytes(forked_task ft)
-{
-    int total = sizeof(forked_task);
-
-    /* ft.program is duplicated in ft.a */
-    total += activation_bytes(&ft.a) - sizeof(activation);
-    /* ft.rt_env is properly inside ft.a now */
-
-    return total;
-}
-
 static Var
 list_for_forked_task(forked_task ft)
 {
     Var list;
 
-    list = new_list(10);
+    list = new_list(9);
     list.v.list[1].type = TYPE_INT;
     list.v.list[1].v.num = ft.id;
     list.v.list[2].type = TYPE_INT;
@@ -1483,22 +1436,8 @@ list_for_forked_task(forked_task ft)
     list.v.list[8].v.num = find_line_number(ft.program, ft.f_index, 0);
     list.v.list[9].type = TYPE_OBJ;
     list.v.list[9].v.obj = ft.a.this;
-    list.v.list[10].type = TYPE_INT;
-    list.v.list[10].v.num = forked_task_bytes(ft);
 
     return list;
-}
-
-static int
-suspended_task_bytes(vm the_vm)
-{
-    int total = sizeof(vmstruct);
-    int i;
-
-    for (i = 0; i <= the_vm->top_activ_stack; i++)
-	total += activation_bytes(the_vm->activ_stack + i);
-
-    return total;
 }
 
 static Var
@@ -1506,7 +1445,7 @@ list_for_vm(vm the_vm)
 {
     Var list;
 
-    list = new_list(10);
+    list = new_list(9);
 
     list.v.list[1].type = TYPE_INT;
     list.v.list[1].v.num = the_vm->task_id;
@@ -1525,8 +1464,6 @@ list_for_vm(vm the_vm)
     list.v.list[8].v.num = suspended_lineno_of_vm(the_vm);
     list.v.list[9].type = TYPE_OBJ;
     list.v.list[9].v.obj = top_activ(the_vm).this;
-    list.v.list[10].type = TYPE_INT;
-    list.v.list[10].v.num = suspended_task_bytes(the_vm);
 
     return list;
 }
@@ -1744,14 +1681,14 @@ killing_closure(vm the_vm, const char *status, void *data)
 {
     struct kcl_data *kdata = data;
 
-    if (the_vm->task_id == kdata->id) {
+    if (the_vm->task_id == kdata->id)
 	if (is_wizard(kdata->owner)
 	    || progr_of_cur_verb(the_vm) == kdata->owner) {
 	    free_vm(the_vm, 1);
 	    return TEA_KILL;
 	} else
 	    return TEA_STOP;
-    }
+
     return TEA_CONTINUE;
 }
 
@@ -1762,6 +1699,7 @@ kill_task(int id, Objid owner)
     tqueue *tq;
 
     if (id == current_task_id) {
+	abort_running_task();
 	return E_NONE;
     }
     for (tt = &waiting_tasks; *tt; tt = &((*tt)->next)) {
@@ -1847,14 +1785,11 @@ kill_task(int id, Objid owner)
 static package
 bf_kill_task(Var arglist, Byte next, void *vdata, Objid progr)
 {
-    int id = arglist.v.list[1].v.num;
-    enum error e = kill_task(id, progr);
+    enum error e = kill_task(arglist.v.list[1].v.num, progr);
 
     free_var(arglist);
     if (e != E_NONE)
 	return make_error_pack(e);
-    else if (id == current_task_id)
-	return make_kill_pack();
 
     return no_var_pack();
 }
@@ -2009,25 +1944,10 @@ register_tasks(void)
     register_function("flush_input", 1, 2, bf_flush_input, TYPE_OBJ, TYPE_ANY);
 }
 
-char rcsid_tasks[] = "$Id: tasks.c,v 1.9 2001-07-31 06:33:22 bjj Exp $";
+char rcsid_tasks[] = "$Id: tasks.c,v 1.5 1998-12-14 13:19:07 nop Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
- * Revision 1.8  2001/07/27 23:06:20  bjj
- * Run through indent, oops.
- *
- * Revision 1.7  2001/07/27 07:29:44  bjj
- * Add a 10th list element to queued_task() entries with the size in bytes
- * of the forked or suspended task.
- *
- * Revision 1.6  2001/03/12 03:25:17  bjj
- * Added new package type BI_KILL which kills the task calling the builtin.
- * Removed the static int task_killed in execute.c which wa tested on every
- * loop through the interpreter to see if the task had been killed.
- *
- * Revision 1.5  1998/12/14 13:19:07  nop
- * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
- *
  * Revision 1.4  1997/07/07 03:24:55  nop
  * Merge UNSAFE_OPTS (r5) after extensive testing.
  * 

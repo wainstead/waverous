@@ -60,10 +60,10 @@ static const char cmap[] =
 int
 mystrcasecmp(const char *ss, const char *tt)
 {
-    register const unsigned char *s = (const unsigned char *) ss;
-    register const unsigned char *t = (const unsigned char *) tt;
+    const unsigned char *s = (const unsigned char *) ss;
+    const unsigned char *t = (const unsigned char *) tt;
 
-    if (s == t) {
+    if (ss == tt) {
 	return 0;
     }
     while (cmap[*s] == cmap[*t++]) {
@@ -127,10 +127,13 @@ verbcasecmp(const char *verb, const char *word)
 unsigned
 str_hash(const char *s)
 {
-    register unsigned ans = 0;
+    unsigned ans = 0;
+    int i, len = strlen(s), offset = 0;
 
-    while (*s) {
-	ans = (ans << 3) + (ans >> 28) + cmap[(unsigned char) *s++];
+    for (i = 0; i < len; i++) {
+	ans = ans ^ (cmap[(unsigned char) s[i]] << offset++);
+	if (offset == 25)
+	    offset = 0;
     }
     return ans;
 }
@@ -439,13 +442,10 @@ binary_to_raw_bytes(const char *binary, int *buflen)
     return reset_stream(s);
 }
 
-char rcsid_utils[] = "$Id: utils.c,v 1.7 2002-08-18 09:47:26 bjj Exp $";
+char rcsid_utils[] = "$Id: utils.c,v 1.5 1999-08-09 02:36:33 nop Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
- * Revision 1.5  1999/08/09 02:36:33  nop
- * Shortcut various equality tests if we have pointer equality.
- *
  * Revision 1.4  1998/12/14 13:19:14  nop
  * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
  *

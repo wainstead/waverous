@@ -385,7 +385,7 @@ extern const char *db_unparse_prep(db_prep_spec);
 				 * persistent.
 				 */
 
-extern int  db_add_verb(Objid oid, const char *vnames,
+extern void db_add_verb(Objid oid, const char *vnames,
 			Objid owner, unsigned flags,
 			db_arg_spec dobj, db_prep_spec prep,
 			db_arg_spec iobj);
@@ -518,9 +518,6 @@ extern void db_delete_verb(db_verb_handle);
 
 /* 
  * $Log: not supported by cvs2svn $
- * Revision 1.3  1998/12/14 13:17:32  nop
- * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
- *
  * Revision 1.2  1997/03/03 04:18:26  nop
  * GNU Indent normalization
  *

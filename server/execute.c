@@ -57,6 +57,7 @@ static int root_activ_vector;	/* root_activ_vector == MAIN_VECTOR
 static int ticks_remaining;
 int task_timed_out;
 static int interpreter_is_running = 0;
+static int task_killed;
 static Timer_ID task_alarm_id;
 static task_kind current_task_kind;
 
@@ -261,7 +262,7 @@ unwind_stack(Finally_Reason why, Var value, enum outcome *outcome)
 	    bi_func_data = a->bi_func_data;
 	}
 	player = a->player;
-	free_activation(a, 0);	/* 0 == don't free bi_func_data */
+	free_activation(*a, 0);	/* 0 == don't free bi_func_data */
 
 	if (top_activ_stack == 0) {	/* done */
 	    if (outcome)
@@ -312,8 +313,6 @@ unwind_stack(Finally_Reason why, Var value, enum outcome *outcome)
 		    a->bi_func_pc = p.u.call.pc;
 		    a->bi_func_data = p.u.call.data;
 		    return 0;
-		case BI_KILL:
-		    return unwind_stack(FIN_ABORT, zero, outcome);
 		}
 	    } else {
 		/* Built-in functions receive zero as a `returned value' on
@@ -338,10 +337,9 @@ unwind_stack(Finally_Reason why, Var value, enum outcome *outcome)
 			free_var(p.u.raise.value);
 			break;
 		    case BI_SUSPEND:
-		    case BI_KILL:
 			break;
 		    case BI_CALL:
-			free_activation(&activ_stack[top_activ_stack--], 0);
+			free_activation(activ_stack[top_activ_stack--], 0);
 			bi_func_pc = p.u.call.pc;
 			bi_func_data = p.u.call.data;
 			break;
@@ -511,23 +509,23 @@ push_activation(void)
 }
 
 void
-free_activation(activation *ap, char data_too)
+free_activation(activation a, char data_too)
 {
     Var *i;
 
-    free_rt_env(ap->rt_env, ap->prog->num_var_names);
+    free_rt_env(a.rt_env, a.prog->num_var_names);
 
-    for (i = ap->base_rt_stack; i < ap->top_rt_stack; i++)
+    for (i = a.base_rt_stack; i < a.top_rt_stack; i++)
 	free_var(*i);
-    free_rt_stack(ap);
-    free_var(ap->temp);
-    free_str(ap->verb);
-    free_str(ap->verbname);
+    free_rt_stack(&a);
+    free_var(a.temp);
+    free_str(a.verb);
+    free_str(a.verbname);
 
-    free_program(ap->prog);
+    free_program(a.prog);
 
-    if (data_too && ap->bi_func_pc && ap->bi_func_data)
-	free_data(ap->bi_func_data);
+    if (data_too && a.bi_func_pc && a.bi_func_data)
+	free_data(a.bi_func_data);
     /* else bi_func_state will be later freed by bi_function */
 }
 
@@ -535,31 +533,12 @@ free_activation(activation *ap, char data_too)
 /** Set up another activation for calling a verb
   does not change the vm in case of any error **/
 
-enum error call_verb2(Objid this, const char *vname, Var args, int do_pass);
-
-/*
- * Historical interface for things which want to call with vname not
- * already in a moo-str.
- */
 enum error
-call_verb(Objid this, const char *vname_in, Var args, int do_pass)
-{
-    const char *vname = str_dup(vname_in);
-    enum error result;
-
-    result = call_verb2(this, vname, args, do_pass);
-    /* call_verb2 got any refs it wanted */
-    free_str(vname);
-    return result;
-}
-
-enum error
-call_verb2(Objid this, const char *vname, Var args, int do_pass)
+call_verb(Objid this, const char *vname, Var args, int do_pass)
 {
     /* if call succeeds, args will be consumed.  If call fails, args
        will NOT be consumed  -- it must therefore be freed by caller */
     /* vname will never be consumed */
-    /* vname *must* already be a MOO-string (as in str_ref-able) */
 
     /* will only return E_MAXREC, E_INVIND, E_VERBNF, or E_NONE */
     /* returns an error if there is one, and does not change the vm in that
@@ -589,6 +568,7 @@ call_verb2(Objid this, const char *vname, Var args, int do_pass)
 	return E_MAXREC;
 
     program = db_verb_program(h);
+    vname = str_dup(vname);	/* ensure that vname is heap-allocated */
     RUN_ACTIV.prog = program_ref(program);
     RUN_ACTIV.this = this;
     RUN_ACTIV.progr = db_verb_owner(h);
@@ -630,7 +610,7 @@ call_verb2(Objid this, const char *vname, Var args, int do_pass)
 #undef ENV_COPY
 
     v.type = TYPE_STR;
-    v.v.str = str_ref(vname);
+    v.v.str = vname;
     set_rt_env_var(env, SLOT_VERB, v);	/* no var_dup */
     set_rt_env_var(env, SLOT_ARGS, args);	/* no var_dup */
 
@@ -733,8 +713,6 @@ run(char raise, enum error resumption_error, Var * result)
 	     + ((unsigned) bv[-2] << 8)      	\
 	     + bv[-1]))))
 
-#define SKIP_BYTES(bv, nb)	(void)(bv += nb)
-
 #define LOAD_STATE_VARIABLES() 					\
 do {  								\
     bc = ( (top_activ_stack != 0 || root_activ_vector == MAIN_VECTOR) \
@@ -800,6 +778,11 @@ do {    						    	\
 		return OUTCOME_ABORTED;
 	    }
 	}
+	if (task_killed) {
+	    STORE_STATE_VARIABLES();
+	    unwind_stack(FIN_ABORT, zero, 0);
+	    return OUTCOME_ABORTED;
+	}
 	switch (op) {
 
 	case OP_IF_QUES:
@@ -814,7 +797,7 @@ do {    						    	\
 		if (!is_true(cond))	/* jump if false */
 		    JUMP(READ_BYTES(bv, bc.numbytes_label));
 		else {
-		    SKIP_BYTES(bv, bc.numbytes_label);
+		    bv += bc.numbytes_label;
 		}
 		free_var(cond);
 	    }
@@ -1556,7 +1539,7 @@ do {    						    	\
 		    err = E_INVIND;
 		else {
 		    STORE_STATE_VARIABLES();
-		    err = call_verb2(obj.v.obj, verb.v.str, args, 0);
+		    err = call_verb(obj.v.obj, verb.v.str, args, 0);
 		    /* if there is no error, RUN_ACTIV is now the CALLEE's.
 		       args will be consumed in the new rt_env */
 		    /* if there is an error, then RUN_ACTIV is unchanged, and
@@ -1646,11 +1629,6 @@ do {    						    	\
 				PUSH_ERROR(e);
 			}
 			break;
-		    case BI_KILL:
-			STORE_STATE_VARIABLES();
-			unwind_stack(FIN_ABORT, zero, 0);
-			return OUTCOME_ABORTED;
-			/* NOTREACHED */
 		    }
 		}
 	    }
@@ -1753,8 +1731,8 @@ do {    						    	\
 			    free_var(POP());	/* replace list with error code */
 			    PUSH_ERROR(e);
 			    for (i = 1; i <= nargs; i++) {
-			        SKIP_BYTES(bv, bc.numbytes_var_name);
-			        SKIP_BYTES(bv, bc.numbytes_label);
+				READ_BYTES(bv, bc.numbytes_var_name);
+				READ_BYTES(bv, bc.numbytes_label);
 			    }
 			} else {
 			    nopt_avail = len - nreq;
@@ -2085,7 +2063,7 @@ setup_task_execution_limits(int seconds, int ticks)
 {
     task_alarm_id = set_virtual_timer(seconds < 1 ? 1 : seconds,
 				      task_timeout, 0);
-    task_timed_out = 0;
+    task_timed_out = task_killed = 0;
     ticks_remaining = (ticks < 100 ? 100 : ticks);
     return task_alarm_id;
 }
@@ -2370,6 +2348,12 @@ setup_activ_for_eval(Program * prog)
     return 1;
 }
 
+void
+abort_running_task(void)
+{
+    task_killed = 1;
+}
+
 /**** built in functions ****/
 
 struct cf_state {
@@ -2540,7 +2524,7 @@ bf_ticks_left(Var arglist, Byte next, void *vdata, Objid progr)
 static package
 bf_pass(Var arglist, Byte next, void *vdata, Objid progr)
 {
-    enum error e = call_verb2(RUN_ACTIV.this, RUN_ACTIV.verb, arglist, 1);
+    enum error e = call_verb(RUN_ACTIV.this, RUN_ACTIV.verb, arglist, 1);
 
     if (e == E_NONE)
 	return tail_call_pack();
@@ -2874,22 +2858,10 @@ read_activ(activation * a, int which_vector)
 }
 
 
-char rcsid_execute[] = "$Id: execute.c,v 1.13 2002-08-18 09:47:26 bjj Exp $";
+char rcsid_execute[] = "$Id: execute.c,v 1.10 1998-12-14 13:17:50 nop Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
- * Revision 1.12  2001/03/12 05:10:54  bjj
- * Split out call_verb and call_verb2.  The latter must only be called with
- * strings that are already MOO strings (str_ref-able).
- *
- * Revision 1.11  2001/03/12 03:25:16  bjj
- * Added new package type BI_KILL which kills the task calling the builtin.
- * Removed the static int task_killed in execute.c which wa tested on every
- * loop through the interpreter to see if the task had been killed.
- *
- * Revision 1.10  1998/12/14 13:17:50  nop
- * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
- *
  * Revision 1.9  1998/02/19 07:36:17  nop
  * Initial string interning during db load.
  *
