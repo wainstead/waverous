@@ -35,6 +35,8 @@ typedef enum Memory_Type {
     M_REF_ENTRY, M_REF_TABLE, M_VC_ENTRY, M_VC_TABLE, M_STRING_PTRS,
     M_INTERN_POINTER, M_INTERN_ENTRY, M_INTERN_HUNK,
 
+    M_WAIF, M_WAIF_XTRA,
+
     Sizeof_Memory_Type
 
 } Memory_Type;
@@ -58,6 +60,9 @@ free_str(const char *s)
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  1998/12/14 13:19:00  nop
+ * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
+ *
  * Revision 1.4  1998/02/19 07:36:17  nop
  * Initial string interning during db load.
  *

@@ -27,9 +27,13 @@ extern void register_property(void);
 extern void register_server(void);
 extern void register_tasks(void);
 extern void register_verbs(void);
+extern void register_waif(void);
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  1998/12/14 13:17:29  nop
+ * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
+ *
  * Revision 1.1.1.1  1997/03/03 03:45:02  nop
  * LambdaMOO 1.8.0p5
  *

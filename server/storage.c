@@ -47,6 +47,9 @@ refcount_overhead(Memory_Type type)
     case M_LIST:
 	/* for systems with picky pointer alignment */
 	return MAX(sizeof(int), sizeof(Var *));
+    case M_WAIF:
+	/* for systems with picky pointer alignment */
+	return MAX(sizeof(int), sizeof(void *));
     default:
 	return 0;
     }
@@ -221,10 +224,13 @@ memory_usage(void)
     return r;
 }
 
-char rcsid_storage[] = "$Id: storage.c,v 1.5 1998-12-14 13:18:59 nop Exp $";
+char rcsid_storage[] = "$Id: storage.c,v 1.5.2.1 2002-08-29 05:44:24 bjj Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  1998/12/14 13:18:59  nop
+ * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
+ *
  * Revision 1.4  1997/07/07 03:24:55  nop
  * Merge UNSAFE_OPTS (r5) after extensive testing.
  *
