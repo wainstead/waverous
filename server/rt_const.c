@@ -22,14 +22,15 @@
 #include "utils.h"
 
 Var rt_const_values[SizeOf_Constant_Slot];
-const char *rt_const_names[SizeOf_Constant_Slot] = {
-	"NUM",
-	"OBJ",
-	"STR",
-	"LIST",
-	"ERR",
-	"INT",
-	"FLOAT",
+const char *rt_const_names[SizeOf_Constant_Slot] =
+{
+    "NUM",
+    "OBJ",
+    "STR",
+    "LIST",
+    "ERR",
+    "INT",
+    "FLOAT",
 };
 
 void
@@ -54,9 +55,13 @@ initialize_rt_consts(void)
     rt_const_values[CSLOT_FLOAT] = var_ref(v);
 }
 
-char rcsid_rt_const[] = "$Id: rt_const.c,v 1.1.2.1 2002-11-03 03:37:58 xplat Exp $";
+char rcsid_rt_const[] = "$Id: rt_const.c,v 1.1.2.2 2002-11-03 03:42:35 xplat Exp $";
 
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1.2.1  2002/11/03 03:37:58  xplat
+ * Initial support for keeping type constants in a global constants table
+ * rather than every stack frame.
+ *
  */

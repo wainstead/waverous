@@ -647,11 +647,11 @@ decompile(Bytecodes bc, Byte * start, Byte * end, Stmt ** stmt_sink,
 		    goto finish_binary;
 		case EOP_CONSTANT:
 		    {
-		        enum Constant_Slot slot = READ_BYTES(1);
+			enum Constant_Slot slot = READ_BYTES(1);
 
-		        e = alloc_expr(EXPR_CONSTANT);
-		        e->e.constant = slot;
-		        push_expr(HOTX_OP(e));
+			e = alloc_expr(EXPR_CONSTANT);
+			e->e.constant = slot;
+			push_expr(HOTX_OP(e));
 		    }
 		    break;
 		case EOP_SCATTER:
@@ -1096,10 +1096,14 @@ find_line_number(Program * prog, int vector, int pc)
     return lineno;
 }
 
-char rcsid_decompile[] = "$Id: decompile.c,v 1.5.6.5.2.1 2002-11-03 03:37:58 xplat Exp $";
+char rcsid_decompile[] = "$Id: decompile.c,v 1.5.6.5.2.2 2002-11-03 03:42:35 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5.6.5.2.1  2002/11/03 03:37:58  xplat
+ * Initial support for keeping type constants in a global constants table
+ * rather than every stack frame.
+ *
  * Revision 1.5.6.5  2002/10/27 22:48:12  xplat
  * Changes to support PCs located in vectors other than MAIN_VECTOR.
  *

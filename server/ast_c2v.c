@@ -153,50 +153,50 @@ const2var_name_expr(Slots * slots, Expr * expr)
 }
 
 static void
-const2var_lvalue_before(Slots * slots, Expr *expr)
+const2var_lvalue_before(Slots * slots, Expr * expr)
 {
-	switch(expr->kind) {
-	case EXPR_RANGE:
-		const2var_lvalue_before(slots, expr->e.range.base);
-		const2var_expr(slots, expr->e.range.from);
-		const2var_expr(slots, expr->e.range.to);
-		break;
-	case EXPR_INDEX:
-		const2var_lvalue_before(slots, expr->e.bin.lhs);
-		const2var_expr(slots, expr->e.bin.rhs);
-		break;
-	case EXPR_ID:
-		break;
-	case EXPR_PROP:
-		const2var_expr(slots, expr->e.bin.lhs);
-		const2var_expr(slots, expr->e.bin.rhs);
-		break;
-	default:
-		errlog("CONST2VAR_LVALUE_BEFORE: Unknown Expr_Kind: %d\n", expr->kind);
-	}
+    switch (expr->kind) {
+    case EXPR_RANGE:
+	const2var_lvalue_before(slots, expr->e.range.base);
+	const2var_expr(slots, expr->e.range.from);
+	const2var_expr(slots, expr->e.range.to);
+	break;
+    case EXPR_INDEX:
+	const2var_lvalue_before(slots, expr->e.bin.lhs);
+	const2var_expr(slots, expr->e.bin.rhs);
+	break;
+    case EXPR_ID:
+	break;
+    case EXPR_PROP:
+	const2var_expr(slots, expr->e.bin.lhs);
+	const2var_expr(slots, expr->e.bin.rhs);
+	break;
+    default:
+	errlog("CONST2VAR_LVALUE_BEFORE: Unknown Expr_Kind: %d\n", expr->kind);
+    }
 }
 
 static void
-const2var_lvalue_after(Slots * slots, Expr *expr)
+const2var_lvalue_after(Slots * slots, Expr * expr)
 {
-	while (1) {
-		switch (expr->kind) {
-		case EXPR_RANGE:
-			expr = expr->e.range.base;
-			continue;
-		case EXPR_INDEX:
-			expr = expr->e.bin.lhs;
-			continue;
-		case EXPR_ID:
-			/* HERE */
-			break;
-		case EXPR_PROP:
-			break;
-		default:
-			errlog("CONST2VAR_LVALUE_AFTER: Unknown Expr_Kind: %d\n", expr->kind);
-		}
-		break;
+    while (1) {
+	switch (expr->kind) {
+	case EXPR_RANGE:
+	    expr = expr->e.range.base;
+	    continue;
+	case EXPR_INDEX:
+	    expr = expr->e.bin.lhs;
+	    continue;
+	case EXPR_ID:
+	    /* HERE */
+	    break;
+	case EXPR_PROP:
+	    break;
+	default:
+	    errlog("CONST2VAR_LVALUE_AFTER: Unknown Expr_Kind: %d\n", expr->kind);
 	}
+	break;
+    }
 }
 
 static void
@@ -268,19 +268,19 @@ const2var_expr(Slots * slots, Expr * expr)
 	/* literal expr->e.var */
 	break;
 
-    case EXPR_ASGN: {
-	Expr *e = expr->e.bin.lhs;
+    case EXPR_ASGN:{
+	    Expr *e = expr->e.bin.lhs;
 
-	if (e->kind == EXPR_SCATTER) {
-	    const2var_expr(slots, expr->e.bin.rhs);
-	    const2var_scatter(slots, e->e.scatter);
-	} else {
-	    const2var_lvalue_before(slots, expr->e.bin.lhs);
-	    const2var_expr(slots, expr->e.bin.rhs);
-	    const2var_lvalue_after(slots, expr->e.bin.lhs);
+	    if (e->kind == EXPR_SCATTER) {
+		const2var_expr(slots, expr->e.bin.rhs);
+		const2var_scatter(slots, e->e.scatter);
+	    } else {
+		const2var_lvalue_before(slots, expr->e.bin.lhs);
+		const2var_expr(slots, expr->e.bin.rhs);
+		const2var_lvalue_after(slots, expr->e.bin.lhs);
+	    }
+	    break;
 	}
-	break;
-    }
 
     case EXPR_CALL:
 	/* expr->e.call.func */
@@ -310,20 +310,20 @@ const2var_expr(Slots * slots, Expr * expr)
 	break;
 
     case EXPR_HOT:
-        const2var_expr(slots, expr->e.hot.expr);
-        break;
+	const2var_expr(slots, expr->e.hot.expr);
+	break;
 
     case EXPR_CONSTANT:
-        /* expr->e.constant */
-    	{
-            int which_var = (*slots)[expr->e.constant];
+	/* expr->e.constant */
+	{
+	    int which_var = (*slots)[expr->e.constant];
 
-            if (which_var != -1) {
-            	expr->kind = EXPR_ID;
-            	expr->e.id = which_var;
-            }
-        }
-        break;
+	    if (which_var != -1) {
+		expr->kind = EXPR_ID;
+		expr->e.id = which_var;
+	    }
+	}
+	break;
 
     default:
 	errlog("CONST2VAR_EXPR: Unknown Expr_Kind: %d\n", expr->kind);
@@ -362,8 +362,12 @@ const2var_scatter(Slots * slots, Scatter * sc)
     }
 }
 
-char rcsid_ast_c2v[] = "$Id: ast_c2v.c,v 1.1.2.1 2002-11-03 03:37:58 xplat Exp $";
+char rcsid_ast_c2v[] = "$Id: ast_c2v.c,v 1.1.2.2 2002-11-03 03:42:35 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1.2.1  2002/11/03 03:37:58  xplat
+ * Initial support for keeping type constants in a global constants table
+ * rather than every stack frame.
+ *
  */

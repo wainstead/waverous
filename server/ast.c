@@ -327,8 +327,8 @@ free_expr(Expr * expr)
 	break;
 
     case EXPR_HOT:
-        free_expr(expr->e.hot.expr);
-        break;
+	free_expr(expr->e.hot.expr);
+	break;
 
     default:
 	errlog("FREE_EXPR: Unknown Expr_Kind: %d\n", expr->kind);
@@ -416,10 +416,14 @@ free_stmt(Stmt * stmt)
     }
 }
 
-char rcsid_ast[] = "$Id: ast.c,v 1.3.6.1.2.1 2002-11-03 03:37:58 xplat Exp $";
+char rcsid_ast[] = "$Id: ast.c,v 1.3.6.1.2.2 2002-11-03 03:42:34 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3.6.1.2.1  2002/11/03 03:37:58  xplat
+ * Initial support for keeping type constants in a global constants table
+ * rather than every stack frame.
+ *
  * Revision 1.3.6.1  2002/09/15 06:28:32  xplat
  * Fixed bugs revealed by smoke test.
  *

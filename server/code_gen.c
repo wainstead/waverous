@@ -917,10 +917,10 @@ generate_expr(Expr * expr, State * state)
 	    panic("Illegal hot position in GENERATE_EXPR()");
 	break;
     case EXPR_CONSTANT:
-    	emit_extended_byte(EOP_CONSTANT, state);
-    	emit_byte(expr->e.constant, state);
-    	push_stack(1, state);
-    	break;
+	emit_extended_byte(EOP_CONSTANT, state);
+	emit_byte(expr->e.constant, state);
+	push_stack(1, state);
+	break;
     default:
 	panic("Can't happen in GENERATE_EXPR()");
     }
@@ -1408,10 +1408,14 @@ generate_code(Stmt * stmt, DB_Version version, int *pc_vector, int *pc)
     return prog;
 }
 
-char rcsid_code_gen[] = "$Id: code_gen.c,v 1.10.4.5.2.1 2002-11-03 03:37:58 xplat Exp $";
+char rcsid_code_gen[] = "$Id: code_gen.c,v 1.10.4.5.2.2 2002-11-03 03:42:35 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.10.4.5.2.1  2002/11/03 03:37:58  xplat
+ * Initial support for keeping type constants in a global constants table
+ * rather than every stack frame.
+ *
  * Revision 1.10.4.5  2002/10/27 22:48:12  xplat
  * Changes to support PCs located in vectors other than MAIN_VECTOR.
  *

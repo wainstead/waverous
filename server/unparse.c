@@ -669,13 +669,13 @@ unparse_expr(Stream * str, Expr * expr)
 	break;
 
     case EXPR_CONSTANT:
-    	if (expr->e.constant >= SizeOf_Constant_Slot || expr->e.constant < 0) {
-    	    errlog("UNPARSE_EXPR: Unknown Constant_Slot: %d\n", expr->e.constant);
-    	    stream_add_string(str, "(?!?!?!?!?)");
-    	} else {
-    	    stream_add_string(str, rt_const_names[expr->e.constant]);
-    	}
-    	break;
+	if (expr->e.constant >= SizeOf_Constant_Slot || expr->e.constant < 0) {
+	    errlog("UNPARSE_EXPR: Unknown Constant_Slot: %d\n", expr->e.constant);
+	    stream_add_string(str, "(?!?!?!?!?)");
+	} else {
+	    stream_add_string(str, rt_const_names[expr->e.constant]);
+	}
+	break;
 
     default:
 	errlog("UNPARSE_EXPR: Unknown Expr_Kind: %d\n", expr->kind);
@@ -766,10 +766,14 @@ unparse_to_stderr(Program * p, int fully_parenthesize, int indent_lines,
     unparse_to_file(stderr, p, fully_parenthesize, indent_lines, f_index);
 }
 
-char rcsid_unparse[] = "$Id: unparse.c,v 1.3.6.4.2.1 2002-11-03 03:37:58 xplat Exp $";
+char rcsid_unparse[] = "$Id: unparse.c,v 1.3.6.4.2.2 2002-11-03 03:42:35 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3.6.4.2.1  2002/11/03 03:37:58  xplat
+ * Initial support for keeping type constants in a global constants table
+ * rather than every stack frame.
+ *
  * Revision 1.3.6.4  2002/10/27 22:48:12  xplat
  * Changes to support PCs located in vectors other than MAIN_VECTOR.
  *

@@ -58,7 +58,7 @@ first_user_slot(DB_Version version, int upgrading)
     int count = 16;		/* DBV_Prehistory count */
 
     if (version >= DBV_Constants || upgrading)
-        return 11;
+	return 11;
 
     if (version >= DBV_Float)
 	count += 2;
@@ -111,8 +111,8 @@ new_builtin_names(DB_Version version, int upgrading)
 	    bi->names[OLD_SLOT_IOBJSTR] = str_dup("iobjstr");
 
 	    if (version >= DBV_Float) {
-	    	bi->names[OLD_SLOT_INT] = str_dup("INT");
-	    	bi->names[OLD_SLOT_FLOAT] = str_dup("FLOAT");
+		bi->names[OLD_SLOT_INT] = str_dup("INT");
+		bi->names[OLD_SLOT_FLOAT] = str_dup("FLOAT");
 	    }
 	}
     }
@@ -166,10 +166,14 @@ free_names(Names * names)
     myfree(names, M_NAMES);
 }
 
-char rcsid_sym_table[] = "$Id: sym_table.c,v 1.3.6.1.2.1 2002-11-03 03:37:58 xplat Exp $";
+char rcsid_sym_table[] = "$Id: sym_table.c,v 1.3.6.1.2.2 2002-11-03 03:42:35 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3.6.1.2.1  2002/11/03 03:37:58  xplat
+ * Initial support for keeping type constants in a global constants table
+ * rather than every stack frame.
+ *
  * Revision 1.3.6.1  2002/09/12 05:57:40  xplat
  * Changes for inline PC saving and patch tags in the on-disk DB.
  *

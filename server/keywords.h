@@ -25,7 +25,7 @@ struct keyword {
     DB_Version version;		/* the DB version when it was introduced */
     int token;			/* the type of token the scanner should use */
     enum error error;		/* for token == ERROR, the value */
-    enum Constant_Slot constant;/* for token == CONSTANT, the constant slot */
+    enum Constant_Slot constant;	/* for token == CONSTANT, the constant slot */
 };
 
 typedef const struct keyword Keyword;
@@ -34,6 +34,10 @@ extern Keyword *find_keyword(const char *);
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3.8.1  2002/11/03 03:37:58  xplat
+ * Initial support for keeping type constants in a global constants table
+ * rather than every stack frame.
+ *
  * Revision 1.3  1998/12/14 13:17:56  nop
  * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
  *

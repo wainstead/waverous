@@ -1368,10 +1368,9 @@ bf_open_network_connection(Var arglist, Byte next, void *vdata, Objid progr)
     enum error e;
 
     if (!is_wizard(progr)) {
-        free_var(arglist);
-        return make_error_pack(E_PERM);
+	free_var(arglist);
+	return make_error_pack(E_PERM);
     }
-
     e = network_open_connection(arglist);
     free_var(arglist);
     if (e == E_NONE) {
@@ -1737,10 +1736,14 @@ register_server(void)
 		      bf_buffered_output_length, TYPE_OBJ);
 }
 
-char rcsid_server[] = "$Id: server.c,v 1.5.8.1 2002-11-03 03:37:58 xplat Exp $";
+char rcsid_server[] = "$Id: server.c,v 1.5.8.2 2002-11-03 03:42:35 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5.8.1  2002/11/03 03:37:58  xplat
+ * Initial support for keeping type constants in a global constants table
+ * rather than every stack frame.
+ *
  * Revision 1.5  1998/12/29 06:56:32  nop
  * Fixed leak in onc().
  *

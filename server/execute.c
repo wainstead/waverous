@@ -1910,13 +1910,13 @@ do {    						    	\
 		    break;
 
 		case EOP_CONSTANT:
-	    	    {
+		    {
 			int slot;
 
 			slot = READ_BYTES(bv, 1);
 			PUSH_REF(rt_const_values[slot]);
-	    	    }
-	    	    break;
+		    }
+		    break;
 
 		default:
 		    panic("Unknown extended opcode!");
@@ -3102,10 +3102,14 @@ upgrade_activ(activation * a, int *which_vector, int is_root)
     return 1;
 }
 
-char rcsid_execute[] = "$Id: execute.c,v 1.13.6.7.2.1 2002-11-03 03:37:58 xplat Exp $";
+char rcsid_execute[] = "$Id: execute.c,v 1.13.6.7.2.2 2002-11-03 03:42:35 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.13.6.7.2.1  2002/11/03 03:37:58  xplat
+ * Initial support for keeping type constants in a global constants table
+ * rather than every stack frame.
+ *
  * Revision 1.13.6.7  2002/10/29 01:00:13  xplat
  * Changed PMODE_* to PARSE_* for clarity.
  *

@@ -51,8 +51,8 @@ typedef enum {
 				 * into compiled opcodes.
 				 */
     DBV_Constants,		/* Started treating constants like STR as true
-    				 * constants rather than preset variables.
-    				 */
+				 * constants rather than preset variables.
+				 */
     Num_DB_Versions		/* Special: the current version is this - 1. */
 } DB_Version;
 
@@ -67,6 +67,10 @@ extern int check_version(DB_Version);
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3.6.2.2.1  2002/11/03 03:37:58  xplat
+ * Initial support for keeping type constants in a global constants table
+ * rather than every stack frame.
+ *
  * Revision 1.3.6.2  2002/09/17 15:35:06  xplat
  * GNU indent normalization.
  *
