@@ -704,6 +704,7 @@ get_pattern(const char *string, int case_matters)
 		free_pattern(entry->pattern);
 	    }
 	    entry->pattern = new_pattern(string, case_matters);
+	    entry->case_matters = case_matters;
 	    if (!entry->pattern.ptr)
 		entry->string = 0;
 	    else
@@ -1134,9 +1135,13 @@ register_list(void)
 }
 
 
-char rcsid_list[] = "$Id: list.c,v 1.3.2.2 1997-05-20 14:55:52 nop Exp $";
+char rcsid_list[] = "$Id: list.c,v 1.3.2.3 1997-07-03 08:04:01 bjj Exp $";
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.3.2.2  1997/05/20 14:55:52  nop
+ * Include Jason's patch for bf_decode_binary losing on systems where
+ * char is signed.
+ *
  * Revision 1.3.2.1  1997/03/21 15:22:56  bjj
  * doinsert reallocs for appending to refcnt 1 lists.  note that this wins
  * because it avoids all the var_ref/free_var that's done in the general case,
