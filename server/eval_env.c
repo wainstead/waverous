@@ -82,17 +82,17 @@ fill_in_rt_consts(Var * env, DB_Version version)
     env[SLOT_ERR] = var_ref(v);
     v.v.num = (int) TYPE_INT;
     env[SLOT_NUM] = var_ref(v);
-    v.v.num = (int) TYPE_STR;
+    v.v.num = (int) _TYPE_STR;
     env[SLOT_STR] = var_ref(v);
     v.v.num = (int) TYPE_OBJ;
     env[SLOT_OBJ] = var_ref(v);
-    v.v.num = (int) TYPE_LIST;
+    v.v.num = (int) _TYPE_LIST;
     env[SLOT_LIST] = var_ref(v);
 
     if (version >= DBV_Float) {
 	v.v.num = (int) TYPE_INT;
 	env[SLOT_INT] = var_ref(v);
-	v.v.num = (int) TYPE_FLOAT;
+	v.v.num = (int) _TYPE_FLOAT;
 	env[SLOT_FLOAT] = var_ref(v);
     }
 }
@@ -121,9 +121,14 @@ set_rt_env_var(Var * env, int slot, Var v)
     env[slot] = v;
 }
 
-char rcsid_rt_env[] = "$Id: eval_env.c,v 1.3 1997-03-05 08:41:50 bjj Exp $";
+char rcsid_rt_env[] = "$Id: eval_env.c,v 1.3.2.1 1997-03-20 18:07:50 bjj Exp $";
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.3  1997/03/05 08:41:50  bjj
+ * A few malloc-friendly changes:  rt_stacks are now centrally allocated/freed
+ * so that we can keep a pool of them handy.  rt_envs are similarly pooled.
+ * Both revert to malloc/free for large requests.
+ *
  * Revision 1.2  1997/03/03 04:18:35  nop
  * GNU Indent normalization
  *

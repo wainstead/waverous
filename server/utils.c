@@ -133,7 +133,7 @@ str_hash(const char *s)
 }
 
 void
-free_var(Var v)
+complex_free_var(Var v)
 {
     int i;
 
@@ -153,22 +153,11 @@ free_var(Var v)
 	if (delref(v.v.fnum) == 0)
 	    myfree(v.v.fnum, M_FLOAT);
 	break;
-    case TYPE_INT:
-    case TYPE_OBJ:
-    case TYPE_ERR:
-    case TYPE_CLEAR:
-    case TYPE_NONE:
-    case TYPE_CATCH:
-    case TYPE_FINALLY:
-	break;
-    default:
-	panic("FREE_VAR: Unknown value type");
-	break;
     }
 }
 
 Var
-var_ref(Var v)
+complex_var_ref(Var v)
 {
     switch ((int) v.type) {
     case TYPE_STR:
@@ -180,22 +169,12 @@ var_ref(Var v)
     case TYPE_FLOAT:
 	addref(v.v.fnum);
 	break;
-    case TYPE_INT:
-    case TYPE_OBJ:
-    case TYPE_ERR:
-    case TYPE_CLEAR:
-    case TYPE_NONE:
-    case TYPE_CATCH:
-    case TYPE_FINALLY:
-	break;
-    default:
-	panic("VAR_REF: Unknown value type");
     }
     return v;
 }
 
 Var
-var_dup(Var v)
+complex_var_dup(Var v)
 {
     int i;
     Var newlist;
@@ -214,15 +193,6 @@ var_dup(Var v)
     case TYPE_FLOAT:
 	v = new_float(*v.v.fnum);
 	break;
-    case TYPE_INT:
-    case TYPE_OBJ:
-    case TYPE_ERR:
-    case TYPE_NONE:
-    case TYPE_CATCH:
-    case TYPE_FINALLY:
-	break;
-    default:
-	panic("VAR_DUP: Unknown value type");
     }
     return v;
 }
@@ -441,9 +411,12 @@ binary_to_raw_bytes(const char *binary, int *buflen)
     return reset_stream(s);
 }
 
-char rcsid_utils[] = "$Id: utils.c,v 1.2 1997-03-03 04:19:36 nop Exp $";
+char rcsid_utils[] = "$Id: utils.c,v 1.2.2.1 1997-03-20 18:07:48 bjj Exp $";
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.2  1997/03/03 04:19:36  nop
+ * GNU Indent normalization
+ *
  * Revision 1.1.1.1  1997/03/03 03:45:01  nop
  * LambdaMOO 1.8.0p5
  *

@@ -37,9 +37,34 @@ extern int verbcasecmp(const char *verb, const char *word);
 
 extern unsigned str_hash(const char *);
 
-extern void free_var(Var);
-extern Var var_dup(Var);
-extern Var var_ref(Var);
+extern void complex_free_var(Var);
+extern Var complex_var_ref(Var);
+extern Var complex_var_dup(Var);
+
+static inline void
+free_var(Var v)
+{
+    if (v.type & TYPE_COMPLEX_FLAG)
+	complex_free_var(v);
+}
+
+static inline Var
+var_ref(Var v)
+{
+    if (v.type & TYPE_COMPLEX_FLAG)
+	return complex_var_ref(v);
+    else
+	return v;
+}
+
+static inline Var
+var_dup(Var v)
+{
+    if (v.type & TYPE_COMPLEX_FLAG)
+	return complex_var_dup(v);
+    else
+	return v;
+}
 
 extern int equality(Var lhs, Var rhs, int case_matters);
 extern int is_true(Var v);
@@ -59,6 +84,10 @@ extern const char *binary_to_raw_bytes(const char *binary, int *rawlen);
 #endif
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.4  1997/03/05 08:20:51  bjj
+ * With 1.2 (oops) add MIN/MAX macros that do the obvious thing, with undef to
+ * avoid clashing with system definitions.
+ *
  * Revision 1.3  1997/03/05 08:15:55  bjj
  * *** empty log message ***
  *

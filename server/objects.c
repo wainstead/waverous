@@ -206,7 +206,7 @@ bf_typeof(Var arglist, Byte next, void *vdata, Objid progr)
 {
     Var r;
     r.type = TYPE_INT;
-    r.v.num = (int) arglist.v.list[1].type;
+    r.v.num = (int) arglist.v.list[1].type & TYPE_DB_MASK;
     free_var(arglist);
     return make_var_pack(r);
 }
@@ -618,9 +618,12 @@ register_objects(void)
 				      TYPE_OBJ, TYPE_OBJ);
 }
 
-char rcsid_objects[] = "$Id: objects.c,v 1.2 1997-03-03 04:19:12 nop Exp $";
+char rcsid_objects[] = "$Id: objects.c,v 1.2.2.1 1997-03-20 18:07:50 bjj Exp $";
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.2  1997/03/03 04:19:12  nop
+ * GNU Indent normalization
+ *
  * Revision 1.1.1.1  1997/03/03 03:45:01  nop
  * LambdaMOO 1.8.0p5
  *
