@@ -594,6 +594,7 @@ read_stdin_line()
     char *line, buffer[1000];
     int buflen;
 
+    fflush(stdout);
     if (!s)
 	s = new_stream(100);
 
@@ -811,6 +812,7 @@ emergency_mode()
 		else
 		    printf("%s\n", message);
 	    } else if (!mystrcasecmp(command, "abort") && nargs == 0) {
+	        printf("Bye.  (%s)\n\n", "NOT saving database");
 		exit(1);
 	    } else if (!mystrcasecmp(command, "quit") && nargs == 0) {
 		start_ok = 0;
@@ -861,6 +863,9 @@ emergency_mode()
 	    free_var(words);
 	}
     }
+
+    printf("Bye.  (%s)\n\n", start_ok ? "continuing" : "saving database");
+    fclose(stdout);
 
     free_stream(s);
     in_emergency_mode = 0;
@@ -1210,6 +1215,11 @@ main(int argc, char **argv)
 		this_program, db_usage_string(), network_usage_string());
 	exit(1);
     }
+    if (!emergency)
+	fclose(stdout);
+    if (log_file)
+	fclose(stderr);
+
     oklog("STARTING: Version %s of the LambdaMOO server\n", server_version);
     oklog("          (Using %s protocol)\n", network_protocol_name());
     oklog("          (Task timeouts measured in %s seconds.)\n",
@@ -1727,10 +1737,13 @@ register_server(void)
 		      bf_buffered_output_length, TYPE_OBJ);
 }
 
-char rcsid_server[] = "$Id: server.c,v 1.5.10.2 2003-06-11 10:40:16 wrog Exp $";
+char rcsid_server[] = "$Id: server.c,v 1.5.10.3 2004-05-20 19:57:11 wrog Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5.10.2  2003/06/11 10:40:16  wrog
+ * added binary argument to new_input_task()
+ *
  * Revision 1.5.10.1  2003/06/07 12:59:04  wrog
  * introduced connection_option macros
  *
