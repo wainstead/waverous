@@ -388,14 +388,16 @@ fmt_verb_name(void *data)
  * want them to persist.
  */
 
-static void
+static int
 read_tag(const char *tag, const char *data)
 {
     if (0) {
         /* just here to make sure the other ones are 'else if' */
     } else {
         errlog("READ_TAG: Unknown format tag in DB header: %s\n", tag);
+        return 0;
     }
+    return 1;
 }
 
 static int
@@ -426,15 +428,21 @@ read_db_file(void)
          *       comma is optional but without it the line
          *       may not end in whitespace.
          */
-        char *tags = str_dup(dbio_read_string());
+        char *tags;
         char *t, *tag, *tag_data;
 
+        if (dbio_scanf("Tags:") == EOF) {
+            errlog("READ_DB_FILE: Malformed tags line.\n");
+            return 0;
+        }
+
+	tags = str_dup(dbio_read_string());
 	t = tags;
         while (*t) {
             while (*t && *t == ' ')
                 t++;
 
-            if (!t)
+            if (!*t)
                 break;
 
             tag = t;
@@ -454,7 +462,8 @@ read_db_file(void)
                     *t++ = 0;
             }
 
-            read_tag(tag, tag_data);
+            if (!read_tag(tag, tag_data))
+            	return 0;
         }
         free_str(tags);
     }
@@ -546,6 +555,7 @@ write_tag(const char *tag, const char *data)
 static void
 write_tags(void)
 {
+    dbio_printf("Tags: ");
     /* your write_tag()s go here: */
     dbio_printf("\n");
 }
@@ -800,10 +810,13 @@ db_shutdown()
     dump_database(DUMP_SHUTDOWN);
 }
 
-char rcsid_db_file[] = "$Id: db_file.c,v 1.4.6.1 2002-09-12 05:57:40 xplat Exp $";
+char rcsid_db_file[] = "$Id: db_file.c,v 1.4.6.2 2002-09-15 06:28:32 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4.6.1  2002/09/12 05:57:40  xplat
+ * Changes for inline PC saving and patch tags in the on-disk DB.
+ *
  * Revision 1.4  1998/12/14 13:17:33  nop
  * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
  *

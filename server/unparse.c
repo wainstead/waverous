@@ -163,7 +163,8 @@ static struct prec prec_table[] =
     {EXPR_LIST, 11},
     {EXPR_CALL, 11},
     {EXPR_LENGTH, 11},
-    {EXPR_CATCH, 11}
+    {EXPR_CATCH, 11},
+    {EXPR_SCATTER, 11},
 };
 
 static int expr_prec[SizeOf_Expr_Kind];
@@ -607,7 +608,7 @@ unparse_expr(Stream * str, Expr * expr)
 	break;
 
     case EXPR_ASGN:
-	unparse_expr(str, expr->e.bin.lhs);
+	bracket_le(str, expr->kind, expr->e.bin.lhs);
 	stream_add_string(str, " = ");
 	unparse_expr(str, expr->e.bin.rhs);
 	break;
@@ -664,6 +665,7 @@ unparse_expr(Stream * str, Expr * expr)
             stream_add_string(str, "(?!?!?!?!?)");
         }
         bracket_le(str, EXPR_HOT, expr->e.hot.expr);
+        break;
 
     default:
 	errlog("UNPARSE_EXPR: Unknown Expr_Kind: %d\n", expr->kind);
@@ -754,10 +756,13 @@ unparse_to_stderr(Program * p, int fully_parenthesize, int indent_lines,
     unparse_to_file(stderr, p, fully_parenthesize, indent_lines, f_index);
 }
 
-char rcsid_unparse[] = "$Id: unparse.c,v 1.3.6.1 2002-09-12 05:57:40 xplat Exp $";
+char rcsid_unparse[] = "$Id: unparse.c,v 1.3.6.2 2002-09-15 06:28:32 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3.6.1  2002/09/12 05:57:40  xplat
+ * Changes for inline PC saving and patch tags in the on-disk DB.
+ *
  * Revision 1.3  1998/12/14 13:19:12  nop
  * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
  *

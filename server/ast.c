@@ -325,6 +325,10 @@ free_expr(Expr * expr)
 	free_scatter(expr->e.scatter);
 	break;
 
+    case EXPR_HOT:
+        free_expr(expr->e.hot.expr);
+        break;
+
     default:
 	errlog("FREE_EXPR: Unknown Expr_Kind: %d\n", expr->kind);
 	break;
@@ -411,10 +415,13 @@ free_stmt(Stmt * stmt)
     }
 }
 
-char rcsid_ast[] = "$Id: ast.c,v 1.3 1998-12-14 13:17:26 nop Exp $";
+char rcsid_ast[] = "$Id: ast.c,v 1.3.6.1 2002-09-15 06:28:32 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  1998/12/14 13:17:26  nop
+ * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
+ *
  * Revision 1.2  1997/03/03 04:18:21  nop
  * GNU Indent normalization
  *

@@ -2891,7 +2891,7 @@ write_activ(activation a)
         errlog("WRITE_ACTIV: Verb wasn't upgraded\n");
         dbio_printf("%u %u %u\n", a.pc, a.bi_func_pc, a.error_pc);
     } else {
-        dbio_printf("%u", a.bi_func_pc);
+        dbio_printf("%u\n", a.bi_func_pc);
     }
     if (a.bi_func_pc != 0) {
 	dbio_write_string(name_func_by_num(a.bi_func_id));
@@ -3095,10 +3095,13 @@ upgrade_activ(activation * a, int which_vector)
     return 1;
 }
 
-char rcsid_execute[] = "$Id: execute.c,v 1.13.6.2 2002-09-12 16:08:07 xplat Exp $";
+char rcsid_execute[] = "$Id: execute.c,v 1.13.6.3 2002-09-15 06:28:32 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.13.6.2  2002/09/12 16:08:07  xplat
+ * Ben-derived bugfixes.
+ *
  * Revision 1.13.6.1  2002/09/12 05:57:40  xplat
  * Changes for inline PC saving and patch tags in the on-disk DB.
  *
