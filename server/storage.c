@@ -24,34 +24,50 @@
 #include "ref_count.h"
 #include "storage.h"
 #include "structures.h"
+#include "utils.h"
 
 static unsigned alloc_num[Sizeof_Memory_Type];
 #ifdef USE_GNU_MALLOC
 static unsigned alloc_size[Sizeof_Memory_Type], alloc_real_size[Sizeof_Memory_Type];
 #endif
 
+static inline int
+refcount_overhead(Memory_Type type)
+{
+    /* These are the only allocation types that are addref()'d.
+     * As long as we're living on the wild side, avoid getting the
+     * refcount slot for allocations that won't need it.
+     */
+    switch (type) {
+    case M_FLOAT:
+	/* for systems with picky double alignment */
+	return MAX(sizeof(int), sizeof(double));
+    case M_STRING:
+	return sizeof(int);
+    case M_LIST:
+	/* for systems with picky pointer alignment */
+	return MAX(sizeof(int), sizeof(Var *));
+    default:
+	return 0;
+    }
+}
+
 void *
 mymalloc(unsigned size, Memory_Type type)
 {
-    void *memptr;
+    char *memptr;
     char msg[100];
+    int offs;
 
     if (size == 0)		/* For queasy systems */
 	size = 1;
 
-    memptr = (void *) malloc(size
-#ifdef FIND_LEAKS
-			     + 8
-#endif
-	);
+    offs = refcount_overhead(type);
+    memptr = (char *) malloc(size + offs);
     if (!memptr) {
 	sprintf(msg, "memory allocation (size %u) failed!", size);
 	panic(msg);
     }
-#ifdef FIND_LEAKS
-    *((int *) memptr) = type;
-#endif
-
     alloc_num[type]++;
 #ifdef USE_GNU_MALLOC
     {
@@ -63,11 +79,11 @@ mymalloc(unsigned size, Memory_Type type)
     }
 #endif
 
-#ifdef FIND_LEAKS
-    return ((char *) memptr) + 8;
-#else
+    if (offs) {
+	memptr += offs;
+	((int *) memptr)[-1] = 1;
+    }
     return memptr;
-#endif
 }
 
 const char *
@@ -101,13 +117,6 @@ str_dup(const char *s)
 void
 myfree(void *ptr, Memory_Type type)
 {
-#ifdef FIND_LEAKS
-    ptr = ((char *) ptr) - 8;
-
-    if (*((int *) ptr) != type)
-	abort();
-#endif
-
     alloc_num[type]--;
 #ifdef USE_GNU_MALLOC
     {
@@ -119,7 +128,7 @@ myfree(void *ptr, Memory_Type type)
     }
 #endif
 
-    free(ptr);
+    free((char *) ptr - refcount_overhead(type));
 }
 
 #ifdef USE_GNU_MALLOC
@@ -179,9 +188,12 @@ memory_usage(void)
     return r;
 }
 
-char rcsid_storage[] = "$Id: storage.c,v 1.3 1997-03-03 06:32:10 bjj Exp $";
+char rcsid_storage[] = "$Id: storage.c,v 1.3.2.1 1997-03-20 18:59:26 bjj Exp $";
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.3  1997/03/03 06:32:10  bjj
+ * str_dup("") now returns the same empty string to every caller
+ *
  * Revision 1.2  1997/03/03 04:19:26  nop
  * GNU Indent normalization
  *

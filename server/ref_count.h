@@ -17,10 +17,19 @@
 
 #include "config.h"
 
+#if 0
 extern void addref(const void *p);
 extern unsigned int delref(const void *p);
+#else
+#define addref(X) (++((int *)(X))[-1])
+#define delref(X) (--((int *)(X))[-1])
+#define refcount(X) (((int *)(X))[-1])
+#endif
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.2  1997/03/03 04:19:21  nop
+ * GNU Indent normalization
+ *
  * Revision 1.1.1.1  1997/03/03 03:45:04  nop
  * LambdaMOO 1.8.0p5
  *
