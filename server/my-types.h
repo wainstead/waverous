@@ -20,6 +20,12 @@
 
 #include "config.h"
 
+/* The Linux manpage for select indicates that sys/time.h is necessary
+   for the FD_ZERO et al declarations.  If this causes problems on
+   other systems, we'll have to put this into autoconf.     --Jay */
+
+#include <sys/time.h>
+
 #include <sys/types.h>
 
 #if NEED_BSDTYPES_H
@@ -36,6 +42,9 @@
 #endif				/* !My_Types_h */
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.2  1997/03/03 04:18:58  nop
+ * GNU Indent normalization
+ *
  * Revision 1.1.1.1  1997/03/03 03:45:05  nop
  * LambdaMOO 1.8.0p5
  *
