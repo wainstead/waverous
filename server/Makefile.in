@@ -17,7 +17,8 @@ CC = @CC@
 LIBRARIES = @LIBS@
 YACC = @YACC@
 
-CFLAGS = -O
+CFLAGS = @CFLAGS@
+LDFLAGS = @LDFLAGS@
 # If you're using GCC, you may prefer:
 # CFLAGS = -O2 -finline-functions
 #
@@ -81,16 +82,16 @@ YOBJS = $(YSRCS:.y=.o)
 OBJS = $(COBJS) $(YOBJS)
 
 moo:	$(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) $(LIBRARIES) -o $@
+	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) $(LIBRARIES) -o $@
 
 pure_moo: moo
-	purify $(CC) $(CFLAGS) $(OBJS) $(LIBRARIES) -o $@
+	purify $(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) $(LIBRARIES) -o $@
 
 client_bsd: client_bsd.o
-	$(CC) $(CFLAGS) client_bsd.o $(LIBRARIES) -o $@
+	$(CC) $(CFLAGS) $(LDFLAGS) client_bsd.o $(LIBRARIES) -o $@
 
 client_sysv: client_sysv.o
-	$(CC) $(CFLAGS) client_sysv.o $(LIBRARIES) -o $@
+	$(CC) $(CFLAGS) $(LDFLAGS) client_sysv.o $(LIBRARIES) -o $@
 
 # This rule gets around some "make"s' desire to `derive' it from `restart.sh'.
 restart:
@@ -120,7 +121,7 @@ keywords.c: keywords.gperf
 		| sed -e 's/#include <ctype.h>/#include "my-ctype.h"/' \
 		> keywords.c
 
-dist.tar.Z:	$(DISTFILES)
+dist.tar.gz:	$(DISTFILES)
 	rm -f version_number
 	grep "server_version = " version.c \
 		| sed -e 's/^.* = "//' -e 's/";//' > version_number
@@ -129,10 +130,10 @@ dist.tar.Z:	$(DISTFILES)
 	chmod 755 MOO-`cat version_number`
 	cp -pr $(DISTFILES) MOO-`cat version_number`
 	chmod u+w MOO-`cat version_number`/*
-	tar cvf - MOO-`cat version_number` | compress -c > dist.tar.Z.NEW
-	mv dist.tar.Z.NEW dist.tar.Z
-	rm -f LambdaMOO-`cat version_number`.tar.Z
-	ln dist.tar.Z LambdaMOO-`cat version_number`.tar.Z
+	tar cvf - MOO-`cat version_number` | gzip -9c > dist.tar.gz.NEW
+	mv dist.tar.gz.NEW dist.tar.gz
+	rm -f LambdaMOO-`cat version_number`.tar.gz
+	ln dist.tar.gz LambdaMOO-`cat version_number`.tar.gz
 	rm -fr MOO-`cat version_number` version_number
 
 tags:
@@ -142,7 +143,7 @@ clean:
 	rm -f $(OBJS) $(OPT_NET_OBJS) core y.tab.c y.tab.h y.output makedep eddep
 
 distclean:	clean
-	rm -f config.h Makefile config.status
+	rm -f config.h Makefile config.status config.cache config.log
 
 depend: ${ALL_CSRCS}
 	rm -f eddep makedep
@@ -156,6 +157,9 @@ depend: ${ALL_CSRCS}
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.9  2004/05/22 01:25:43  wrog
+# merging in WROGUE changes (W_SRCIP, W_STARTUP, W_OOB)
+#
 # Revision 1.8.10.1  2003/06/01 12:33:07  wrog
 # added net_tcp.c; (put db_tune.h in HDRS); ran makedepend
 #
