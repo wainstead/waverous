@@ -55,7 +55,7 @@ typedef struct {
     int debug;
 } activation;
 
-extern void free_activation(activation a, char data_too);
+extern void free_activation(activation *, char data_too);
 
 typedef struct {
     int task_id;
@@ -135,6 +135,10 @@ extern int read_activ(activation * a, int which_vector);
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2001/03/12 05:10:54  bjj
+ * Split out call_verb and call_verb2.  The latter must only be called with
+ * strings that are already MOO strings (str_ref-able).
+ *
  * Revision 1.4  1998/12/14 13:17:51  nop
  * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
  *
