@@ -18,6 +18,8 @@
 #ifndef Opcode_h
 #define Opcode_h 1
 
+#include "options.h"
+
 #define NUM_READY_VARS 32
 
 enum Extended_Opcode {
@@ -66,6 +68,12 @@ enum Opcode {
     OP_PUSH,
     OP_G_PUSH = OP_PUSH + NUM_READY_VARS,
 
+#ifdef BYTECODE_REDUCE_REF
+    /* final variable references, no tick: */
+    OP_PUSH_CLEAR,
+    OP_G_PUSH_CLEAR = OP_PUSH_CLEAR + NUM_READY_VARS,
+#endif /* BYTECODE_REDUCE_REF */
+
     /* expr-related opcodes with no tick: */
     OP_IMM, OP_MAKE_EMPTY_LIST, OP_LIST_ADD_TAIL, OP_LIST_APPEND,
     OP_PUSH_REF, OP_PUT_TEMP, OP_PUSH_TEMP,
@@ -85,6 +93,11 @@ enum Opcode {
 
 #define IS_PUSH_n(o)             ((o) >= (unsigned) OP_PUSH \
 				  && (o) < (unsigned) OP_G_PUSH)
+#ifdef BYTECODE_REDUCE_REF
+#define IS_PUSH_CLEAR_n(o)             ((o) >= (unsigned) OP_PUSH_CLEAR \
+				  && (o) < (unsigned) OP_G_PUSH_CLEAR)
+#define PUSH_CLEAR_n_INDEX(o)          ((o) - OP_PUSH_CLEAR)
+#endif /* BYTECODE_REDUCE_REF */
 #define IS_PUT_n(o)              ((o) >= (unsigned) OP_PUT \
 				  && (o) < (unsigned) OP_G_PUT)
 #define PUSH_n_INDEX(o)          ((o) - OP_PUSH)
@@ -110,6 +123,9 @@ typedef enum Extended_Opcode Extended_Opcode;
 #endif
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.2  1997/03/03 04:19:13  nop
+ * GNU Indent normalization
+ *
  * Revision 1.1.1.1  1997/03/03 03:45:04  nop
  * LambdaMOO 1.8.0p5
  *

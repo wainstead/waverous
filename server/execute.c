@@ -957,8 +957,15 @@ do {    						    	\
 		    free_var(list);
 		    PUSH_ERROR(E_INVARG);
 		} else if (list.type == TYPE_LIST) {
-		    PUSH(listset(var_dup(list), value, index.v.num));
-		    free_var(list);
+		    Var res;
+
+		    if (var_refcount(list) == 1)
+			res = list;
+		    else {
+			res = var_dup(list);
+		        free_var(list);
+		    }
+		    PUSH(listset(res, value, index.v.num));
 		} else {	/* TYPE_STR */
 		    char *tmp_str = str_dup(list.v.str);
 		    free_str(list.v.str);
@@ -1950,6 +1957,52 @@ do {    						    	\
 	    }
 	    break;
 
+#ifdef BYTECODE_REDUCE_REF
+	case OP_PUSH_CLEAR:
+	case OP_PUSH_CLEAR + 1:
+	case OP_PUSH_CLEAR + 2:
+	case OP_PUSH_CLEAR + 3:
+	case OP_PUSH_CLEAR + 4:
+	case OP_PUSH_CLEAR + 5:
+	case OP_PUSH_CLEAR + 6:
+	case OP_PUSH_CLEAR + 7:
+	case OP_PUSH_CLEAR + 8:
+	case OP_PUSH_CLEAR + 9:
+	case OP_PUSH_CLEAR + 10:
+	case OP_PUSH_CLEAR + 11:
+	case OP_PUSH_CLEAR + 12:
+	case OP_PUSH_CLEAR + 13:
+	case OP_PUSH_CLEAR + 14:
+	case OP_PUSH_CLEAR + 15:
+	case OP_PUSH_CLEAR + 16:
+	case OP_PUSH_CLEAR + 17:
+	case OP_PUSH_CLEAR + 18:
+	case OP_PUSH_CLEAR + 19:
+	case OP_PUSH_CLEAR + 20:
+	case OP_PUSH_CLEAR + 21:
+	case OP_PUSH_CLEAR + 22:
+	case OP_PUSH_CLEAR + 23:
+	case OP_PUSH_CLEAR + 24:
+	case OP_PUSH_CLEAR + 25:
+	case OP_PUSH_CLEAR + 26:
+	case OP_PUSH_CLEAR + 27:
+	case OP_PUSH_CLEAR + 28:
+	case OP_PUSH_CLEAR + 29:
+	case OP_PUSH_CLEAR + 30:
+	case OP_PUSH_CLEAR + 31:
+	    {
+		Var *vp;
+		vp = &RUN_ACTIV.rt_env[PUSH_CLEAR_n_INDEX(op)];
+		if (vp->type == TYPE_NONE) {
+		    PUSH_ERROR(E_VARNF);
+		} else {
+		    PUSH(*vp);
+		    vp->type = TYPE_NONE;
+		}
+	    }
+	    break;
+#endif /* BYTECODE_REDUCE_REF */
+
 	case OP_PUT:
 	case OP_PUT + 1:
 	case OP_PUT + 2:
@@ -2818,9 +2871,12 @@ read_activ(activation * a, int which_vector)
 }
 
 
-char rcsid_execute[] = "$Id: execute.c,v 1.6.2.2 1997-05-24 07:08:37 bjj Exp $";
+char rcsid_execute[] = "$Id: execute.c,v 1.6.2.3 1997-09-09 07:01:17 bjj Exp $";
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.6.2.2  1997/05/24 07:08:37  bjj
+ * Cleanup of Jay's last checkin to avoid some code duplication.
+ *
  * Revision 1.6.2.1  1997/05/23 07:03:44  nop
  * Failure during property lookups/stores sometimes fails to free the string
  * containing the property name.  (PUSH_ERROR() may return immediately.)

@@ -155,6 +155,13 @@ decompile(Bytecodes bc, Byte * start, Byte * end, Stmt ** stmt_sink,
 	    e->e.id = PUSH_n_INDEX(op);
 	    push_expr(HOT_OP(e));
 	    continue;
+#ifdef BYTECODE_REDUCE_REF
+	} else if (IS_PUSH_CLEAR_n(op)) {
+	    e = alloc_expr(EXPR_ID);
+	    e->e.id = PUSH_CLEAR_n_INDEX(op);
+	    push_expr(HOT_OP(e));
+	    continue;
+#endif /* BYTECODE_REDUCE_REF */
 	} else if (IS_PUT_n(op)) {
 	    e = alloc_expr(EXPR_ID);
 	    e->e.id = PUT_n_INDEX(op);
@@ -982,9 +989,13 @@ find_line_number(Program * prog, int vector, int pc)
     return lineno;
 }
 
-char rcsid_decompile[] = "$Id: decompile.c,v 1.2.2.1 1997-06-05 09:00:00 bjj Exp $";
+char rcsid_decompile[] = "$Id: decompile.c,v 1.2.2.2 1997-09-09 07:01:16 bjj Exp $";
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.2.2.1  1997/06/05 09:00:00  bjj
+ * Cache one pc/lineno pair with each Program.  Hopefully most programs that
+ * fail multiple times usually do it on the same line!
+ *
  * Revision 1.2  1997/03/03 04:18:32  nop
  * GNU Indent normalization
  *
