@@ -138,6 +138,23 @@ bf_read_stdin(Var arglist, Byte next, void *vdata, Objid progr)
 }
 #endif				/* EXAMPLE */
 
+#define STUPID_VERB_CACHE 1
+#ifdef STUPID_VERB_CACHE
+static package
+bf_log_cache_stats(Var arglist, Byte next, void *vdata, Objid progr)
+{
+    free_var(arglist);
+
+    if (!is_wizard(progr)) {
+	return make_error_pack(E_PERM);
+    }
+    db_log_cache_stats();
+
+    return no_var_pack();
+}
+#endif
+
+
 void
 register_extensions()
 {
@@ -145,11 +162,17 @@ register_extensions()
     register_task_queue(stdin_enumerator);
     register_function("read_stdin", 0, 0, bf_read_stdin);
 #endif
+#ifdef STUPID_VERB_CACHE
+    register_function("log_cache_stats", 0, 0, bf_log_cache_stats);
+#endif
 }
 
-char rcsid_extensions[] = "$Id: extensions.c,v 1.2 1997-03-03 04:18:41 nop Exp $";
+char rcsid_extensions[] = "$Id: extensions.c,v 1.2.2.1 1997-03-20 07:26:04 nop Exp $";
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.2  1997/03/03 04:18:41  nop
+ * GNU Indent normalization
+ *
  * Revision 1.1.1.1  1997/03/03 03:45:00  nop
  * LambdaMOO 1.8.0p5
  *

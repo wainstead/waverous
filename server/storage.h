@@ -31,7 +31,7 @@ typedef enum Memory_Type {
 
     M_RT_STACK, M_RT_ENV, M_BI_FUNC_DATA, M_VM,
 
-    M_REF_ENTRY, M_REF_TABLE,
+    M_REF_ENTRY, M_REF_TABLE, M_VC_ENTRY, M_VC_TABLE,
 
     Sizeof_Memory_Type
 
@@ -48,6 +48,9 @@ extern void *mymalloc(unsigned size, Memory_Type type);
 #endif				/* Storage_h */
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.2  1997/03/03 04:19:27  nop
+ * GNU Indent normalization
+ *
  * Revision 1.1.1.1  1997/03/03 03:45:04  nop
  * LambdaMOO 1.8.0p5
  *

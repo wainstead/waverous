@@ -136,6 +136,8 @@ db_destroy_object(Objid oid)
     Verbdef *v, *w;
     int i;
 
+    db_priv_affected_callable_verb_lookup();
+
     if (!o)
 	panic("DB_DESTROY_OBJECT: Invalid object!");
 
@@ -181,6 +183,8 @@ db_renumber_object(Objid old)
 {
     Objid new;
     Object *o;
+
+    db_priv_affected_callable_verb_lookup();
 
     for (new = 0; new < old; new++) {
 	if (objects[new] == 0) {
@@ -402,6 +406,8 @@ db_change_parent(Objid oid, Objid parent)
 {
     Objid old_parent;
 
+    db_priv_affected_callable_verb_lookup();
+
     if (!dbpriv_check_properties_for_chparent(oid, parent))
 	return 0;
 
@@ -533,9 +539,12 @@ dbpriv_set_all_users(Var v)
     all_users = v;
 }
 
-char rcsid_db_objects[] = "$Id: db_objects.c,v 1.2 1997-03-03 04:18:29 nop Exp $";
+char rcsid_db_objects[] = "$Id: db_objects.c,v 1.2.2.1 1997-03-20 07:26:01 nop Exp $";
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.2  1997/03/03 04:18:29  nop
+ * GNU Indent normalization
+ *
  * Revision 1.1.1.1  1997/03/03 03:44:59  nop
  * LambdaMOO 1.8.0p5
  *

@@ -198,6 +198,8 @@ db_add_verb(Objid oid, const char *vnames, Objid owner, unsigned flags,
     Object *o = dbpriv_find_object(oid);
     Verbdef *v, *newv;
 
+    db_priv_affected_callable_verb_lookup();
+
     newv = mymalloc(sizeof(Verbdef), M_VERBDEF);
     newv->name = vnames;
     newv->owner = owner;
@@ -267,6 +269,8 @@ db_delete_verb(db_verb_handle vh)
     Object *o = dbpriv_find_object(oid);
     Verbdef *vv;
 
+    db_priv_affected_callable_verb_lookup();
+
     vv = o->verbdefs;
     if (vv == v)
 	o->verbdefs = v->next;
@@ -314,6 +318,94 @@ db_find_command_verb(Objid oid, const char *verb,
     return vh;
 }
 
+#ifdef VERB_CACHE
+int db_verb_generation = 0;
+
+int verbcache_hit = 0;
+int verbcache_miss = 0;
+
+typedef struct vc_entry vc_entry;
+
+struct vc_entry {
+    unsigned int hash;
+#ifdef RONG
+    int generation;
+#endif
+    Objid oid_key;    /* Note that we proceed up the parent tree until we hit
+                         an object with verbs on it */
+    Objid definer;
+    char *verbname;
+    Verbdef *verbdef;
+    struct vc_entry *next;
+};
+
+static vc_entry **vc_table = NULL;
+static int vc_size = 0;
+
+#define DEFAULT_VC_SIZE 721
+
+void 
+db_priv_affected_callable_verb_lookup(void) {
+    int i;
+    vc_entry *vc, *vc_next;
+    
+    if (vc_table == NULL) 
+        return;
+
+    db_verb_generation++;
+
+    for (i = 0; i < vc_size; i++) {
+        vc = vc_table[i];
+        while (vc) {
+            vc_next = vc->next;
+            free_str(vc->verbname);
+            myfree(vc, M_VC_ENTRY);
+            vc = vc_next;
+        }
+        vc_table[i] = NULL;
+    }
+}
+
+static void 
+make_vc_table(int size) {
+    int i;
+
+    vc_size = size;
+    vc_table = mymalloc(size * sizeof(vc_entry *), M_VC_TABLE);
+    for (i = 0; i < size; i++) {
+        vc_table[i] = NULL;
+    }
+}
+
+#define VC_CACHE_STATS_MAX 16
+void 
+db_log_cache_stats(void) {
+    int i, depth, histogram[VC_CACHE_STATS_MAX + 1];
+    vc_entry *vc;
+    
+    for (i = 0; i < VC_CACHE_STATS_MAX + 1; i++) {
+        histogram[i] = 0;
+    }
+
+    for (i = 0; i < vc_size; i++) {
+        depth = 0;
+        for (vc = vc_table[i]; vc; vc = vc->next)
+            depth++;
+        if (depth > VC_CACHE_STATS_MAX)
+            depth = VC_CACHE_STATS_MAX;
+        histogram[depth]++;
+    }
+
+    oklog("Verb cache stat summary: %d hits, %d misses, %d generations\n",
+          verbcache_hit, verbcache_miss, db_verb_generation);
+    oklog("Depth   Count\n");
+    for (i = 0; i < VC_CACHE_STATS_MAX + 1; i++)
+        oklog("%-5d   %-5d\n", i, histogram[i]);
+    oklog("---\n");
+}
+
+#endif
+
 db_verb_handle
 db_find_callable_verb(Objid oid, const char *verb)
 {
@@ -322,14 +414,67 @@ db_find_callable_verb(Objid oid, const char *verb)
     static handle h;
     db_verb_handle vh;
 
-    for (o = dbpriv_find_object(oid); o; o = dbpriv_find_object(o->parent))
-	if ((v = find_verbdef_by_name(o, verb, 1)) != 0) {
-	    h.definer = o->id;
-	    h.verbdef = v;
-	    vh.ptr = &h;
+#ifdef VERB_CACHE
+    unsigned int hash, bucket;
+    Objid first_parent_with_verbs = oid;
+    vc_entry *vc;
 
-	    return vh;
-	}
+    if (vc_table == NULL)
+        make_vc_table(DEFAULT_VC_SIZE);
+
+    for (o = dbpriv_find_object(oid); o; o = dbpriv_find_object(o->parent)) {
+        if (o->verbdefs != NULL)
+            break;
+    }
+
+    if (o) {
+        first_parent_with_verbs = o->id;
+    } else {
+        first_parent_with_verbs = NOTHING;
+    }
+
+    hash = str_hash(verb) ^ (~first_parent_with_verbs); /* ewww, but who cares */
+    bucket = hash % vc_size;
+
+    for (vc = vc_table[bucket]; vc; vc = vc->next) {
+        if (hash == vc->hash
+            && first_parent_with_verbs == vc->oid_key
+            && !mystrcasecmp(verb, vc->verbname)) {
+            /* we haaave a winnaaah */
+            verbcache_hit++;
+
+            h.verbdef = vc->verbdef;
+            h.definer = vc->definer;
+            vh.ptr = &h;
+            return vh;
+        }
+    }
+    
+    /* A swing and a miss. */
+    verbcache_miss++;
+#endif
+
+    for (o = dbpriv_find_object(oid); o; o = dbpriv_find_object(o->parent))
+        if ((v = find_verbdef_by_name(o, verb, 1)) != 0) {
+#ifdef VERB_CACHE
+            vc_entry *new_vc = mymalloc(sizeof(vc_entry), M_VC_ENTRY);
+
+            new_vc->hash = hash;
+            new_vc->oid_key = first_parent_with_verbs;
+            new_vc->definer = o->id;
+            new_vc->verbname = str_dup(verb);
+            new_vc->verbdef = v;
+
+            new_vc->next = vc_table[bucket];
+            vc_table[bucket] = new_vc;
+#endif            
+            
+            h.definer = o->id;
+            h.verbdef = v;
+            vh.ptr = &h;
+            
+            return vh;
+        }
     vh.ptr = 0;
 
     return vh;
@@ -417,6 +562,8 @@ db_set_verb_names(db_verb_handle vh, const char *names)
 {
     handle *h = (handle *) vh.ptr;
 
+    db_priv_affected_callable_verb_lookup();
+
     if (h) {
 	if (h->verbdef->name)
 	    free_str(h->verbdef->name);
@@ -465,6 +612,8 @@ db_set_verb_flags(db_verb_handle vh, unsigned flags)
 {
     handle *h = (handle *) vh.ptr;
 
+    db_priv_affected_callable_verb_lookup();
+
     if (h) {
 	h->verbdef->perms &= ~PERMMASK;
 	h->verbdef->perms |= flags;
@@ -490,6 +639,8 @@ void
 db_set_verb_program(db_verb_handle vh, Program * program)
 {
     handle *h = (handle *) vh.ptr;
+
+    db_priv_affected_callable_verb_lookup();
 
     if (h) {
 	if (h->verbdef->program)
@@ -519,6 +670,8 @@ db_set_verb_arg_specs(db_verb_handle vh,
 {
     handle *h = (handle *) vh.ptr;
 
+    db_priv_affected_callable_verb_lookup();
+
     if (h) {
 	h->verbdef->perms = ((h->verbdef->perms & PERMMASK)
 			     | (dobj << DOBJSHIFT)
@@ -537,9 +690,12 @@ db_verb_allows(db_verb_handle h, Objid progr, db_verb_flag flag)
 }
 
 
-char rcsid_db_verbs[] = "$Id: db_verbs.c,v 1.2 1997-03-03 04:18:31 nop Exp $";
+char rcsid_db_verbs[] = "$Id: db_verbs.c,v 1.2.2.1 1997-03-20 07:26:03 nop Exp $";
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.2  1997/03/03 04:18:31  nop
+ * GNU Indent normalization
+ *
  * Revision 1.1.1.1  1997/03/03 03:44:59  nop
  * LambdaMOO 1.8.0p5
  *
