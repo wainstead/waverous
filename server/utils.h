@@ -40,6 +40,7 @@ extern unsigned str_hash(const char *);
 extern void complex_free_var(Var);
 extern Var complex_var_ref(Var);
 extern Var complex_var_dup(Var);
+extern int var_refcount(Var);
 
 static inline void
 free_var(Var v)
@@ -84,6 +85,12 @@ extern const char *binary_to_raw_bytes(const char *binary, int *rawlen);
 #endif
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.4.2.1  1997/03/20 18:07:49  bjj
+ * Add a flag to the in-memory type identifier so that inlines can cheaply
+ * identify Vars that need actual work done to ref/free/dup them.  Add the
+ * appropriate inlines to utils.h and replace old functions in utils.c with
+ * complex_* functions which only handle the types with external storage.
+ *
  * Revision 1.4  1997/03/05 08:20:51  bjj
  * With 1.2 (oops) add MIN/MAX macros that do the obvious thing, with undef to
  * avoid clashing with system definitions.

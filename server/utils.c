@@ -199,6 +199,26 @@ complex_var_dup(Var v)
     return v;
 }
 
+/* could be inlined and use complex_etc like the others, but this should
+ * usually be called in a context where we already konw the type.
+ */
+int
+var_refcount(Var v)
+{
+    switch ((int) v.type) {
+    case TYPE_STR:
+	return refcount(v.v.str);
+	break;
+    case TYPE_LIST:
+	return refcount(v.v.list);
+	break;
+    case TYPE_FLOAT:
+	return refcount(v.v.fnum);
+	break;
+    }
+    return 1;
+}
+
 int
 is_true(Var v)
 {
@@ -413,9 +433,12 @@ binary_to_raw_bytes(const char *binary, int *buflen)
     return reset_stream(s);
 }
 
-char rcsid_utils[] = "$Id: utils.c,v 1.2.2.2 1997-03-21 14:29:03 bjj Exp $";
+char rcsid_utils[] = "$Id: utils.c,v 1.2.2.3 1997-03-21 15:11:22 bjj Exp $";
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.2.2.2  1997/03/21 14:29:03  bjj
+ * Some code bumming in complex_free_var (3rd most expensive function!)
+ *
  * Revision 1.2.2.1  1997/03/20 18:07:48  bjj
  * Add a flag to the in-memory type identifier so that inlines can cheaply
  * identify Vars that need actual work done to ref/free/dup them.  Add the
