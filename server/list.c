@@ -116,7 +116,6 @@ doinsert(Var list, Var value, int pos)
 	list.v.list[pos] = value;
 	return list;
     }
-
     new = new_list(size);
     for (i = 1; i < pos; i++)
 	new.v.list[i] = var_ref(list.v.list[i]);
@@ -995,7 +994,7 @@ bf_decode_binary(Var arglist, Byte next, void *vdata, Objid progr)
 	r = new_list(length);
 	for (i = 1; i <= length; i++) {
 	    r.v.list[i].type = TYPE_INT;
-	    r.v.list[i].v.num = bytes[i - 1];
+	    r.v.list[i].v.num = (unsigned char) bytes[i - 1];
 	}
     } else {
 	static Stream *s = 0;
@@ -1135,9 +1134,15 @@ register_list(void)
 }
 
 
-char rcsid_list[] = "$Id: list.c,v 1.3.2.1 1997-03-21 15:22:56 bjj Exp $";
+char rcsid_list[] = "$Id: list.c,v 1.3.2.2 1997-05-20 14:55:52 nop Exp $";
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.3.2.1  1997/03/21 15:22:56  bjj
+ * doinsert reallocs for appending to refcnt 1 lists.  note that this wins
+ * because it avoids all the var_ref/free_var that's done in the general case,
+ * not because it avoids malloc/free.  the general case could also benefit from
+ * using memcpy when the refcnt is 1, rather than looping with var_ref.
+ *
  * Revision 1.3  1997/03/03 06:20:04  bjj
  * new_list(0) now returns the same empty list to every caller
  *
