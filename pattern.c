@@ -176,7 +176,11 @@ free_pattern(Pattern p)
 
 char rcsid_pattern[] = "$Id";
 
-/* $Log: not supported by cvs2svn $
+/* 
+ * $Log: not supported by cvs2svn $
+ * Revision 1.3  1997/03/03 07:04:01  bjj
+ * fastmap is mymalloc'd, so myfree it
+ *
  * Revision 1.2  1997/03/03 04:19:16  nop
  * GNU Indent normalization
  *

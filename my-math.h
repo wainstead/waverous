@@ -25,7 +25,11 @@
 
 #endif
 
-/* $Log: not supported by cvs2svn $
+/* 
+ * $Log: not supported by cvs2svn $
+ * Revision 1.1.1.1  1997/03/03 03:45:04  nop
+ * LambdaMOO 1.8.0p5
+ *
  * Revision 2.2  1996/03/10  01:06:01  pavel
  * Replaced HUGE_VAL with DBL_MAX, since some systems (e.g., BSDi 1.1)
  * mis-define the former as positive infinity.  Release 1.8.0.

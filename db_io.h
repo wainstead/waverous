@@ -96,7 +96,11 @@ extern void dbio_write_var(Var);
 extern void dbio_write_program(Program *);
 extern void dbio_write_forked_program(Program * prog, int f_index);
 
-/* $Log: not supported by cvs2svn $
+/* 
+ * $Log: not supported by cvs2svn $
+ * Revision 1.3  1998/02/19 07:36:16  nop
+ * Initial string interning during db load.
+ *
  * Revision 1.2  1997/03/03 04:18:28  nop
  * GNU Indent normalization
  *

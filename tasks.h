@@ -36,9 +36,8 @@ extern int tasks_set_connection_option(task_queue, const char *,
 				       Var);
 
 extern void new_input_task(task_queue, const char *);
-extern Var enqueue_forked_task(Program * program, activation a,
-			       Var * rt_env, int f_index,
-			       unsigned after_seconds);
+extern enum error enqueue_forked_task2(activation a, int f_index,
+			       unsigned after_seconds, int vid);
 extern enum error enqueue_suspended_task(vm the_vm, void *data);
 				/* data == &(int after_seconds) */
 extern enum error make_reading_task(vm the_vm, void *data);
@@ -109,7 +108,17 @@ extern db_verb_handle find_verb_for_programming(Objid player,
 
 #endif				/* !Tasks_H */
 
-/* $Log: not supported by cvs2svn $
+/* 
+ * $Log: not supported by cvs2svn $
+ * Revision 1.2.2.1  1998/12/06 07:13:23  bjj
+ * Rationalize enqueue_forked_task interface and fix program_ref leak in
+ * the case where fork fails with E_QUOTA.  Make .queued_task_limit=0 really
+ * enforce a limit of zero tasks (for old behavior set it to 1, that's the
+ * effect it used to have).
+ *
+ * Revision 1.2  1997/03/03 04:19:32  nop
+ * GNU Indent normalization
+ *
  * Revision 1.1.1.1  1997/03/03 03:45:04  nop
  * LambdaMOO 1.8.0p5
  *

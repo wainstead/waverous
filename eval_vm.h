@@ -29,7 +29,11 @@ extern activation top_activ(vm);
 extern Objid progr_of_cur_verb(vm);
 extern unsigned suspended_lineno_of_vm(vm);
 
-/* $Log: not supported by cvs2svn $
+/* 
+ * $Log: not supported by cvs2svn $
+ * Revision 1.2  1997/03/03 04:18:36  nop
+ * GNU Indent normalization
+ *
  * Revision 1.1.1.1  1997/03/03 03:45:02  nop
  * LambdaMOO 1.8.0p5
  *

@@ -28,7 +28,11 @@ extern void register_server(void);
 extern void register_tasks(void);
 extern void register_verbs(void);
 
-/* $Log: not supported by cvs2svn $
+/* 
+ * $Log: not supported by cvs2svn $
+ * Revision 1.1.1.1  1997/03/03 03:45:02  nop
+ * LambdaMOO 1.8.0p5
+ *
  * Revision 2.2  1996/02/08  06:29:12  pavel
  * Updated copyright notice for 1996.  Release 1.8.0beta1.
  *

@@ -91,7 +91,12 @@ extern void load_server_options(void);
 
 #endif
 
-/* $Log: not supported by cvs2svn $
+/* 
+ * $Log: not supported by cvs2svn $
+ * Revision 1.3  1997/03/03 05:03:51  nop
+ * steak2: move protectedness into builtin struct, load_server_options()
+ * now required for $server_options updates.
+ *
  * Revision 1.2  1997/03/03 04:18:42  nop
  * GNU Indent normalization
  *

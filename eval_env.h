@@ -34,7 +34,11 @@ void fill_in_rt_consts(Var * env, DB_Version);
 
 #endif
 
-/* $Log: not supported by cvs2svn $
+/* 
+ * $Log: not supported by cvs2svn $
+ * Revision 1.2  1997/03/03 04:18:36  nop
+ * GNU Indent normalization
+ *
  * Revision 1.1.1.1  1997/03/03 03:45:02  nop
  * LambdaMOO 1.8.0p5
  *

@@ -50,7 +50,11 @@ extern const char *lookup_name_from_addr(struct sockaddr_in *addr,
 
 #endif				/* Name_Lookup_H */
 
-/* $Log: not supported by cvs2svn $
+/* 
+ * $Log: not supported by cvs2svn $
+ * Revision 1.2  1997/03/03 04:19:01  nop
+ * GNU Indent normalization
+ *
  * Revision 1.1.1.1  1997/03/03 03:45:04  nop
  * LambdaMOO 1.8.0p5
  *

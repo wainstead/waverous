@@ -84,7 +84,11 @@ extern const char *binary_to_raw_bytes(const char *binary, int *rawlen);
 
 #endif
 
-/* $Log: not supported by cvs2svn $
+/* 
+ * $Log: not supported by cvs2svn $
+ * Revision 1.5  1997/07/07 03:24:55  nop
+ * Merge UNSAFE_OPTS (r5) after extensive testing.
+ *
  * Revision 1.4.2.2  1997/03/21 15:11:22  bjj
  * add var_refcount interface
  *

@@ -21,7 +21,11 @@
 extern enum error validate_verb_descriptor(Var desc);
 extern db_verb_handle find_described_verb(Objid oid, Var desc);
 
-/* $Log: not supported by cvs2svn $
+/* 
+ * $Log: not supported by cvs2svn $
+ * Revision 1.2  1997/03/03 04:19:38  nop
+ * GNU Indent normalization
+ *
  * Revision 1.1.1.1  1997/03/03 03:45:04  nop
  * LambdaMOO 1.8.0p5
  *

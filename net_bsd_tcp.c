@@ -277,9 +277,13 @@ proto_open_connection(Var arglist, int *read_fd, int *write_fd,
 }
 #endif				/* OUTBOUND_NETWORK */
 
-char rcsid_net_bsd_tcp[] = "$Id: net_bsd_tcp.c,v 1.2 1997-03-03 04:19:02 nop Exp $";
+char rcsid_net_bsd_tcp[] = "$Id: net_bsd_tcp.c,v 1.3 1998-12-14 13:18:27 nop Exp $";
 
-/* $Log: not supported by cvs2svn $
+/* 
+ * $Log: not supported by cvs2svn $
+ * Revision 1.2  1997/03/03 04:19:02  nop
+ * GNU Indent normalization
+ *
  * Revision 1.1.1.1  1997/03/03 03:45:02  nop
  * LambdaMOO 1.8.0p5
  *

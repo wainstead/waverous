@@ -66,9 +66,13 @@ incr_quota(Objid player)
     db_set_property_value(h, v);
 }
 
-char rcsid_quota[] = "$Id: quota.c,v 1.2 1997-03-03 04:19:19 nop Exp $";
+char rcsid_quota[] = "$Id: quota.c,v 1.3 1998-12-14 13:18:51 nop Exp $";
 
-/* $Log: not supported by cvs2svn $
+/* 
+ * $Log: not supported by cvs2svn $
+ * Revision 1.2  1997/03/03 04:19:19  nop
+ * GNU Indent normalization
+ *
  * Revision 1.1.1.1  1997/03/03 03:45:01  nop
  * LambdaMOO 1.8.0p5
  *

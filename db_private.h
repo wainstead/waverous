@@ -160,9 +160,10 @@ extern Exception dbpriv_dbio_failed;
 extern void dbpriv_set_dbio_input(FILE *);
 extern void dbpriv_set_dbio_output(FILE *);
 
-/* $Log: not supported by cvs2svn $
- * Revision 1.2.2.1  1997/03/20 07:26:03  nop
- * First pass at the new verb cache.  Some ugly code inside.
+/* 
+ * $Log: not supported by cvs2svn $
+ * Revision 1.3  1997/07/07 03:24:53  nop
+ * Merge UNSAFE_OPTS (r5) after extensive testing.
  *
  * Revision 1.2  1997/03/03 04:18:30  nop
  * GNU Indent normalization

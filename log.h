@@ -30,7 +30,11 @@ extern void reset_command_history(void);
 extern void log_command_history(void);
 extern void add_command_to_history(Objid player, const char *command);
 
-/* $Log: not supported by cvs2svn $
+/* 
+ * $Log: not supported by cvs2svn $
+ * Revision 1.2  1997/03/03 04:18:48  nop
+ * GNU Indent normalization
+ *
  * Revision 1.1.1.1  1997/03/03 03:45:03  nop
  * LambdaMOO 1.8.0p5
  *

@@ -36,7 +36,11 @@ extern int mknod(const char *file, int mode, int dev);
 #define mkfifo(path, mode)	mknod(path, S_IFIFO | (mode), 0)
 #endif
 
-/* $Log: not supported by cvs2svn $
+/* 
+ * $Log: not supported by cvs2svn $
+ * Revision 1.2  1997/03/03 04:18:55  nop
+ * GNU Indent normalization
+ *
  * Revision 1.1.1.1  1997/03/03 03:45:05  nop
  * LambdaMOO 1.8.0p5
  *
