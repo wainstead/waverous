@@ -717,7 +717,9 @@ enqueue_input_task(tqueue * tq, const char *input, int at_front)
     if (!tq->hold_input || tq->reading)		/* Anything to do with this line? */
 	ensure_usage(tq);
 
-    if (!tq->input_suspended && tq->total_input_length > INPUT_HIWAT) {
+    if (!tq->input_suspended
+	&& tq->connected
+	&& tq->total_input_length > INPUT_HIWAT) {
 	server_suspend_input(tq->player);
 	tq->input_suspended = 1;
     }
@@ -1937,9 +1939,12 @@ register_tasks(void)
     register_function("flush_input", 1, 2, bf_flush_input, TYPE_OBJ, TYPE_ANY);
 }
 
-char rcsid_tasks[] = "$Id: tasks.c,v 1.3.2.1 1997-05-21 03:41:34 bjj Exp $";
+char rcsid_tasks[] = "$Id: tasks.c,v 1.3.2.2 1998-11-23 01:10:55 bjj Exp $";
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.3.2.1  1997/05/21 03:41:34  bjj
+ * Fix a memleak when a forked task was killed before it ever started.
+ *
  * Revision 1.3  1997/03/08 06:25:43  nop
  * 1.8.0p6 merge by hand.
  *
