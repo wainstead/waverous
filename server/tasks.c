@@ -43,6 +43,10 @@
 #include "verbs.h"
 #include "version.h"
 
+typedef enum {
+    TASK_INPUT, TASK_FORKED, TASK_SUSPENDED
+} task_kind;
+
 typedef struct forked_task {
     int id;
     Program *program;
@@ -1000,7 +1004,7 @@ run_ready_tasks(void)
 		current_task_id = tq->reading_vm->task_id;
 		v.type = TYPE_ERR;
 		v.v.err = E_INVARG;
-		resume_from_previous_vm(tq->reading_vm, v, TASK_INPUT, 0);
+		resume_from_previous_vm(tq->reading_vm, v);
 		did_one = 1;
 	    }
 	    while (!did_one) {	/* Loop over tasks, looking for runnable one */
@@ -1025,8 +1029,7 @@ run_ready_tasks(void)
 			current_task_id = tq->reading_vm->task_id;
 			v.type = TYPE_STR;
 			v.v.str = t->t.input.string;
-			resume_from_previous_vm(tq->reading_vm, v, TASK_INPUT,
-						0);
+			resume_from_previous_vm(tq->reading_vm, v);
 			did_one = 1;
 		    } else {
 			/* Used to insist on tq->connected here, but Pavel
@@ -1046,15 +1049,14 @@ run_ready_tasks(void)
 			ft = t->t.forked;
 			current_task_id = ft.id;
 			do_forked_task(ft.program, ft.rt_env, ft.a,
-				       ft.f_index, 0);
+				       ft.f_index);
 			did_one = 1;
 		    }
 		    break;
 		case TASK_SUSPENDED:
 		    current_task_id = t->t.suspended.the_vm->task_id;
 		    resume_from_previous_vm(t->t.suspended.the_vm,
-					    t->t.suspended.value,
-					    TASK_SUSPENDED, 0);
+					    t->t.suspended.value);
 		    did_one = 1;
 		    break;
 		}
@@ -1106,7 +1108,7 @@ run_server_task_setting_id(Objid player, Objid what, const char *verb,
     h = db_find_callable_verb(what, verb);
     if (h.ptr)
 	return do_server_verb_task(what, verb, args, h, player, argstr,
-				   result, 1);
+				   result, 1/*traceback*/);
     else {
 	/* simulate an empty verb */
 	if (result) {
@@ -1126,7 +1128,8 @@ run_server_program_task(Objid this, const char *verb, Var args, Objid vloc,
 {
     current_task_id = new_task_id();
     return do_server_program_task(this, verb, args, vloc, verbname, program,
-				progr, debug, player, argstr, result, 1);
+				  progr, debug, player, argstr, result,
+				  1/*traceback*/);
 }
 
 void
@@ -2009,10 +2012,13 @@ register_tasks(void)
     register_function("flush_input", 1, 2, bf_flush_input, TYPE_OBJ, TYPE_ANY);
 }
 
-char rcsid_tasks[] = "$Id: tasks.c,v 1.10 2002-09-15 23:21:01 xplat Exp $";
+char rcsid_tasks[] = "$Id: tasks.c,v 1.10.2.1 2003-06-04 21:28:59 wrog Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2002/09/15 23:21:01  xplat
+ * GNU indent normalization.
+ *
  * Revision 1.9  2001/07/31 06:33:22  bjj
  * Fixed some bugs in the reporting of forked task sizes.
  *
