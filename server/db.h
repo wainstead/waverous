@@ -161,13 +161,30 @@ extern int db_for_all_contents(Objid,
 				 */
 extern void db_change_location(Objid oid, Objid location);
 
-/* NOTE: New flags must always be added to the end of this list, rather than
- *     replacing one of the obsolete ones, since old databases might have
- *       old objects around that still have that flag set.
- */
 typedef enum {
-    FLAG_USER, FLAG_PROGRAMMER, FLAG_WIZARD, FLAG_OBSOLETE_1,
-    FLAG_READ, FLAG_WRITE, FLAG_OBSOLETE_2, FLAG_FERTILE
+    /* Permanent flags */
+    FLAG_USER,
+    FLAG_PROGRAMMER,
+    FLAG_WIZARD,
+    FLAG_OBSOLETE_1,
+    FLAG_READ,
+    FLAG_WRITE,
+    FLAG_OBSOLETE_2,
+    FLAG_FERTILE,
+    /* NOTE: New permanent flags must always be added here, rather
+     *	     than replacing one of the obsolete ones, since old
+     *	     databases might have old objects around that still have
+     *	     that flag set.
+     */
+
+    /* Temporary flags.
+     * (not saved; can be renumbered with impunity)
+     * make sure FLAG_FIRST_TEMP > last permanent flag
+     */
+    FLAG_FIRST_TEMP = 14,
+    /* allows space for the 2 needed by validate_hierarchies(),
+     * just in case int is only 16 bits
+     */
 } db_object_flag;
 
 extern int db_object_has_flag(Objid, db_object_flag);
@@ -518,6 +535,11 @@ extern void db_delete_verb(db_verb_handle);
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2001/01/29 08:38:44  bjj
+ * Fix Sourceforge Bug #127620: add_verb() should return verbindex
+ * And now it does.  Old servers always returned 0, new servers will always
+ * return a positive integer.
+ *
  * Revision 1.3  1998/12/14 13:17:32  nop
  * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
  *
