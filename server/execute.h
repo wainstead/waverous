@@ -129,7 +129,13 @@ extern int read_activ(activation * a, int which_vector);
 
 #endif
 
-/* $Log: not supported by cvs2svn $
+/* 
+ * $Log: not supported by cvs2svn $
+ * Revision 1.3  1997/03/05 08:41:49  bjj
+ * A few malloc-friendly changes:  rt_stacks are now centrally allocated/freed
+ * so that we can keep a pool of them handy.  rt_envs are similarly pooled.
+ * Both revert to malloc/free for large requests.
+ *
  * Revision 1.2  1997/03/03 04:18:40  nop
  * GNU Indent normalization
  *

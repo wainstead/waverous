@@ -26,7 +26,11 @@ extern unsigned int delref(const void *p);
 #define refcount(X) (((int *)(X))[-1])
 #endif
 
-/* $Log: not supported by cvs2svn $
+/* 
+ * $Log: not supported by cvs2svn $
+ * Revision 1.3  1997/07/07 03:24:55  nop
+ * Merge UNSAFE_OPTS (r5) after extensive testing.
+ *
  * Revision 1.2.2.1  1997/03/20 18:59:25  bjj
  * Allocate refcounts with objects that can be addref()'d (strings, lists,
  * floats).  Use macros to manipulate those counts.  This completely replaces

@@ -322,7 +322,11 @@ md5_Final(md5ctx_t * context, uint8 digest[16])
     memset((char *) context, 0, sizeof(*context));
 }
 
-/* $Log: not supported by cvs2svn $
+/* 
+ * $Log: not supported by cvs2svn $
+ * Revision 1.2  1997/03/03 04:18:51  nop
+ * GNU Indent normalization
+ *
  * Revision 1.1.1.1  1997/03/03 03:45:00  nop
  * LambdaMOO 1.8.0p5
  *

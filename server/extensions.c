@@ -186,9 +186,13 @@ register_extensions()
 #endif
 }
 
-char rcsid_extensions[] = "$Id: extensions.c,v 1.3 1997-07-07 03:24:54 nop Exp $";
+char rcsid_extensions[] = "$Id: extensions.c,v 1.4 1998-12-14 13:17:52 nop Exp $";
 
-/* $Log: not supported by cvs2svn $
+/* 
+ * $Log: not supported by cvs2svn $
+ * Revision 1.3  1997/07/07 03:24:54  nop
+ * Merge UNSAFE_OPTS (r5) after extensive testing.
+ * 
  * Revision 1.2.2.3  1997/05/29 11:56:22  nop
  * Added Jason Maltzen's builtin to return a list version of cache stats.
  *

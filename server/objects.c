@@ -618,9 +618,13 @@ register_objects(void)
 				      TYPE_OBJ, TYPE_OBJ);
 }
 
-char rcsid_objects[] = "$Id: objects.c,v 1.3 1997-07-07 03:24:54 nop Exp $";
+char rcsid_objects[] = "$Id: objects.c,v 1.4 1998-12-14 13:18:39 nop Exp $";
 
-/* $Log: not supported by cvs2svn $
+/* 
+ * $Log: not supported by cvs2svn $
+ * Revision 1.3  1997/07/07 03:24:54  nop
+ * Merge UNSAFE_OPTS (r5) after extensive testing.
+ * 
  * Revision 1.2.2.1  1997/03/20 18:07:50  bjj
  * Add a flag to the in-memory type identifier so that inlines can cheaply
  * identify Vars that need actual work done to ref/free/dup them.  Add the

@@ -111,7 +111,11 @@ extern Var zero;		/* useful constant */
 
 #endif				/* !Structures_h */
 
-/* $Log: not supported by cvs2svn $
+/* 
+ * $Log: not supported by cvs2svn $
+ * Revision 1.3  1997/07/07 03:24:55  nop
+ * Merge UNSAFE_OPTS (r5) after extensive testing.
+ * 
  * Revision 1.2.2.2  1997/05/23 07:01:30  nop
  * Added experimental support for 32-bit pointer model on Alpha with DEC cc.
  *

@@ -1222,9 +1222,13 @@ parse_list_as_program(Var code, Var *errors)
     return program;
 }
 
-char rcsid_parser[] = "$Id: parser.y,v 1.1.1.1 1997-03-03 03:45:02 nop Exp $";
+char rcsid_parser[] = "$Id: parser.y,v 1.2 1998-12-14 13:18:45 nop Exp $";
 
-/* $Log: not supported by cvs2svn $
+/* 
+ * $Log: not supported by cvs2svn $
+ * Revision 1.1.1.1  1997/03/03 03:45:02  nop
+ * LambdaMOO 1.8.0p5
+ *
  * Revision 2.11  1996/05/12  21:28:37  pavel
  * Removed non-backward-compatible parse error for negating a non-numeric
  * literal.  Made certain aspects of floating-point literal parsing be

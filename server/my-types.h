@@ -41,7 +41,11 @@
 
 #endif				/* !My_Types_h */
 
-/* $Log: not supported by cvs2svn $
+/* 
+ * $Log: not supported by cvs2svn $
+ * Revision 1.3  1997/03/03 06:39:28  nop
+ * sys/time.h necessary for FD_ZERO et al...maybe.
+ *
  * Revision 1.2  1997/03/03 04:18:58  nop
  * GNU Indent normalization
  *

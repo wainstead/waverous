@@ -216,9 +216,13 @@ find_keyword(const char *word)
     return in_word_set(word, strlen(word));
 }
 
-char rcsid_keywords[] = "$Id: keywords.c,v 1.2 1997-03-03 04:18:45 nop Exp $";
+char rcsid_keywords[] = "$Id: keywords.c,v 1.3 1998-12-14 13:17:55 nop Exp $";
 
-/* $Log: not supported by cvs2svn $
+/* 
+ * $Log: not supported by cvs2svn $
+ * Revision 1.2  1997/03/03 04:18:45  nop
+ * GNU Indent normalization
+ *
  * Revision 1.1.1.1  1997/03/03 03:45:00  nop
  * LambdaMOO 1.8.0p5
  *

@@ -550,9 +550,13 @@ dbpriv_set_all_users(Var v)
     all_users = v;
 }
 
-char rcsid_db_objects[] = "$Id: db_objects.c,v 1.3 1997-07-07 03:24:53 nop Exp $";
+char rcsid_db_objects[] = "$Id: db_objects.c,v 1.4 1998-12-14 13:17:36 nop Exp $";
 
-/* $Log: not supported by cvs2svn $
+/* 
+ * $Log: not supported by cvs2svn $
+ * Revision 1.3  1997/07/07 03:24:53  nop
+ * Merge UNSAFE_OPTS (r5) after extensive testing.
+ *
  * Revision 1.2.2.2  1997/07/07 01:40:20  nop
  * Because we use first-parent-with-verbs as a verb cache key, we can skip
  * a generation bump if the target of a chparent has no kids and no verbs.

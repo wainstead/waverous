@@ -83,9 +83,13 @@ mplex_is_writable(int fd)
     return FD_ISSET(fd, &output);
 }
 
-char rcsid_net_mp_selct[] = "$Id: net_mp_selct.c,v 1.2 1997-03-03 04:19:04 nop Exp $";
+char rcsid_net_mp_selct[] = "$Id: net_mp_selct.c,v 1.3 1998-12-14 13:18:28 nop Exp $";
 
-/* $Log: not supported by cvs2svn $
+/* 
+ * $Log: not supported by cvs2svn $
+ * Revision 1.2  1997/03/03 04:19:04  nop
+ * GNU Indent normalization
+ *
  * Revision 1.1.1.1  1997/03/03 03:45:02  nop
  * LambdaMOO 1.8.0p5
  *

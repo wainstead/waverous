@@ -24,7 +24,11 @@
 
 #endif
 
-/* $Log: not supported by cvs2svn $
+/* 
+ * $Log: not supported by cvs2svn $
+ * Revision 1.1.1.1  1997/03/03 03:45:04  nop
+ * LambdaMOO 1.8.0p5
+ *
  * Revision 2.0  1995/11/30  05:08:14  pavel
  * New baseline version, corresponding to release 1.8.0alpha1.
  *

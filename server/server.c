@@ -1733,9 +1733,14 @@ register_server(void)
 		      bf_buffered_output_length, TYPE_OBJ);
 }
 
-char rcsid_server[] = "$Id: server.c,v 1.3 1997-03-03 05:03:52 nop Exp $";
+char rcsid_server[] = "$Id: server.c,v 1.4 1998-12-14 13:18:57 nop Exp $";
 
-/* $Log: not supported by cvs2svn $
+/* 
+ * $Log: not supported by cvs2svn $
+ * Revision 1.3  1997/03/03 05:03:52  nop
+ * steak2: move protectedness into builtin struct, load_server_options()
+ * now required for $server_options updates.
+ *
  * Revision 1.2  1997/03/03 04:19:24  nop
  * GNU Indent normalization
  *

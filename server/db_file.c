@@ -718,9 +718,13 @@ db_shutdown()
     dump_database(DUMP_SHUTDOWN);
 }
 
-char rcsid_db_file[] = "$Id: db_file.c,v 1.3 1998-02-19 07:36:16 nop Exp $";
+char rcsid_db_file[] = "$Id: db_file.c,v 1.4 1998-12-14 13:17:33 nop Exp $";
 
-/* $Log: not supported by cvs2svn $
+/* 
+ * $Log: not supported by cvs2svn $
+ * Revision 1.3  1998/02/19 07:36:16  nop
+ * Initial string interning during db load.
+ *
  * Revision 1.2  1997/03/03 04:18:27  nop
  * GNU Indent normalization
  *

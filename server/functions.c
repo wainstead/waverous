@@ -454,9 +454,13 @@ register_functions(void)
     register_function("load_server_options", 0, 0, bf_load_server_options);
 }
 
-char rcsid_functions[] = "$Id: functions.c,v 1.4 1997-07-07 03:24:54 nop Exp $";
+char rcsid_functions[] = "$Id: functions.c,v 1.5 1998-12-14 13:17:53 nop Exp $";
 
-/* $Log: not supported by cvs2svn $
+/* 
+ * $Log: not supported by cvs2svn $
+ * Revision 1.4  1997/07/07 03:24:54  nop
+ * Merge UNSAFE_OPTS (r5) after extensive testing.
+ * 
  * Revision 1.3.2.2  1997/05/12 04:03:21  bjj
  * This time for sure!
  *
