@@ -2868,12 +2868,12 @@ regenerate_error_pc(Program * prog, int which_vector, unsigned pc)
 }
 
 void
-write_activ(activation a)
+write_activ(activation a, int which_vector)
 {
     register Var *v;
 
     dbio_printf("language version %u\n", a.prog->version);
-    dbio_write_active_program(a.prog, a.error_pc, a.pc);
+    dbio_write_active_program(a.prog, which_vector, a.error_pc, a.pc);
     write_rt_env(a.prog->var_names, a.rt_env, a.prog->num_var_names);
 
     dbio_printf("%d rt_stack slots in use\n",
@@ -2915,10 +2915,10 @@ check_pc_validity(Program * prog, int which_vector, unsigned pc)
 }
 
 static int
- upgrade_activ(activation * a, int which_vector);
+ upgrade_activ(activation * a, int *which_vector, int is_root);
 
 int
-read_activ(activation * a, int which_vector)
+read_activ(activation * a, int *which_vector, int is_root)
 {
     DB_Version version;
     Var *old_rt_env;
@@ -2942,7 +2942,7 @@ read_activ(activation * a, int which_vector)
     }
     if (!(a->prog = dbio_read_active_program(version,
 					     0, (void *) "suspended task",
-					     &orig_names, &a->pc))) {
+				   &orig_names, which_vector, &a->pc))) {
 	errlog("READ_ACTIV: Malformed program\n");
 	return 0;
     }
@@ -2952,9 +2952,9 @@ read_activ(activation * a, int which_vector)
     }
     a->rt_env = reorder_rt_env(old_rt_env, old_names, old_size, orig_names);
 
-    max_stack = (which_vector == MAIN_VECTOR
+    max_stack = (*which_vector == MAIN_VECTOR
 		 ? a->prog->main_vector.max_stack
-		 : a->prog->fork_vectors[which_vector].max_stack);
+		 : a->prog->fork_vectors[*which_vector].max_stack);
     alloc_rt_stack(a, max_stack);
 
     if (dbio_scanf("%d rt_stack slots in use\n", &stack_in_use) != 1) {
@@ -2995,10 +2995,10 @@ read_activ(activation * a, int which_vector)
 	errlog("READ_ACTIV: bad builtin function pc.\n");
 	return 0;
     }
-    a->error_pc = regenerate_error_pc(a->prog, which_vector, a->pc);
+    a->error_pc = regenerate_error_pc(a->prog, *which_vector, a->pc);
 
   have_error_pc:
-    if (!check_pc_validity(a->prog, which_vector, a->pc)) {
+    if (!check_pc_validity(a->prog, *which_vector, a->pc)) {
 	errlog("READ_ACTIV: Bad PC for suspended task.\n");
 	return 0;
     }
@@ -3017,7 +3017,7 @@ read_activ(activation * a, int which_vector)
 	}
     }
     if (version < current_version)
-	return upgrade_activ(a, which_vector);
+	return upgrade_activ(a, which_vector, is_root);
 
     return 1;
 }
@@ -3034,7 +3034,7 @@ stream_receiver(void *data, const char *line)
 static void
 unparse_for_upgrade(Stream * s, Program * p, int f_index, int pc)
 {
-    unparse_program2(p, stream_receiver, s, 1, 0, f_index, pc);
+    unparse_program2(p, stream_receiver, s, 1, 0, MAIN_VECTOR, f_index, pc);
 }
 
 static void
@@ -3065,23 +3065,24 @@ static Parser_Client string_parser_client =
 {spc_error, spc_warning, spc_getc};
 
 static Program *
-reparse_for_upgrade(Stream * s, DB_Version old_version, Names ** orig_names, int *pc)
+reparse_for_upgrade(Stream * s, DB_Version old_version, Names ** orig_names, int *pc_vector, int *pc, int is_root)
 {
     char *contents;
 
     contents = stream_contents(s);
-    return parse_program(old_version, string_parser_client, &contents, PMODE_VERB, orig_names, pc);
+    /* root activations must be treated carefully -- they may be disembodied fork vectors */
+    return parse_program(old_version, string_parser_client, &contents, (is_root ? PMODE_FORK : PMODE_VERB), orig_names, pc_vector, pc);
 }
 
 static int
-upgrade_activ(activation * a, int which_vector)
+upgrade_activ(activation * a, int *which_vector, int is_root)
 {
     Stream *s = new_stream(8000);
     Program *new_prog;
     Names *orig_names;
 
-    unparse_for_upgrade(s, a->prog, which_vector, a->error_pc);
-    new_prog = reparse_for_upgrade(s, a->prog->version, &orig_names, &(a->pc));
+    unparse_for_upgrade(s, a->prog, *which_vector, a->error_pc);
+    new_prog = reparse_for_upgrade(s, a->prog->version, &orig_names, which_vector, &(a->pc), is_root);
     free_stream(s);
     /* reparsing might order the variable names differently, so: */
     a->rt_env = reorder_rt_env(a->rt_env, a->prog->var_names, a->prog->num_var_names, orig_names);
@@ -3090,15 +3091,18 @@ upgrade_activ(activation * a, int which_vector)
     a->prog->num_var_names = 0;
     free_program(a->prog);
     a->prog = new_prog;
-    a->error_pc = regenerate_error_pc(a->prog, which_vector, a->pc);
+    a->error_pc = regenerate_error_pc(a->prog, *which_vector, a->pc);
 
     return 1;
 }
 
-char rcsid_execute[] = "$Id: execute.c,v 1.13.6.5 2002-09-17 15:35:04 xplat Exp $";
+char rcsid_execute[] = "$Id: execute.c,v 1.13.6.6 2002-10-27 22:48:12 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.13.6.5  2002/09/17 15:35:04  xplat
+ * GNU indent normalization.
+ *
  * Revision 1.13.6.4  2002/09/17 15:04:00  xplat
  * Updated to INLINEPC_updater_1 in trunk.
  *

@@ -716,15 +716,15 @@ unparse_program(Program * p, Unparser_Receiver r, void *data,
 		int fully_parenthesize, int indent_lines, int f_index)
 {
     unparse_program2(p, r, data, fully_parenthesize, indent_lines,
-		     f_index, -1);
+		     f_index, MAIN_VECTOR, -1);
 }
 
 void
 unparse_program2(Program * p, Unparser_Receiver r, void *data,
 		 int fully_parenthesize, int indent_lines, int f_index,
-		 int pc)
+		 int pc_vector, int pc)
 {
-    Stmt *stmt = decompile_for_resume(p, f_index, pc);
+    Stmt *stmt = decompile_for_resume(p, f_index, pc_vector, pc);
 
     prog = p;
     receiver = r;
@@ -756,10 +756,13 @@ unparse_to_stderr(Program * p, int fully_parenthesize, int indent_lines,
     unparse_to_file(stderr, p, fully_parenthesize, indent_lines, f_index);
 }
 
-char rcsid_unparse[] = "$Id: unparse.c,v 1.3.6.3 2002-09-17 15:35:06 xplat Exp $";
+char rcsid_unparse[] = "$Id: unparse.c,v 1.3.6.4 2002-10-27 22:48:12 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3.6.3  2002/09/17 15:35:06  xplat
+ * GNU indent normalization.
+ *
  * Revision 1.3.6.2  2002/09/15 06:28:32  xplat
  * Fixed bugs revealed by smoke test.
  *

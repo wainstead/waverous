@@ -42,12 +42,15 @@ extern const char *unparse_error(enum error);	/* E_NONE -> "No error" */
 extern void unparse_program2(Program *, Unparser_Receiver, void *,
 			     int fully_parenthesize,
 			     int indent_lines, int f_index,
-			     int pc);
+			     int pc_vector, int pc);
 
 #endif
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3.6.1  2002/09/12 05:57:40  xplat
+ * Changes for inline PC saving and patch tags in the on-disk DB.
+ *
  * Revision 1.3  1998/12/14 13:19:13  nop
  * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
  *

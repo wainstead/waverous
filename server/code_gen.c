@@ -52,6 +52,8 @@ struct gstate {
     unsigned num_literals, max_literals;
     Var *literals;
     unsigned num_fork_vectors, max_fork_vectors;
+    Byte *hot_pc_bc;		/* For finding the vector */
+    int hot_pc_vector;
     int hot_pc;
     Bytecodes *fork_vectors;
 };
@@ -315,6 +317,9 @@ add_fork(Bytecodes b, State * state)
 	gstate->max_fork_vectors = new_max;
     }
     gstate->fork_vectors[i = gstate->num_fork_vectors++] = b;
+
+    if (gstate->hot_pc_bc == b.vector)
+	gstate->hot_pc_vector = i;
 
     add_fixup(FIXUP_FORK, i, state);
     state->num_forks++;
@@ -1311,6 +1316,7 @@ stmt_to_code(Stmt * stmt, GState * gstate)
 		break;
 	    case FIXUP_PC:
 		gstate->hot_pc = new_i;
+		gstate->hot_pc_bc = bc.vector;
 		size = 0;
 		break;
 	    default:
@@ -1346,7 +1352,7 @@ stmt_to_code(Stmt * stmt, GState * gstate)
 }
 
 Program *
-generate_code(Stmt * stmt, DB_Version version, int *pc)
+generate_code(Stmt * stmt, DB_Version version, int *pc_vector, int *pc)
 {
     Program *prog = new_program();
     GState gstate;
@@ -1383,18 +1389,27 @@ generate_code(Stmt * stmt, DB_Version version, int *pc)
 	prog->fork_vectors_size = 0;
     }
 
+    if (gstate.hot_pc_bc == prog->main_vector.vector)
+	gstate.hot_pc_vector = MAIN_VECTOR;
+
     if (pc)
 	*pc = gstate.hot_pc;
+
+    if (pc_vector && (gstate.hot_pc != -1))
+	*pc_vector = gstate.hot_pc_vector;
 
     free_gstate(gstate);
 
     return prog;
 }
 
-char rcsid_code_gen[] = "$Id: code_gen.c,v 1.10.4.4 2002-09-17 15:35:04 xplat Exp $";
+char rcsid_code_gen[] = "$Id: code_gen.c,v 1.10.4.5 2002-10-27 22:48:12 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.10.4.4  2002/09/17 15:35:04  xplat
+ * GNU indent normalization.
+ *
  * Revision 1.10.4.3  2002/09/17 15:03:51  xplat
  * Updated to INLINEPC_updater_1 in trunk.
  *

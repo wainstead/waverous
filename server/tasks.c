@@ -418,7 +418,7 @@ end_programming(tqueue * tq)
 	    s.nerrors = 0;
 	    s.input = stream_contents(tq->program_stream);
 
-	    program = parse_program(current_version, client, &s, PMODE_VERB, 0, 0);
+	    program = parse_program(current_version, client, &s, PMODE_VERB, 0, 0, 0);
 
 	    sprintf(buf, "%d error(s).", s.nerrors);
 	    notify(player, buf);
@@ -2010,10 +2010,13 @@ register_tasks(void)
     register_function("flush_input", 1, 2, bf_flush_input, TYPE_OBJ, TYPE_ANY);
 }
 
-char rcsid_tasks[] = "$Id: tasks.c,v 1.9.6.3 2002-09-17 15:35:06 xplat Exp $";
+char rcsid_tasks[] = "$Id: tasks.c,v 1.9.6.4 2002-10-27 22:48:12 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.9.6.3  2002/09/17 15:35:06  xplat
+ * GNU indent normalization.
+ *
  * Revision 1.9.6.2  2002/09/17 15:04:07  xplat
  * Updated to INLINEPC_updater_1 in trunk.
  *

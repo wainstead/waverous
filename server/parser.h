@@ -36,13 +36,16 @@ typedef enum {
 } Parser_Mode;
 
 extern Program *parse_program(DB_Version, Parser_Client, void *,
-			      Parser_Mode, Names **, int *);
+			      Parser_Mode, Names **, int *, int *);
 extern Program *parse_list_as_program(Var code, Var * errors);
 
 #endif
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3.6.1  2002/09/12 05:57:40  xplat
+ * Changes for inline PC saving and patch tags in the on-disk DB.
+ *
  * Revision 1.3  1998/12/14 13:18:44  nop
  * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
  *

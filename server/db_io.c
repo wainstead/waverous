@@ -307,19 +307,19 @@ dbio_read_program(DB_Version version, const char *(*fmtr) (void *), void *data)
     s.prev_char = '\n';
     s.fmtr = fmtr;
     s.data = data;
-    return parse_program(version, parser_client, &s, PMODE_VERB, 0, 0);
+    return parse_program(version, parser_client, &s, PMODE_VERB, 0, 0, 0);
 }
 
 Program *
 dbio_read_active_program(DB_Version version, const char *(*fmtr) (void *),
-			 void *data, Names ** orig_names, int *pc)
+		void *data, Names ** orig_names, int *pc_vector, int *pc)
 {
     struct state s;
 
     s.prev_char = '\n';
     s.fmtr = fmtr;
     s.data = data;
-    return parse_program(version, parser_client, &s, PMODE_COMPAT, orig_names, pc);
+    return parse_program(version, parser_client, &s, PMODE_COMPAT, orig_names, pc_vector, pc);
 }
 
 Program *
@@ -330,7 +330,7 @@ dbio_read_forked_program(DB_Version version, const char *(*fmtr) (void *), void 
     s.prev_char = '\n';
     s.fmtr = fmtr;
     s.data = data;
-    return parse_program(version, parser_client, &s, PMODE_FORK, orig_names, 0);
+    return parse_program(version, parser_client, &s, PMODE_FORK, orig_names, 0, 0);
 }
 
 
@@ -433,9 +433,9 @@ dbio_write_program(Program * program)
 }
 
 void
-dbio_write_active_program(Program * program, int error_pc, int pc)
+dbio_write_active_program(Program * program, int pc_vector, int error_pc, int pc)
 {
-    unparse_program2(program, receiver, 0, 1, 0, MAIN_VECTOR, error_pc);
+    unparse_program2(program, receiver, 0, 1, 0, MAIN_VECTOR, pc_vector, error_pc);
     dbio_printf(".\n");
 }
 
@@ -446,10 +446,13 @@ dbio_write_forked_program(Program * program, int f_index)
     dbio_printf(".\n");
 }
 
-char rcsid_db_io[] = "$Id: db_io.c,v 1.5.6.2 2002-09-17 15:35:04 xplat Exp $";
+char rcsid_db_io[] = "$Id: db_io.c,v 1.5.6.3 2002-10-27 22:48:12 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5.6.2  2002/09/17 15:35:04  xplat
+ * GNU indent normalization.
+ *
  * Revision 1.5.6.1  2002/09/12 05:57:40  xplat
  * Changes for inline PC saving and patch tags in the on-disk DB.
  *

@@ -1126,7 +1126,7 @@ check_loop_name(const char *name, enum loop_exit_kind kind)
 
 Program *
 parse_program(DB_Version version, Parser_Client c, void *data,
-              Parser_Mode mode, Names **original_names, int *pc)
+              Parser_Mode mode, Names **original_names, int *pc_vector, int *pc)
 {
     extern int	yyparse();
     Program    *prog;
@@ -1225,7 +1225,7 @@ parse_program(DB_Version version, Parser_Client c, void *data,
 	    local_names->names[SLOT_INT] = str_dup("INT");
 	}
 
-	prog = generate_code(prog_start, (mode == PMODE_COMPAT) ? version : current_version, pc);
+	prog = generate_code(prog_start, (mode == PMODE_COMPAT) ? version : current_version, pc_vector, pc);
 	prog->num_var_names = local_names->size;
 	prog->var_names = local_names->names;
 
@@ -1289,16 +1289,19 @@ parse_list_as_program(Var code, Var *errors)
     state.cur_string = 1;
     state.cur_char = 0;
     state.errors = new_list(0);
-    program = parse_program(current_version, list_parser_client, &state, PMODE_VERB, 0, 0);
+    program = parse_program(current_version, list_parser_client, &state, PMODE_VERB, 0, 0, 0);
     *errors = state.errors;
 
     return program;
 }
 
-char rcsid_parser[] = "$Id: parser.y,v 1.2.6.2 2002-09-15 06:28:32 xplat Exp $";
+char rcsid_parser[] = "$Id: parser.y,v 1.2.6.3 2002-10-27 22:48:12 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2.6.2  2002/09/15 06:28:32  xplat
+ * Fixed bugs revealed by smoke test.
+ *
  * Revision 1.2.6.1  2002/09/12 05:57:40  xplat
  * Changes for inline PC saving and patch tags in the on-disk DB.
  *
