@@ -1515,23 +1515,12 @@ do {    						    	\
 		    free_var(time);
 		    RAISE_ERROR(E_INVARG);
 		} else {
-		    Var *copied_rt_env;
-		    Var task_id;
+		    enum error e;
 
-		    copied_rt_env = copy_rt_env(RUN_ACTIV.rt_env,
-					  RUN_ACTIV.prog->num_var_names);
-		    task_id = enqueue_forked_task(program_ref(RUN_ACTIV.prog),
-						RUN_ACTIV, copied_rt_env,
-						  f_index, time.v.num);
-		    if (task_id.type == TYPE_ERR) {
-			free_rt_env(copied_rt_env, RUN_ACTIV.prog->num_var_names);
-			RAISE_ERROR(task_id.v.err);
-		    } else if (op == OP_FORK_WITH_ID) {
-			free_var(RUN_ACTIV.rt_env[id]);
-			RUN_ACTIV.rt_env[id] = task_id;
-			free_var(copied_rt_env[id]);
-			copied_rt_env[id] = task_id;
-		    }
+		    e = enqueue_forked_task2(RUN_ACTIV, f_index, time.v.num,
+			op == OP_FORK_WITH_ID ? id : -1);
+		    if (e != E_NONE)
+			RAISE_ERROR(e);
 		}
 	    }
 	    break;
@@ -2871,9 +2860,17 @@ read_activ(activation * a, int which_vector)
 }
 
 
-char rcsid_execute[] = "$Id: execute.c,v 1.6.2.3 1997-09-09 07:01:17 bjj Exp $";
+char rcsid_execute[] = "$Id: execute.c,v 1.6.2.4 1998-12-06 07:13:21 bjj Exp $";
 
 /* $Log: not supported by cvs2svn $
+/* Revision 1.6.2.3  1997/09/09 07:01:17  bjj
+/* Change bytecode generation so that x=f(x) calls f() without holding a ref
+/* to the value of x in the variable slot.  See the options.h comment for
+/* BYTECODE_REDUCE_REF for more details.
+/*
+/* This checkin also makes x[y]=z (OP_INDEXSET) take advantage of that (that
+/* new code is not conditional and still works either way).
+/*
  * Revision 1.6.2.2  1997/05/24 07:08:37  bjj
  * Cleanup of Jay's last checkin to avoid some code duplication.
  *
