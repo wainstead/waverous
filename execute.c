@@ -2858,11 +2858,11 @@ read_activ(activation * a, int which_vector)
     }
     if (a->bi_func_pc != 0) {
 	func_name = dbio_read_string();
-	a->bi_func_id = number_func_by_name(func_name);
-	if (a->bi_func_id == FUNC_NOT_FOUND) {
+	if ((i = number_func_by_name(func_name)) == FUNC_NOT_FOUND) {
 	    errlog("READ_ACTIV: Unknown built-in function `%s'\n", func_name);
 	    return 0;
 	}
+	a->bi_func_id = i;
 	if (!read_bi_func_data(a->bi_func_id, &a->bi_func_data,
 			       &a->bi_func_pc)) {
 	    errlog("READ_ACTIV: Bad saved state for built-in function `%s'\n",
@@ -2874,10 +2874,13 @@ read_activ(activation * a, int which_vector)
 }
 
 
-char rcsid_execute[] = "$Id: execute.c,v 1.14 2002-09-15 23:21:01 xplat Exp $";
+char rcsid_execute[] = "$Id: execute.c,v 1.15 2004-03-03 23:06:57 bjj Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.14  2002/09/15 23:21:01  xplat
+ * GNU indent normalization.
+ *
  * Revision 1.13  2002/08/18 09:47:26  bjj
  * Finally made free_activation() take a pointer after noticing how !$%^&
  * much time it was taking in a particular profiling run.
