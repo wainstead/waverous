@@ -270,7 +270,11 @@
 
 #endif /* !Config_H */
 
-/* $Log: not supported by cvs2svn $
+/* 
+ * $Log: not supported by cvs2svn $
+ * Revision 1.1.1.1  1997/03/03 03:45:06  nop
+ * LambdaMOO 1.8.0p5
+ *
  * Revision 2.5  1996/02/11  00:41:40  pavel
  * Added check for matherr().  Release 1.8.0beta2.
  *
