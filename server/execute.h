@@ -84,7 +84,7 @@ extern enum error call_verb(Objid obj, const char *vname, Var args,
 /* if your vname is already a moo str (via str_dup) then you can
    use this interface instead */
 extern enum error call_verb2(Objid obj, const char *vname, Var args,
-			    int do_pass);
+			     int do_pass);
 
 extern int setup_activ_for_eval(Program * prog);
 
@@ -135,6 +135,10 @@ extern int read_activ(activation * a, int which_vector);
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2002/08/18 09:47:26  bjj
+ * Finally made free_activation() take a pointer after noticing how !$%^&
+ * much time it was taking in a particular profiling run.
+ *
  * Revision 1.5  2001/03/12 05:10:54  bjj
  * Split out call_verb and call_verb2.  The latter must only be called with
  * strings that are already MOO strings (str_ref-able).
