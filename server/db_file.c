@@ -489,38 +489,39 @@ write_db_file(const char *reason)
 
     user_list = db_all_users();
 
-    TRY
+    TRY {
 	dbio_printf(header_format_string, current_version);
-    dbio_printf("%d\n%d\n%d\n%d\n",
-		max_oid + 1, nprogs, 0, user_list.v.list[0].v.num);
-    for (i = 1; i <= user_list.v.list[0].v.num; i++)
-	dbio_write_objid(user_list.v.list[i].v.obj);
-    oklog("%s: Writing %d objects...\n", reason, max_oid + 1);
-    for (oid = 0; oid <= max_oid; oid++) {
-	write_object(oid);
-	if ((oid + 1) % 10000 == 0 || oid == max_oid)
-	    oklog("%s: Done writing %d objects...\n", reason, oid + 1);
-    }
-    oklog("%s: Writing %d MOO verb programs...\n", reason, nprogs);
-    for (i = 0, oid = 0; oid <= max_oid; oid++)
-	if (valid(oid)) {
-	    int vcount = 0;
-
-	    for (v = dbpriv_find_object(oid)->verbdefs; v; v = v->next) {
-		if (v->program) {
-		    dbio_printf("#%d:%d\n", oid, vcount);
-		    dbio_write_program(v->program);
-		    if (++i % 5000 == 0 || i == nprogs)
-			oklog("%s: Done writing %d verb programs...\n",
-			      reason, i);
-		}
-		vcount++;
-	    }
+	dbio_printf("%d\n%d\n%d\n%d\n",
+		    max_oid + 1, nprogs, 0, user_list.v.list[0].v.num);
+	for (i = 1; i <= user_list.v.list[0].v.num; i++)
+	    dbio_write_objid(user_list.v.list[i].v.obj);
+	oklog("%s: Writing %d objects...\n", reason, max_oid + 1);
+	for (oid = 0; oid <= max_oid; oid++) {
+	    write_object(oid);
+	    if ((oid + 1) % 10000 == 0 || oid == max_oid)
+		oklog("%s: Done writing %d objects...\n", reason, oid + 1);
 	}
-    oklog("%s: Writing forked and suspended tasks...\n", reason);
-    write_task_queue();
-    oklog("%s: Writing list of formerly active connections...\n", reason);
-    write_active_connections();
+	oklog("%s: Writing %d MOO verb programs...\n", reason, nprogs);
+	for (i = 0, oid = 0; oid <= max_oid; oid++)
+	    if (valid(oid)) {
+		int vcount = 0;
+
+		for (v = dbpriv_find_object(oid)->verbdefs; v; v = v->next) {
+		    if (v->program) {
+			dbio_printf("#%d:%d\n", oid, vcount);
+			dbio_write_program(v->program);
+			if (++i % 5000 == 0 || i == nprogs)
+			    oklog("%s: Done writing %d verb programs...\n",
+				  reason, i);
+		    }
+		    vcount++;
+		}
+	    }
+	oklog("%s: Writing forked and suspended tasks...\n", reason);
+	write_task_queue();
+	oklog("%s: Writing list of formerly active connections...\n", reason);
+	write_active_connections();
+    }
     EXCEPT(dbpriv_dbio_failed)
 	success = 0;
     ENDTRY;
@@ -718,10 +719,13 @@ db_shutdown()
     dump_database(DUMP_SHUTDOWN);
 }
 
-char rcsid_db_file[] = "$Id: db_file.c,v 1.4 1998-12-14 13:17:33 nop Exp $";
+char rcsid_db_file[] = "$Id: db_file.c,v 1.4.8.1 2003-06-01 12:27:35 wrog Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  1998/12/14 13:17:33  nop
+ * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
+ *
  * Revision 1.3  1998/02/19 07:36:16  nop
  * Initial string interning during db load.
  *
