@@ -513,7 +513,7 @@ push_activation(void)
 }
 
 void
-free_activation(activation *ap, char data_too)
+free_activation(activation * ap, char data_too)
 {
     Var *i;
 
@@ -980,7 +980,7 @@ do {    						    	\
 			res = list;
 		    else {
 			res = var_dup(list);
-		        free_var(list);
+			free_var(list);
 		    }
 		    PUSH(listset(res, value, index.v.num));
 		} else {	/* TYPE_STR */
@@ -1535,7 +1535,7 @@ do {    						    	\
 		    enum error e;
 
 		    e = enqueue_forked_task2(RUN_ACTIV, f_index, time.v.num,
-			op == OP_FORK_WITH_ID ? id : -1);
+					op == OP_FORK_WITH_ID ? id : -1);
 		    if (e != E_NONE)
 			RAISE_ERROR(e);
 		}
@@ -1755,8 +1755,8 @@ do {    						    	\
 			    free_var(POP());	/* replace list with error code */
 			    PUSH_ERROR(e);
 			    for (i = 1; i <= nargs; i++) {
-			        SKIP_BYTES(bv, bc.numbytes_var_name);
-			        SKIP_BYTES(bv, bc.numbytes_label);
+				SKIP_BYTES(bv, bc.numbytes_var_name);
+				SKIP_BYTES(bv, bc.numbytes_label);
 			    }
 			} else {
 			    nopt_avail = len - nreq;
@@ -2012,7 +2012,7 @@ do {    						    	\
 		}
 	    }
 	    break;
-#endif /* BYTECODE_REDUCE_REF */
+#endif				/* BYTECODE_REDUCE_REF */
 
 	case OP_PUT:
 	case OP_PUT + 1:
@@ -3095,10 +3095,13 @@ upgrade_activ(activation * a, int which_vector)
     return 1;
 }
 
-char rcsid_execute[] = "$Id: execute.c,v 1.13.6.3 2002-09-15 06:28:32 xplat Exp $";
+char rcsid_execute[] = "$Id: execute.c,v 1.13.6.4 2002-09-17 15:04:00 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.13.6.3  2002/09/15 06:28:32  xplat
+ * Fixed bugs revealed by smoke test.
+ *
  * Revision 1.13.6.2  2002/09/12 16:08:07  xplat
  * Ben-derived bugfixes.
  *

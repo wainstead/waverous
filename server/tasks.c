@@ -1424,7 +1424,7 @@ bf_task_id(Var arglist, Byte next, void *vdata, Objid progr)
 }
 
 static int
-activation_bytes(activation *ap)
+activation_bytes(activation * ap)
 {
     int total = sizeof(activation);
     Var *v;
@@ -2010,10 +2010,13 @@ register_tasks(void)
     register_function("flush_input", 1, 2, bf_flush_input, TYPE_OBJ, TYPE_ANY);
 }
 
-char rcsid_tasks[] = "$Id: tasks.c,v 1.9.6.1 2002-09-12 05:57:40 xplat Exp $";
+char rcsid_tasks[] = "$Id: tasks.c,v 1.9.6.2 2002-09-17 15:04:07 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.9.6.1  2002/09/12 05:57:40  xplat
+ * Changes for inline PC saving and patch tags in the on-disk DB.
+ *
  * Revision 1.9  2001/07/31 06:33:22  bjj
  * Fixed some bugs in the reporting of forked task sizes.
  *

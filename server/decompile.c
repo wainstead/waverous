@@ -210,7 +210,7 @@ decompile(Bytecodes bc, Byte * start, Byte * end, Stmt ** stmt_sink,
 	    e->e.id = PUSH_CLEAR_n_INDEX(op);
 	    push_expr(HOTX_OP(e));
 	    continue;
-#endif /* BYTECODE_REDUCE_REF */
+#endif				/* BYTECODE_REDUCE_REF */
 	} else if (IS_PUT_n(op)) {
 	    e = alloc_expr(EXPR_ID);
 	    e->e.id = PUT_n_INDEX(op);
@@ -1086,10 +1086,13 @@ find_line_number(Program * prog, int vector, int pc)
     return lineno;
 }
 
-char rcsid_decompile[] = "$Id: decompile.c,v 1.5.6.2 2002-09-12 07:20:50 xplat Exp $";
+char rcsid_decompile[] = "$Id: decompile.c,v 1.5.6.3 2002-09-17 15:03:56 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5.6.2  2002/09/12 07:20:50  xplat
+ * Early comments from Ben.
+ *
  * Revision 1.5.6.1  2002/09/12 05:57:40  xplat
  * Changes for inline PC saving and patch tags in the on-disk DB.
  *
