@@ -46,7 +46,7 @@ extern void myfree(void *where, Memory_Type type);
 extern void *mymalloc(unsigned size, Memory_Type type);
 extern void *myrealloc(void *where, unsigned size, Memory_Type type);
 
-extern inline void
+static inline void    /* XXX was extern, fix for non-gcc compilers */
 free_str(const char *s)
 {
     if (delref(s) == 0)
@@ -56,6 +56,12 @@ free_str(const char *s)
 #endif				/* Storage_h */
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.2.2.3  1997/05/20 03:01:34  nop
+ * parse_into_words was allocating pointers to strings as strings.  Predictably,
+ * the refcount prepend code was not prepared for this, causing unaligned memory
+ * access on the Alpha.  Added new M_STRING_PTRS allocation class that could
+ * be renamed to something better, perhaps.
+ *
  * Revision 1.2.2.2  1997/03/21 15:19:24  bjj
  * add myrealloc interface, inline free_str
  *

@@ -171,12 +171,15 @@ struct mstats_value {
 extern struct mstats_value malloc_stats(int size);
 #endif
 
+/* XXX stupid fix for non-gcc compilers, already in storage.h */
+#ifdef NEVER
 void
 free_str(const char *s)
 {
     if (delref(s) == 0)
 	myfree((void *) s, M_STRING);
 }
+#endif
 
 Var
 memory_usage(void)
@@ -218,9 +221,12 @@ memory_usage(void)
     return r;
 }
 
-char rcsid_storage[] = "$Id: storage.c,v 1.3.2.2 1997-03-21 15:19:23 bjj Exp $";
+char rcsid_storage[] = "$Id: storage.c,v 1.3.2.3 1997-05-29 20:47:32 nop Exp $";
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.3.2.2  1997/03/21 15:19:23  bjj
+ * add myrealloc interface, inline free_str
+ *
  * Revision 1.3.2.1  1997/03/20 18:59:26  bjj
  * Allocate refcounts with objects that can be addref()'d (strings, lists,
  * floats).  Use macros to manipulate those counts.  This completely replaces
