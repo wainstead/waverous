@@ -251,7 +251,8 @@ AC_EGREP_CPP(yes, [
   yes
 #endif
 ], [CFLAGS="$CFLAGS -Wall -Wwrite-strings"])
-test -n "$GCC" && CC="$CC -g"
+dnl we were getting -g twice, so i cut this. -x*
+dnl -test -n "$GCC" && CC="$CC -g"
 AC_PROG_CPP
 MOO_NEXT
 MOO_ALPHA
@@ -497,6 +498,10 @@ echo "----------------------------------------------------------------------"
 AC_OUTPUT
 
 # $Log: not supported by cvs2svn $
+# Revision 1.1.2.1  2004/07/13 02:06:37  xplat
+# Initial autoconf2.50 integration (may need work).  Also, make dist tarballs
+# using gzip instead of compress.
+#
 # Revision 1.2  2004/05/22 01:25:43  wrog
 # merging in WROGUE changes (W_SRCIP, W_STARTUP, W_OOB)
 #
