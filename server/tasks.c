@@ -1256,7 +1256,7 @@ read_task_queue(void)
 	    return 0;
 	}
 	if (!(program = dbio_read_forked_program(dbio_input_version,
-					  0, (void *) "forked task", &orig_names))) {
+			      0, (void *) "forked task", &orig_names))) {
 	    errlog("READ_TASK_QUEUE: Bad program, count = %d.\n", count);
 	    return 0;
 	}
@@ -2010,10 +2010,13 @@ register_tasks(void)
     register_function("flush_input", 1, 2, bf_flush_input, TYPE_OBJ, TYPE_ANY);
 }
 
-char rcsid_tasks[] = "$Id: tasks.c,v 1.9.6.2 2002-09-17 15:04:07 xplat Exp $";
+char rcsid_tasks[] = "$Id: tasks.c,v 1.9.6.3 2002-09-17 15:35:06 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.9.6.2  2002/09/17 15:04:07  xplat
+ * Updated to INLINEPC_updater_1 in trunk.
+ *
  * Revision 1.9.6.1  2002/09/12 05:57:40  xplat
  * Changes for inline PC saving and patch tags in the on-disk DB.
  *

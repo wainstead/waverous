@@ -2752,7 +2752,7 @@ reorder_rt_env(Var * old_rt_env, const char **old_names,
 }
 
 int
-regenerate_error_pc(Program *prog, int which_vector, unsigned pc)
+regenerate_error_pc(Program * prog, int which_vector, unsigned pc)
 {
     Bytecodes *bc = (which_vector == MAIN_VECTOR
 		     ? &prog->main_vector
@@ -2761,14 +2761,14 @@ regenerate_error_pc(Program *prog, int which_vector, unsigned pc)
     enum Opcode op;
 
     if (!pc)
-    	return -1;
+	return -1;
 
     bv = bc->vector;
     target_bv = bv + pc;
     error_bv = bv;
 
     while (bv < target_bv) {
-        error_bv = bv;
+	error_bv = bv;
 	op = *bv++;
 
 	switch (op) {
@@ -2823,9 +2823,9 @@ regenerate_error_pc(Program *prog, int which_vector, unsigned pc)
 		case EOP_SCATTER:
 		    {
 			int nargs = READ_BYTES(bv, 1);
-			SKIP_BYTES(bv, 2);		/* nreq, rest */
-		        SKIP_BYTES(bv, nargs * (bc->numbytes_var_name +
-			                                bc->numbytes_label));
+			SKIP_BYTES(bv, 2);	/* nreq, rest */
+			SKIP_BYTES(bv, nargs * (bc->numbytes_var_name +
+						bc->numbytes_label));
 			SKIP_BYTES(bv, bc->numbytes_label);
 		    }
 		    break;
@@ -2886,12 +2886,12 @@ write_activ(activation a)
     dbio_write_var(a.temp);
 
     if (a.prog->version < DBV_InlinePC) {
-    	/* We should never need to do this.
-         */
-        errlog("WRITE_ACTIV: Verb wasn't upgraded\n");
-        dbio_printf("%u %u %u\n", a.pc, a.bi_func_pc, a.error_pc);
+	/* We should never need to do this.
+	 */
+	errlog("WRITE_ACTIV: Verb wasn't upgraded\n");
+	dbio_printf("%u %u %u\n", a.pc, a.bi_func_pc, a.error_pc);
     } else {
-        dbio_printf("%u\n", a.bi_func_pc);
+	dbio_printf("%u\n", a.bi_func_pc);
     }
     if (a.bi_func_pc != 0) {
 	dbio_write_string(name_func_by_num(a.bi_func_id));
@@ -2915,7 +2915,7 @@ check_pc_validity(Program * prog, int which_vector, unsigned pc)
 }
 
 static int
-upgrade_activ(activation * a, int which_vector);
+ upgrade_activ(activation * a, int which_vector);
 
 int
 read_activ(activation * a, int which_vector)
@@ -2941,8 +2941,8 @@ read_activ(activation * a, int which_vector)
 	return 0;
     }
     if (!(a->prog = dbio_read_active_program(version,
-				      0, (void *) "suspended task",
-				      &orig_names, &a->pc))) {
+					     0, (void *) "suspended task",
+					     &orig_names, &a->pc))) {
 	errlog("READ_ACTIV: Malformed program\n");
 	return 0;
     }
@@ -2972,32 +2972,32 @@ read_activ(activation * a, int which_vector)
     a->temp = dbio_read_var();
 
     if (version < DBV_InlinePC) {
-    	if (dbio_scanf("%u %u%c", &a->pc, &i, &c) != 3) {
+	if (dbio_scanf("%u %u%c", &a->pc, &i, &c) != 3) {
 	    errlog("READ_ACTIV: bad pc, next. stack_in_use = %d\n", stack_in_use);
 	    return 0;
-    	}
-        a->bi_func_pc = i;
+	}
+	a->bi_func_pc = i;
 
-        if (c == '\n') {
-            /* do nothing -- we'll clean this up below */
-        } else if (dbio_scanf("%u\n", &a->error_pc) != 1) {
+	if (c == '\n') {
+	    /* do nothing -- we'll clean this up below */
+	} else if (dbio_scanf("%u\n", &a->error_pc) != 1) {
 	    errlog("READ_ACTIV: no error pc.\n");
 	    return 0;
-        } else if (a->error_pc != a->pc) {
-            /*
-             * if they are equal this database must have been read and
-             * rewritten by an old server that incorrectly set them
-             * equal if error_pc was missing
-             */
-            goto have_error_pc;
-        }
+	} else if (a->error_pc != a->pc) {
+	    /*
+	     * if they are equal this database must have been read and
+	     * rewritten by an old server that incorrectly set them
+	     * equal if error_pc was missing
+	     */
+	    goto have_error_pc;
+	}
     } else if (dbio_scanf("%u\n", &a->bi_func_pc) != 1) {
-        errlog("READ_ACTIV: bad builtin function pc.\n");
-        return 0;
+	errlog("READ_ACTIV: bad builtin function pc.\n");
+	return 0;
     }
     a->error_pc = regenerate_error_pc(a->prog, which_vector, a->pc);
 
-    have_error_pc:
+  have_error_pc:
     if (!check_pc_validity(a->prog, which_vector, a->pc)) {
 	errlog("READ_ACTIV: Bad PC for suspended task.\n");
 	return 0;
@@ -3016,9 +3016,8 @@ read_activ(activation * a, int which_vector)
 	    return 0;
 	}
     }
-    
     if (version < current_version)
-    	return upgrade_activ(a, which_vector);
+	return upgrade_activ(a, which_vector);
 
     return 1;
 }
@@ -3033,7 +3032,7 @@ stream_receiver(void *data, const char *line)
 }
 
 static void
-unparse_for_upgrade(Stream *s, Program *p, int f_index, int pc)
+unparse_for_upgrade(Stream * s, Program * p, int f_index, int pc)
 {
     unparse_program2(p, stream_receiver, s, 1, 0, f_index, pc);
 }
@@ -3058,14 +3057,15 @@ spc_getc(void *data)
     char **s = data;
 
     if (**s)
-    	return *((*s)++);
+	return *((*s)++);
     return EOF;
 }
 
-static Parser_Client string_parser_client = { spc_error, spc_warning, spc_getc };
+static Parser_Client string_parser_client =
+{spc_error, spc_warning, spc_getc};
 
 static Program *
-reparse_for_upgrade(Stream *s, DB_Version old_version, Names **orig_names, int *pc)
+reparse_for_upgrade(Stream * s, DB_Version old_version, Names ** orig_names, int *pc)
 {
     char *contents;
 
@@ -3076,9 +3076,9 @@ reparse_for_upgrade(Stream *s, DB_Version old_version, Names **orig_names, int *
 static int
 upgrade_activ(activation * a, int which_vector)
 {
-    Stream * s = new_stream(8000);
-    Program * new_prog;
-    Names * orig_names;
+    Stream *s = new_stream(8000);
+    Program *new_prog;
+    Names *orig_names;
 
     unparse_for_upgrade(s, a->prog, which_vector, a->error_pc);
     new_prog = reparse_for_upgrade(s, a->prog->version, &orig_names, &(a->pc));
@@ -3095,10 +3095,13 @@ upgrade_activ(activation * a, int which_vector)
     return 1;
 }
 
-char rcsid_execute[] = "$Id: execute.c,v 1.13.6.4 2002-09-17 15:04:00 xplat Exp $";
+char rcsid_execute[] = "$Id: execute.c,v 1.13.6.5 2002-09-17 15:35:04 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.13.6.4  2002/09/17 15:04:00  xplat
+ * Updated to INLINEPC_updater_1 in trunk.
+ *
  * Revision 1.13.6.3  2002/09/15 06:28:32  xplat
  * Fixed bugs revealed by smoke test.
  *

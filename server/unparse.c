@@ -656,16 +656,16 @@ unparse_expr(Stream * str, Expr * expr)
 	break;
 
     case EXPR_HOT:
-        if (expr->e.hot.pos == HOT_ASSIGN)
-            stream_add_string(str, ":-)= ");
-        else if (expr->e.hot.pos == HOT_DEFAULT)
-            stream_add_string(str, ":-) ");
-        else {
-            errlog("UNPARSE_EXPR: Unknown Hot_Pos: %d\n", expr->e.hot.pos);
-            stream_add_string(str, "(?!?!?!?!?)");
-        }
-        bracket_le(str, EXPR_HOT, expr->e.hot.expr);
-        break;
+	if (expr->e.hot.pos == HOT_ASSIGN)
+	    stream_add_string(str, ":-)= ");
+	else if (expr->e.hot.pos == HOT_DEFAULT)
+	    stream_add_string(str, ":-) ");
+	else {
+	    errlog("UNPARSE_EXPR: Unknown Hot_Pos: %d\n", expr->e.hot.pos);
+	    stream_add_string(str, "(?!?!?!?!?)");
+	}
+	bracket_le(str, EXPR_HOT, expr->e.hot.expr);
+	break;
 
     default:
 	errlog("UNPARSE_EXPR: Unknown Expr_Kind: %d\n", expr->kind);
@@ -716,7 +716,7 @@ unparse_program(Program * p, Unparser_Receiver r, void *data,
 		int fully_parenthesize, int indent_lines, int f_index)
 {
     unparse_program2(p, r, data, fully_parenthesize, indent_lines,
-                     f_index, -1);
+		     f_index, -1);
 }
 
 void
@@ -756,10 +756,13 @@ unparse_to_stderr(Program * p, int fully_parenthesize, int indent_lines,
     unparse_to_file(stderr, p, fully_parenthesize, indent_lines, f_index);
 }
 
-char rcsid_unparse[] = "$Id: unparse.c,v 1.3.6.2 2002-09-15 06:28:32 xplat Exp $";
+char rcsid_unparse[] = "$Id: unparse.c,v 1.3.6.3 2002-09-17 15:35:06 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3.6.2  2002/09/15 06:28:32  xplat
+ * Fixed bugs revealed by smoke test.
+ *
  * Revision 1.3.6.1  2002/09/12 05:57:40  xplat
  * Changes for inline PC saving and patch tags in the on-disk DB.
  *

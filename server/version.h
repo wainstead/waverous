@@ -46,10 +46,10 @@ typedef enum {
 				 * bug handling in read_bi_func_data().
 				 */
     DBV_InlinePC,		/* Started indicating program counters for
-    				 * suspended tasks with a special token in the
-    				 * verb code instead of as a numeric offset
-    				 * into compiled opcodes.
-    				 */
+				 * suspended tasks with a special token in the
+				 * verb code instead of as a numeric offset
+				 * into compiled opcodes.
+				 */
     Num_DB_Versions		/* Special: the current version is this - 1. */
 } DB_Version;
 
@@ -64,6 +64,9 @@ extern int check_version(DB_Version);
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3.6.1  2002/09/12 05:57:40  xplat
+ * Changes for inline PC saving and patch tags in the on-disk DB.
+ *
  * Revision 1.3  1998/12/14 13:19:19  nop
  * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
  *

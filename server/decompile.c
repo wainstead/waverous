@@ -104,8 +104,8 @@ read_jump(unsigned numbytes_label, Byte ** p, int *is_hot)
 
 static int marking_pc = 0;
 
-static Expr*
-hot_assign(Expr *e)
+static Expr *
+hot_assign(Expr * e)
 {
     Expr *wrapper;
 
@@ -115,13 +115,13 @@ hot_assign(Expr *e)
     return wrapper;
 }
 
-static Expr*
-hot_wrapper(Expr *e)
+static Expr *
+hot_wrapper(Expr * e)
 {
     Expr *wrapper;
 
     if (!marking_pc)
-        return e;
+	return e;
     wrapper = alloc_expr(EXPR_HOT);
     wrapper->e.hot.expr = e;
     wrapper->e.hot.pos = HOT_DEFAULT;
@@ -376,7 +376,7 @@ decompile(Bytecodes bc, Byte * start, Byte * end, Stmt ** stmt_sink,
 	case OP_AND:
 	case OP_OR:
 	    {
-	        /***
+		/***
 	         *** In the case of OP_AND and OP_OR it is not
 	         *** possible to infer pc from error_pc; therefore
 	         *** they do not use HOTX.  Luckily we never need
@@ -519,10 +519,10 @@ decompile(Bytecodes bc, Byte * start, Byte * end, Stmt ** stmt_sink,
 
 		e = alloc_binary(EXPR_INDEX, pop_expr(), index);
 		push_expr(HOT3(op_hot || asgn_hot, e->e.bin.lhs, index,
-		               rvalue, alloc_binary(EXPR_ASGN, e, rvalue)));
+			    rvalue, alloc_binary(EXPR_ASGN, e, rvalue)));
 		if (marking_pc) {
 		    if (op_hot)
-		    	expr_stack[top_expr_stack]->e.bin.lhs = hot_assign(e);
+			expr_stack[top_expr_stack]->e.bin.lhs = hot_assign(e);
 		    next_base = &(e->e.bin.lhs);
 		}
 	    }
@@ -533,18 +533,18 @@ decompile(Bytecodes bc, Byte * start, Byte * end, Stmt ** stmt_sink,
 	     */
 	    asgn_hot = 0;
 	    if (marking_pc) {
-	        while (*ptr == OP_INDEXSET) {
-	            if (ptr == hot_byte) {
-	                *next_base = hot_assign(*next_base);
-	                hot_node = expr_stack[top_expr_stack];
-	            }
-	            next_base = &(next_base[0]->e.bin.lhs);
-	            ptr++;
-	        }
-	        if (ptr == hot_byte) {
-	            *next_base = hot_assign(*next_base);
-	            hot_node = expr_stack[top_expr_stack];
-	        }
+		while (*ptr == OP_INDEXSET) {
+		    if (ptr == hot_byte) {
+			*next_base = hot_assign(*next_base);
+			hot_node = expr_stack[top_expr_stack];
+		    }
+		    next_base = &(next_base[0]->e.bin.lhs);
+		    ptr++;
+		}
+		if (ptr == hot_byte) {
+		    *next_base = hot_assign(*next_base);
+		    hot_node = expr_stack[top_expr_stack];
+		}
 		ptr++;
 		next_base = 0;
 	    }
@@ -568,7 +568,7 @@ decompile(Bytecodes bc, Byte * start, Byte * end, Stmt ** stmt_sink,
 		e = pop_expr();
 		e = alloc_binary(EXPR_PROP, pop_expr(), e);
 		push_expr(HOTX_OP3(e->e.bin.lhs, e->e.bin.rhs, rvalue,
-				  alloc_binary(EXPR_ASGN, e, rvalue)));
+				   alloc_binary(EXPR_ASGN, e, rvalue)));
 	    }
 	    break;
 	case OP_MAKE_EMPTY_LIST:
@@ -631,7 +631,7 @@ decompile(Bytecodes bc, Byte * start, Byte * end, Stmt ** stmt_sink,
 				    alloc_binary(EXPR_ASGN, e, rvalue)));
 			if (marking_pc) {
 			    if (op_hot)
-			    	expr_stack[top_expr_stack]->e.bin.lhs = hot_assign(e);
+				expr_stack[top_expr_stack]->e.bin.lhs = hot_assign(e);
 			    next_base = &(e->e.range.base);
 			}
 		    }
@@ -646,8 +646,8 @@ decompile(Bytecodes bc, Byte * start, Byte * end, Stmt ** stmt_sink,
 		    goto finish_binary;
 		case EOP_SCATTER:
 		    {
-		        /* Can't resume inside scatter machinery either. 
-		         */
+			/* Can't resume inside scatter machinery either. 
+			 */
 			Scatter *sc, **scp;
 			int nargs = *ptr++;
 			int rest = (ptr++, *ptr++);	/* skip nreq */
@@ -712,8 +712,8 @@ decompile(Bytecodes bc, Byte * start, Byte * end, Stmt ** stmt_sink,
 		    break;
 		case EOP_CATCH:
 		    {
-		    	/* `' also does not support resumption
-		    	 */
+			/* `' also does not support resumption
+			 */
 			Expr *label_expr = pop_expr();
 			Expr *codes = pop_expr();
 			Expr *try_expr, *default_expr = 0;
@@ -902,7 +902,7 @@ decompile(Bytecodes bc, Byte * start, Byte * end, Stmt ** stmt_sink,
 }
 
 static Stmt *
-program_to_tree(Program *prog, int vector, int pc_vector, int pc, int mark_pc)
+program_to_tree(Program * prog, int vector, int pc_vector, int pc, int mark_pc)
 {
     Stmt *result;
     Bytecodes bc;
@@ -1086,10 +1086,13 @@ find_line_number(Program * prog, int vector, int pc)
     return lineno;
 }
 
-char rcsid_decompile[] = "$Id: decompile.c,v 1.5.6.3 2002-09-17 15:03:56 xplat Exp $";
+char rcsid_decompile[] = "$Id: decompile.c,v 1.5.6.4 2002-09-17 15:35:04 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5.6.3  2002/09/17 15:03:56  xplat
+ * Updated to INLINEPC_updater_1 in trunk.
+ *
  * Revision 1.5.6.2  2002/09/12 07:20:50  xplat
  * Early comments from Ben.
  *

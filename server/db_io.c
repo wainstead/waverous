@@ -312,7 +312,7 @@ dbio_read_program(DB_Version version, const char *(*fmtr) (void *), void *data)
 
 Program *
 dbio_read_active_program(DB_Version version, const char *(*fmtr) (void *),
-                         void *data, Names **orig_names, int *pc)
+			 void *data, Names ** orig_names, int *pc)
 {
     struct state s;
 
@@ -323,7 +323,7 @@ dbio_read_active_program(DB_Version version, const char *(*fmtr) (void *),
 }
 
 Program *
-dbio_read_forked_program(DB_Version version, const char *(*fmtr) (void *), void *data, Names **orig_names)
+dbio_read_forked_program(DB_Version version, const char *(*fmtr) (void *), void *data, Names ** orig_names)
 {
     struct state s;
 
@@ -446,10 +446,13 @@ dbio_write_forked_program(Program * program, int f_index)
     dbio_printf(".\n");
 }
 
-char rcsid_db_io[] = "$Id: db_io.c,v 1.5.6.1 2002-09-12 05:57:40 xplat Exp $";
+char rcsid_db_io[] = "$Id: db_io.c,v 1.5.6.2 2002-09-17 15:35:04 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5.6.1  2002/09/12 05:57:40  xplat
+ * Changes for inline PC saving and patch tags in the on-disk DB.
+ *
  * Revision 1.5  1998/12/14 13:17:34  nop
  * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
  *

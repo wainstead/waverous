@@ -220,7 +220,7 @@ add_known_fixup(Fixup f, State * state)
     state->fixups[i = state->num_fixups++] = f;
 
     if (f.kind != FIXUP_PC)
-    	emit_byte(0, state);	/* a placeholder for the eventual value */
+	emit_byte(0, state);	/* a placeholder for the eventual value */
 
     return i;
 }
@@ -584,10 +584,10 @@ push_lvalue(Expr * expr, int indexed_above, State * state)
 	}
 	break;
     case EXPR_HOT:
-        push_lvalue(expr->e.hot.expr, indexed_above, state);
-        if (expr->e.hot.pos == HOT_DEFAULT)
-            set_hot_pc(state);
-        break;
+	push_lvalue(expr->e.hot.expr, indexed_above, state);
+	if (expr->e.hot.pos == HOT_DEFAULT)
+	    set_hot_pc(state);
+	break;
     default:
 	panic("Bad lvalue in PUSH_LVALUE()");
     }
@@ -855,10 +855,10 @@ generate_expr(Expr * expr, State * state)
 			pop_stack(2, state);
 			break;
 		    case EXPR_HOT:
-		        if (e->e.hot.pos == HOT_ASSIGN)
-		            set_hot_pc(state);
-		        e = e->e.hot.expr;
-		    	continue;
+			if (e->e.hot.pos == HOT_ASSIGN)
+			    set_hot_pc(state);
+			e = e->e.hot.expr;
+			continue;
 		    default:
 			panic("Bad lvalue in GENERATE_EXPR()");
 		    }
@@ -905,12 +905,12 @@ generate_expr(Expr * expr, State * state)
 	}
 	break;
     case EXPR_HOT:
-        generate_expr(expr->e.hot.expr, state);
-    	if (expr->e.hot.pos == HOT_DEFAULT)
-    	    set_hot_pc(state);
-    	else
-    	    panic("Illegal hot position in GENERATE_EXPR()");
-    	break;
+	generate_expr(expr->e.hot.expr, state);
+	if (expr->e.hot.pos == HOT_DEFAULT)
+	    set_hot_pc(state);
+	else
+	    panic("Illegal hot position in GENERATE_EXPR()");
+	break;
     default:
 	panic("Can't happen in GENERATE_EXPR()");
     }
@@ -1310,9 +1310,9 @@ stmt_to_code(Stmt * stmt, GState * gstate)
 		size = bc.numbytes_label;
 		break;
 	    case FIXUP_PC:
-	        gstate->hot_pc = new_i;
+		gstate->hot_pc = new_i;
 		size = 0;
-	        break;
+		break;
 	    default:
 		panic("Can't happen #1 in STMT_TO_CODE()");
 	    }
@@ -1327,8 +1327,8 @@ stmt_to_code(Stmt * stmt, GState * gstate)
 		bc.vector[new_i++] = value;
 		break;
 	    case 0:
-	        /* There's either another fixup or a plain byte here. */
-	        old_i--;
+		/* There's either another fixup or a plain byte here. */
+		old_i--;
 		break;
 	    default:
 		panic("Can't happen #2 in STMT_TO_CODE()");
@@ -1384,17 +1384,20 @@ generate_code(Stmt * stmt, DB_Version version, int *pc)
     }
 
     if (pc)
-        *pc = gstate.hot_pc;
+	*pc = gstate.hot_pc;
 
     free_gstate(gstate);
 
     return prog;
 }
 
-char rcsid_code_gen[] = "$Id: code_gen.c,v 1.10.4.3 2002-09-17 15:03:51 xplat Exp $";
+char rcsid_code_gen[] = "$Id: code_gen.c,v 1.10.4.4 2002-09-17 15:35:04 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.10.4.3  2002/09/17 15:03:51  xplat
+ * Updated to INLINEPC_updater_1 in trunk.
+ *
  * Revision 1.10.4.2  2002/09/12 07:20:50  xplat
  * Early comments from Ben.
  *

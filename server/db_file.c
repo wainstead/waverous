@@ -392,10 +392,10 @@ static int
 read_tag(const char *tag, const char *data)
 {
     if (0) {
-        /* just here to make sure the other ones are 'else if' */
+	/* just here to make sure the other ones are 'else if' */
     } else {
-        errlog("READ_TAG: Unknown format tag in DB header: %s\n", tag);
-        return 0;
+	errlog("READ_TAG: Unknown format tag in DB header: %s\n", tag);
+	return 0;
     }
     return 1;
 }
@@ -418,57 +418,53 @@ read_db_file(void)
 	       dbio_input_version);
 	return 0;
     }
-
     if (dbio_input_version >= DBV_InlinePC) {
-        /* 
-         * TAGS: the format consists of elements of the
-         *       form 'tag,' or 'tag=data,'.  They may be
-         *       separated by optional whitespace (but NO
-         *       whitespace WITHIN the element).  The final
-         *       comma is optional but without it the line
-         *       may not end in whitespace.
-         */
-        char *tags;
-        char *t, *tag, *tag_data;
+	/* 
+	 * TAGS: the format consists of elements of the
+	 *       form 'tag,' or 'tag=data,'.  They may be
+	 *       separated by optional whitespace (but NO
+	 *       whitespace WITHIN the element).  The final
+	 *       comma is optional but without it the line
+	 *       may not end in whitespace.
+	 */
+	char *tags;
+	char *t, *tag, *tag_data;
 
-        if (dbio_scanf("Tags:") == EOF) {
-            errlog("READ_DB_FILE: Malformed tags line.\n");
-            return 0;
-        }
-
+	if (dbio_scanf("Tags:") == EOF) {
+	    errlog("READ_DB_FILE: Malformed tags line.\n");
+	    return 0;
+	}
 	tags = str_dup(dbio_read_string());
 	t = tags;
-        while (*t) {
-            while (*t && *t == ' ')
-                t++;
+	while (*t) {
+	    while (*t && *t == ' ')
+		t++;
 
-            if (!*t)
-                break;
+	    if (!*t)
+		break;
 
-            tag = t;
-            while (*t && *t != '=' && *t != ',')
-                t++;
+	    tag = t;
+	    while (*t && *t != '=' && *t != ',')
+		t++;
 
-            if (*t == '=') {
-                *t++ = 0;
-                tag_data = t;
-                while (*t && *t != ',')
-                    t++;
-                if (*t)
-                    *t++ = 0;
-            } else {
-                tag_data = 0;
-                if (*t)
-                    *t++ = 0;
-            }
+	    if (*t == '=') {
+		*t++ = 0;
+		tag_data = t;
+		while (*t && *t != ',')
+		    t++;
+		if (*t)
+		    *t++ = 0;
+	    } else {
+		tag_data = 0;
+		if (*t)
+		    *t++ = 0;
+	    }
 
-            if (!read_tag(tag, tag_data))
-            	return 0;
-        }
-        free_str(tags);
+	    if (!read_tag(tag, tag_data))
+		return 0;
+	}
+	free_str(tags);
     }
-
-
     /* I use a `dummy' variable here and elsewhere instead of the `*'
      * assignment-suppression syntax of `scanf' because it allows more
      * straightforward error checking; unfortunately, the standard says that
@@ -547,9 +543,9 @@ static void
 write_tag(const char *tag, const char *data)
 {
     if (data)
-        dbio_printf("%s=%s,", tag, data);
+	dbio_printf("%s=%s,", tag, data);
     else
-        dbio_printf("%s,", tag);
+	dbio_printf("%s,", tag);
 }
 
 static void
@@ -810,10 +806,13 @@ db_shutdown()
     dump_database(DUMP_SHUTDOWN);
 }
 
-char rcsid_db_file[] = "$Id: db_file.c,v 1.4.6.2 2002-09-15 06:28:32 xplat Exp $";
+char rcsid_db_file[] = "$Id: db_file.c,v 1.4.6.3 2002-09-17 15:35:04 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4.6.2  2002/09/15 06:28:32  xplat
+ * Fixed bugs revealed by smoke test.
+ *
  * Revision 1.4.6.1  2002/09/12 05:57:40  xplat
  * Changes for inline PC saving and patch tags in the on-disk DB.
  *
