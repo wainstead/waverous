@@ -406,10 +406,21 @@ db_change_parent(Objid oid, Objid parent)
 {
     Objid old_parent;
 
-    db_priv_affected_callable_verb_lookup();
-
     if (!dbpriv_check_properties_for_chparent(oid, parent))
 	return 0;
+
+    if (objects[oid]->child == NOTHING && objects[oid]->verbdefs == NULL) {
+	/* Since this object has no children and no verbs, we know that it
+	   can't have had any part in affecting verb lookup, since we use first
+	   parent with verbs as a key in the verb lookup cache. */
+	/* The "no kids" rule is necessary because potentially one of the kids
+	   could have verbs on it--and that kid could have cache entries for
+	   THIS object's parentage. */
+	/* In any case, don't clear the cache. */
+	;
+    } else {
+	db_priv_affected_callable_verb_lookup();
+    }
 
     old_parent = objects[oid]->parent;
 
@@ -539,9 +550,12 @@ dbpriv_set_all_users(Var v)
     all_users = v;
 }
 
-char rcsid_db_objects[] = "$Id: db_objects.c,v 1.2.2.1 1997-03-20 07:26:01 nop Exp $";
+char rcsid_db_objects[] = "$Id: db_objects.c,v 1.2.2.2 1997-07-07 01:40:20 nop Exp $";
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.2.2.1  1997/03/20 07:26:01  nop
+ * First pass at the new verb cache.  Some ugly code inside.
+ *
  * Revision 1.2  1997/03/03 04:18:29  nop
  * GNU Indent normalization
  *
