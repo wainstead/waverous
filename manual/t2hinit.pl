@@ -1,4 +1,4 @@
-use warnings;
+# use warnings;
 
 # How to make texi2html put extra stuff into the <HEAD> portions of
 # all of the html files.  I hope this file can be replaced by a
@@ -12,6 +12,9 @@ use warnings;
 }
 
 
-# $Id: t2hinit.pl,v 1.1 2004-06-02 08:02:45 wrog Exp $
+# $Id: t2hinit.pl,v 1.2 2004-06-02 08:09:46 wrog Exp $
 
 # $Log: not supported by cvs2svn $
+# Revision 1.1  2004/06/02 08:02:45  wrog
+# initial version
+#
