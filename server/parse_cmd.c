@@ -54,7 +54,7 @@ parse_into_words(char *input, int *nwords)
 	    for (i = 0; i < max_words; i++)
 		new[i] = words[i];
 
-	    myfree(words, M_STRING);
+	    myfree(words, M_STRING_PTRS);
 	    words = new;
 	    max_words = new_max;
 	}
@@ -249,9 +249,15 @@ free_parsed_command(Parsed_Command * pc)
 }
 
 
-char rcsid_parse_cmd[] = "$Id: parse_cmd.c,v 1.2.2.1 1997-05-20 03:01:34 nop Exp $";
+char rcsid_parse_cmd[] = "$Id: parse_cmd.c,v 1.2.2.2 1997-05-30 18:36:17 nop Exp $";
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.2.2.1  1997/05/20 03:01:34  nop
+ * parse_into_words was allocating pointers to strings as strings.  Predictably,
+ * the refcount prepend code was not prepared for this, causing unaligned memory
+ * access on the Alpha.  Added new M_STRING_PTRS allocation class that could
+ * be renamed to something better, perhaps.
+ *
  * Revision 1.2  1997/03/03 04:19:14  nop
  * GNU Indent normalization
  *
