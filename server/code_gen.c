@@ -35,7 +35,6 @@
 
 enum fixup_kind {
     FIXUP_LITERAL, FIXUP_FORK, FIXUP_LABEL, FIXUP_VAR_REF, FIXUP_STACK, FIXUP_PC,
-    /* note--kinds after FIXUP_PC, inclusive, have no placeholder bytes */
 };
 
 struct fixup {
@@ -220,7 +219,7 @@ add_known_fixup(Fixup f, State * state)
     f.pc = state->num_bytes;
     state->fixups[i = state->num_fixups++] = f;
 
-    if (f.kind < FIXUP_PC)
+    if (f.kind != FIXUP_PC)
     	emit_byte(0, state);	/* a placeholder for the eventual value */
 
     return i;
@@ -1392,10 +1391,13 @@ generate_code(Stmt * stmt, DB_Version version, int *pc)
     return prog;
 }
 
-char rcsid_code_gen[] = "$Id: code_gen.c,v 1.10.4.1 2002-09-12 05:57:40 xplat Exp $";
+char rcsid_code_gen[] = "$Id: code_gen.c,v 1.10.4.2 2002-09-12 07:20:50 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.10.4.1  2002/09/12 05:57:40  xplat
+ * Changes for inline PC saving and patch tags in the on-disk DB.
+ *
  * Revision 1.10  2002/08/23 13:00:18  bjj
  * Removed a spurious EXPR_INDEX case left over from before x[$]
  *
