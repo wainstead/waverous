@@ -1,11 +1,16 @@
 \input texinfo   @c -*-texinfo-*-
-
 @comment %**start of header (This is for running Texinfo on a region.)
 @set INDEX
 @setfilename ProgrammersManual.info
 @settitle LambdaMOO Programmer's Manual
 @c Uncomment the following line for two-sided printing.
 @c @setchapternewpage odd
+@macro lmversion
+1.8.1
+@end macro
+@macro lmdate
+May 2004
+@end macro
 @comment %**end of header (This is for running Texinfo on a region.)
 
 @ifinfo
@@ -15,14 +20,16 @@
 		     *** LambdaMOO Programmer's Manual ***
 		     *************************************
 				       
-                         For LambdaMOO Version 1.8.0p6
-                                  March 1997
+                         For LambdaMOO Version @lmversion
+                                  @lmdate
 				       
 				by Pavel Curtis
 				  aka Haakon
 				  aka Lambda
 @sp 4
 Copyright @copyright{} 1991, 1992, 1993, 1995, 1996 by Pavel Curtis.
+Copyright @copyright{} 1997 by Erik Ostrom.
+Copyright @copyright{} 2004 by Roger F. Crew.
 @end format
 
 Permission is granted to make and distribute verbatim copies of this manual
@@ -52,19 +59,21 @@ author.
 
 @titlepage
 @title LambdaMOO Programmer's Manual
-@subtitle For LambdaMOO Version 1.8.0p6
-@subtitle March 1997
-@author by Pavel Curtis
-@author aka Haakon
-@author aka Lambda
+@subtitle For LambdaMOO Version @lmversion@*
+@subtitle @lmdate
+@author by Pavel Curtis@*
+@author a.k.a. Haakon@*
+@author a.k.a. Lambda
 
 @page
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1991, 1992, 1993, 1995, 1996 by Pavel Curtis.
+Copyright @copyright{} 1991, 1992, 1993, 1995, 1996 by Pavel Curtis.@*
+Copyright @copyright{} 1997 by Erik Ostrom.@*
+Copyright @copyright{} 2004 by Roger F. Crew.
 
 Copies of the electronic source for this document can be obtained using
-anonymous FTP on the Internet.  At the site @code{ftp.research.att.com} the
-files are @code{dist/eostrom/MOO/ProgrammersManual.*}; several different file
+anonymous FTP on the Internet.  At the site @code{ftp.lambda.moo.mud.org} the
+files are @code{pub/MOO/ProgrammersManual.*}; several different file
 formats are provided, including HTML, Texinfo, plain text, and PostScript.
 
 Permission is granted to make and distribute verbatim copies of this manual
@@ -80,24 +89,28 @@ Permission is granted to copy and distribute translations of this manual into
 another language, under the above conditions for modified versions, except
 that this permission notice may be stated in a translation approved by the
 author.
+
 @end titlepage
 
 @node Top, Introduction, (dir), (dir)
 @comment  node-name,  next,  previous,  up
+@ifnothtml
 @ifset INFO
 @format
 		     *************************************
 		     *** LambdaMOO Programmer's Manual ***
 		     *************************************
 				       
-                         For LambdaMOO Version 1.8.0p6
-                                  March 1997
+                         For LambdaMOO Version @lmversion
+                                  @lmdate
 				       
 				by Pavel Curtis
 				  aka Haakon
 				  aka Lambda
 
           Copyright @copyright{} 1991, 1992, 1993, 1995, 1996 by Pavel Curtis.
+          Copyright @copyright{} 1997 by Erik Ostrom.
+          Copyright @copyright{} 2004 by Roger F. Crew.
 @end format
 @end ifset
 
@@ -110,6 +123,9 @@ author.
 * Function Index::           Index to All Built-In Functions
 @end menu
 
+@end ifnothtml
+@c evidently, space is not allowed here
+@c
 @node Introduction, Database, Top, Top
 @comment  node-name,  next,  previous,  up
 @chapter Introduction
@@ -174,10 +190,9 @@ is one particular LambdaMOO database, created every so often by extracting the
 
 @quotation
 @strong{Note}: The original LambdaMOO resides on the host
-@code{lambda.parc.xerox.com} (the numeric address for which is
-@code{192.216.54.2}), on port 8888.  Feel free to drop by!  A copy of the most
+@code{lambda.moo.mud.org} on port 8888.  Feel free to drop by!  A copy of the most
 recent release of the LambdaCore database can be obtained by anonymous FTP from
-host @code{ftp.parc.xerox.com} in the directory @code{pub/MOO}.
+host @code{ftp.lambda.moo.mud.org} in the directory @code{pub/MOO}.
 @end quotation
 
 @menu
@@ -667,7 +682,41 @@ To have any of this make real sense, it is important to understand
 precisely how the server decides what to do when a player types a
 command.
 
-First, the server checks whether or not the first non-blank character in the
+But first, we mention the three situations in which 
+a line typed by a player is @emph{not} treated as an ordinary command:
+
+@enumerate
+@item
+The line may exactly match the connection's defined @dfn{flush command}, 
+if any (@samp{.flush} by default), in which case 
+all pending lines of input are cleared 
+and nothing further is done with the flush command itself.
+Likewise, any line may be flushed by a subsequent flush command 
+before the server otherwise gets a chance to process it.
+For more on this, see @ref{Flushing,.flush,Flushing Unprocessed Input}.
+
+@item
+The line may begin with a prefix that qualifies it
+for @dfn{out-of-band} processing and thence, perhaps,
+as an @dfn{out-of-band command}.
+For more on this, see @ref{Out-of-band Processing,OOB,Out-of-band Processing}.
+
+@item
+The connection may be subject to a @code{read()} call
+(@pxref{Manipulating Connections,read(),Operations on Network Connections}) 
+or there may be a @code{.program} command in progress
+(@pxref{Programming,.program,The @code{.program} Command}),
+either of which will consume the line accordingly.
+Also note that if connection option @code{"hold-input"} has been set, 
+all in-band lines typed by the player are held at this point for future reading,
+even if no reading task is currently active.
+@end enumerate
+
+@noindent
+Otherwise, we (finally) have an actual command line that can undergo
+@dfn{normal command parsing} as follows:
+
+The server checks whether or not the first non-blank character in the
 command is one of the following:
 
 @example
@@ -682,6 +731,7 @@ by a space:
 say      emote    eval
 @end example
 
+@need 2000
 @noindent
 For example, the command
 
@@ -713,12 +763,10 @@ is broken into the words @samp{foo}, @samp{bar mumble}, @samp{baz frotz}, and
 they can be preceded by a backslash, just like in MOO strings.
 
 Having thus broken the string into words, the server next checks to see if the
-first word names any of the six ``built-in'' commands: @samp{.program},
-@samp{PREFIX}, @samp{OUTPUTPREFIX}, @samp{SUFFIX}, @samp{OUTPUTSUFFIX}, or the
-connection's defined @dfn{flush} command, if any (@samp{.flush} by default).
-The first one of these is only available to programmers, the next four are
-intended for use by client programs, and the last can vary from database to
-database or even connection to connection; all six are described in the final
+first word names any of the five ``intrinsic'' commands: @samp{.program},
+@samp{PREFIX}, @samp{OUTPUTPREFIX}, @samp{SUFFIX}, @samp{OUTPUTSUFFIX}.
+The first one of these is only available to programmers, the other four are
+intended for use by client programs; all five are described in the final
 chapter of this document, ``Server Commands and Database Assumptions''.  If the
 first word isn't one of the above, then we get to the usual case: a normal MOO
 command.
@@ -1228,7 +1276,7 @@ power,'' using the @samp{^} operator:
 Note that if the first operand is an integer, then the second operand must also
 be an integer.  If the first operand is a floating-point number, then the
 second operand can be either kind of number.  Although it is legal to raise an
-integer to a negative power, it is unlikely to be terribly useful.
+integer to a negative power, the result is unlikely to be terribly useful.
 
 @node Comparisons, Truth Values, Arithmetic, Expressions
 @comment  node-name,  next,  previous,  up
@@ -2828,6 +2876,7 @@ on server assumptions about the database for details.
 * Time::                     Operations Involving Times and Dates
 * Evaluation and Tasks::     MOO-Code Evaluation and Task Manipulation
 * Administrative::           Administrative Operations
+* Statistics::               Server Statistics and Miscellaneous Information
 @end menu
 
 @node Passing, Manipulating Values, Builtins, Builtins
@@ -3193,11 +3242,11 @@ byte represented in @var{bin_string}.  Raises @code{E_INVARG} if
 section on MOO value types for a full description of binary strings.)
 
 @example
-decode_binary("foo")               @result{}   @{"foo"@}
-decode_binary("~~foo")             @result{}   @{"~foo"@}
-decode_binary("foo~0D~0A")         @result{}   @{"foo", 13, 10@}
-decode_binary("foo~0Abar~0Abaz")   @result{}   @{"foo", 10, "bar", 10, "baz"@}
-decode_binary("foo~0D~0A", 1)      @result{}   @{102, 111, 111, 13, 10@}
+decode_binary("foo")            @result{}   @{"foo"@}
+decode_binary("~~foo")          @result{}   @{"~foo"@}
+decode_binary("foo~0D~0A")      @result{}   @{"foo", 13, 10@}
+decode_binary("foo~0Abar~0A")   @result{}   @{"foo", 10, "bar", 10@}
+decode_binary("foo~0D~0A", 1)   @result{}   @{102, 111, 111, 13, 10@}
 @end example
 @end deftypefun
 
@@ -4184,7 +4233,7 @@ then this function does nothing.  Output is normally written to connections
 only between tasks, not during execution.
 
 The server will not queue an arbitrary amount of output for a connection; the
-@code{MAX_QUEUED_OUTPUT} compilation option (in @samp{options.h}) controls the
+@code{MAX_QUEUED_OUTPUT} compilation option (@pxref{Compile Options,,Server Compilation Options}) controls the
 limit.  When an attempt is made to enqueue output that would take the server
 over its limit, it first tries to write as much output as possible to the
 connection without having to wait for the other end.  If that doesn't result in
@@ -4340,9 +4389,11 @@ following values for @var{option} are currently supported:
 
 @table @code
 @item "hold-input"
-If @var{value} is true, then input received on @var{conn} will never be treated
-as a command; instead, it will remain in the queue until retrieved by a call to
-@code{read()}.
+If @var{value} is true, then input received on @var{conn} will not be treated
+as a command; instead, it will remain in the queue until it is retrieved by a call to
+@code{read()} or this connection option is set false, 
+in which case command processing resumes.
+Processing of out-of-band input lines is unaffected by this option.
 
 @item "client-echo"
 Send the Telnet Protocol @samp{WONT ECHO} or @samp{WILL ECHO} command,
@@ -4557,7 +4608,7 @@ server.
 Each function description is a list of the following form:
 
 @example
-@{@var{name}, @var{min-args}, @var{max-args}, @var{types}
+@{@var{name}, @var{min-args}, @var{max-args}, @var{types}@}
 @end example
 
 @noindent
@@ -4581,12 +4632,12 @@ numbers may be given.  For example, here are several entries from the list:
 @end example
 
 @noindent
-@code{Listdelete()} takes exactly 2 arguments, of which the first must be a
+@code{listdelete()} takes exactly 2 arguments, of which the first must be a
 list (@code{LIST == 4}) and the second must be an integer (@code{INT == 0}).
-@code{Suspend()} has one optional argument that, if provided, must be an
-integer.  @code{Server_log()} has one required argument that must be a string
+@code{suspend()} has one optional argument that, if provided, must be an
+integer.  @code{server_log()} has one required argument that must be a string
 (@code{STR == 2}) and one optional argument that, if provided, may be of any
-type.  @code{Max()} requires at least one argument but can take any number
+type.  @code{max()} requires at least one argument but can take any number
 above that, and the first argument must be either an integer or a
 floating-point number; the type(s) required for any other arguments can't be
 determined from this description.  Finally, @code{tostr()} takes any number of
@@ -4834,12 +4885,30 @@ existing suspended task and @code{E_PERM} if the programmer is neither a wizard
 nor the owner of the specified task.
 @end deftypefun
 
-@node Administrative,  , Evaluation and Tasks, Builtins
+@node Administrative, Statistics, Evaluation and Tasks, Builtins
 @comment  node-name,  next,  previous,  up
 @subsection Administrative Operations
 
-@deftypefun str server_version ()
-Returns a string giving the version number of the running MOO server.
+@deftypefun none dump_database ()
+Requests that the server checkpoint the database at its next opportunity.  It
+is not normally necessary to call this function; the server automatically
+checkpoints the database at regular intervals; see the chapter on server
+assumptions about the database for details.  If the programmer is not a wizard,
+then @code{E_PERM} is raised.
+@end deftypefun
+
+@deftypefun none shutdown ([str @var{message}])
+Requests that the server shut itself down at its next opportunity.  Before
+doing so, a notice (incorporating @var{message}, if provided) is printed to all
+connected players.  If the programmer is not a wizard, then @code{E_PERM} is
+raised.
+@end deftypefun
+
+@deftypefun none load_server_options ()
+This causes the server to consult the current values of properties on 
+@code{$server_options}, updating the corresponding server option settings 
+(@pxref{Server Options,,Server Options Set in the Database}) accordingly.  
+If the programmer is not a wizard, then @code{E_PERM} is raised.
 @end deftypefun
 
 @deftypefun none server_log (str @var{message} [, @var{is-error}])
@@ -4881,6 +4950,15 @@ database from the then-current LambdaMOO database, and other similar
 situations.  Its use requires great care.
 @end deftypefun
 
+@node Statistics,  , Administrative, Builtins
+@comment  node-name,  next,  previous,  up
+@subsection Server Statistics and Miscellaneous Information
+
+@deftypefun str server_version ()
+Returns a string giving the version number of the running MOO server.
+@end deftypefun
+
+@need 1500 
 @deftypefun list memory_usage ()
 On some versions of the server, this returns statistics concerning the server
 consumption of system memory.  The result is a list of lists, each in the
@@ -4902,25 +4980,27 @@ whether or not statistics are available; if the option is not provided,
 statistics are not available.
 @end deftypefun
 
-@deftypefun none dump_database ()
-Requests that the server checkpoint the database at its next opportunity.  It
-is not normally necessary to call this function; the server automatically
-checkpoints the database at regular intervals; see the chapter on server
-assumptions about the database for details.  If the programmer is not a wizard,
-then @code{E_PERM} is raised.
-@end deftypefun
-
 @deftypefun int db_disk_size ()
 Returns the total size, in bytes, of the most recent full representation of the
 database as one or more disk files.  Raises @code{E_QUOTA} if, for some reason,
 no such on-disk representation is currently available.
 @end deftypefun
 
-@deftypefun none shutdown ([str @var{message}])
-Requests that the server shut itself down at its next opportunity.  Before
-doing so, a notice (incorporating @var{message}, if provided) is printed to all
-connected players.  If the programmer is not a wizard, then @code{E_PERM} is
-raised.
+@deftypefun list verb_cache_stats ()
+@deftypefunx none log_cache_stats ()
+As of version 1.8.1, the server caches verbname-to-program lookups to 
+improve performance.  These functions respectively return or write to the 
+server log file the current cache statistics.  
+For @code{verb_cache_stats} the return value will be a list of the form
+
+@example
+@{@var{hits}, @var{negative_hits}, @var{misses}, @var{table_clears}, @var{histogram}@},
+@end example
+
+@noindent
+though this may change in future server releases.  The cache is invalided 
+by any builtin function call that may have an effect on verb lookups
+(e.g., @code{delete_verb()}).
 @end deftypefun
 
 @node Server, Function Index, Language, Top
@@ -4932,134 +5012,38 @@ every property and verb in the database specifically accessed by the server.
 Aside from what is listed here, no assumptions are made by the server
 concerning the contents of the database.
 
+We also describe some of the server configuration options that may affect
+how programs run.
+
 @menu
-* Server Builtins::          Built-in Commands
+* Server Builtins::          Intrinsic Commands
 * Assumptions::              Server Assumptions About the Database
+* Configuration::            Server Compilation and Command-Line Options
 @end menu
 
 @node Server Builtins, Assumptions, Server, Server
 @comment  node-name,  next,  previous,  up
-@section Built-in Commands
+@section Command Lines That Receive Special Treatment
 
-As was mentioned in the chapter on command parsing, there are five commands
-whose interpretation is fixed by the server: @code{PREFIX},
-@code{OUTPUTPREFIX}, @code{SUFFIX}, @code{OUTPUTSUFFIX}, and @code{.program}.
-The first four of these are intended for use by programs that connect to the
-MOO, so-called `client' programs.  The @code{.program} command is used by
-programmers to associate a MOO program with a particular verb.  The server can,
-in addition, recognize a sixth special command on any or all connections, the
-@dfn{flush} command.
+As was mentioned in the chapter on command parsing, 
+there are a number of commands and special prefixes
+whose interpretation is fixed by the server.
+Examples include the flush command and the five intrinsic commands (@code{PREFIX},
+@code{OUTPUTPREFIX}, @code{SUFFIX}, @code{OUTPUTSUFFIX}, and @code{.program}).
 
-The server also performs special processing on command lines that begin with
-certain punctuation characters.
-
-This section discusses these built-in pieces of the command-interpretation
-process.
+This section discusses all of these built-in pieces 
+of the command-interpretation process 
+in the order in which they occur.
 
 @menu
-* Delimiters::               Command-Output Delimiters
-* Programming::              Programming
-* Flushing::                 Flushing Unprocessed Input
-* Initial Punctuation::      Initial Punctuation in Commands
+* Flushing::                 @code{.flush}
+* Out-of-band Processing::   @code{#$#} Out-of-band Commands
+* Initial Punctuation::      @code{"say}, @code{:emote}, @code{;eval}
+* Delimiters::               @code{PREFIX}, @code{SUFFIX}, @code{OUTPUTPREFIX}, @code{OUTPUTSUFFIX}
+* Programming::              @code{.program}
 @end menu
 
-@node Delimiters, Programming, Server Builtins, Server Builtins
-@comment  node-name,  next,  previous,  up
-@subsection Command-Output Delimiters
-
-Every MOO network connection has associated with it two strings, the
-@dfn{output prefix} and the @dfn{output suffix}.  Just before executing a
-command typed on that connection, the server prints the output prefix, if any,
-to the player.  Similarly, just after finishing the command, the output suffix,
-if any, is printed to the player.  Initially, these strings are not defined, so
-no extra printing takes place.
-
-The @code{PREFIX} and @code{SUFFIX} commands are used to set and clear these
-strings.  They have the following simple syntax:
-
-@example
-PREFIX  @var{output-prefix}
-SUFFIX  @var{output-suffix}
-@end example
-
-@noindent
-That is, all text after the command name and any following spaces is used as
-the new value of the appropriate string.  If there is no non-blank text after
-the command string, then the corresponding string is cleared.  For
-compatibility with some general MUD client programs, the server also recognizes
-@code{OUTPUTPREFIX} as a synonym for @code{PREFIX} and @code{OUTPUTSUFFIX} as a
-synonym for @code{SUFFIX}.
-
-These commands are intended for use by programs connected to the MOO, so that
-they can issue MOO commands and reliably determine the beginning and end of the
-resulting output.  For example, one editor-based client program sends this
-sequence of commands on occasion:
-
-@example
-PREFIX >>MOO-Prefix<<
-SUFFIX >>MOO-Suffix<<
-@@list @var{object}:@var{verb} without numbers
-PREFIX
-SUFFIX
-@end example
-
-@noindent
-The effect of which, in a LambdaCore-derived database, is to print out the code
-for the named verb preceded by a line containing only @samp{>>MOO-Prefix<<} and
-followed by a line containing only @samp{>>MOO-Suffix<<}.  This enables the
-editor to reliably extract the program text from the MOO output and show it to
-the user in a separate editor window.  There are many other possible uses.
-
-The built-in function @code{output_delimiters()} can be used by MOO code to
-find out the output prefix and suffix currently in effect on a particular
-network connection.
-
-@node Programming, Flushing, Delimiters, Server Builtins
-@comment  node-name,  next,  previous,  up
-@subsection Programming
-
-The @code{.program} command is a common way for programmers to associate a
-particular MOO-code program with a particular verb.  It has the following
-syntax:
-
-@example
-.program @var{object}:@var{verb}
-@dots{}@var{several lines of MOO code}@dots{}
-.
-@end example
-
-@noindent
-That is, after typing the @code{.program} command, then all lines of input from
-the player are considered to be a part of the MOO program being defined.  This
-ends as soon as the player types a line containing only a dot (@samp{.}).  When
-that line is received, the accumulated MOO program is checked for proper MOO
-syntax and, if correct, associated with the named verb.
-
-If, at the time the line containing only a dot is processed, (a) the player is
-not a programmer, (b) the player does not have write permission on the named
-verb, or (c) the property @code{$server_options.protect_set_verb_code} exists
-and has a true value and the player is not a wizard, then an error message is
-printed and the named verb's program is not changed.
-
-In the @code{.program} command, @var{object} may have one of three forms:
-
-@itemize @bullet
-@item
-The name of some object visible to the player.  This is exactly like the kind
-of matching done by the server for the direct and indirect objects of ordinary
-commands.  See the chapter on command parsing for details.  Note that the
-special names @samp{me} and @samp{here} may be used.
-
-@item
-An object number, in the form @code{#@var{number}}.
-
-@item
-A @dfn{system property} (that is, a property on @code{#0}), in the form
-@code{$@var{name}}.  In this case, the current value of @code{#0.@var{name}}
-must be a valid object.
-@end itemize
-
-@node Flushing, Initial Punctuation, Programming, Server Builtins
+@node Flushing, Out-of-band Processing, , Server Builtins
 @comment  node-name,  next,  previous,  up
 @subsection Flushing Unprocessed Input
 
@@ -5090,7 +5074,54 @@ then its value overrides this default.  If
 string is the flush command for all new connections; otherwise, new connections
 are initially given no flush command at all.
 
-@node Initial Punctuation,  , Flushing, Server Builtins
+@node Out-of-band Processing, Initial Punctuation, Flushing, Server Builtins
+@comment  node-name,  next,  previous,  up
+@subsection Out-of-Band Processing
+
+It is possible to compile the server to recognize an
+@dfn{out-of-band prefix}
+for input lines.  This is a string
+that the server will check for at the beginning of every unflushed line of
+input from a connection, regardless of
+whether or not a player is logged in and regardless of whether or not
+reading tasks are waiting for input on that connection.  
+
+If a given line of input begins with the defined out-of-band prefix 
+(@samp{#$#} by default), then it is not treated as a normal command or given as
+input to any reading task.  Instead, the line is parsed into a list of words in
+the usual way and those words are given as the arguments in a call to
+@code{$do_out_of_band_command()}.  
+
+If this verb does not exist or is not executable, 
+the line in question will be @emph{completely ignored}.
+
+For example, with the default out-of-band prefix, the line of input
+
+@example
+#$#mcp-client-set-type fancy
+@end example
+
+@noindent
+would result in the following call being made in a new server task:
+
+@example
+$do_out_of_band_command("#$#mcp-client-set-type", "fancy")
+@end example
+
+During the call to @code{$do_out_of_band_command()}, the variable @code{player}
+is set to the object number representing the player associated with the
+connection from which the input line came.  Of course, if that connection has
+not yet logged in, the object number will be negative.  Also, the variable
+@code{argstr} will have as its value the unparsed input line as received on the
+network connection.
+
+Out-of-band commands are intended for use by advanced client programs that may
+generate asynchronous @dfn{events} of which the server must be notified.  Since
+the client cannot, in general, know the state of the player's connection
+(logged-in or not, reading task or not), out-of-band commands provide the only
+reliable client-to-server communications channel.
+
+@node Initial Punctuation, Delimiters, Out-of-band Processing, Server Builtins
 @comment  node-name,  next,  previous,  up
 @subsection Initial Punctuation in Commands
 
@@ -5126,7 +5157,127 @@ say Hello, there.
 @noindent
 before parsing.
 
-@node Assumptions,  , Server Builtins, Server
+@node Delimiters, Programming, Initial Punctuation, Server Builtins
+@comment  node-name,  next,  previous,  up
+@subsection Command-Output Delimiters
+
+@quotation
+@strong{Warning:} This is a deprecated feature.
+@end quotation
+
+Every MOO network connection has associated with it two strings, the
+@dfn{output prefix} and the @dfn{output suffix}.  Just before executing a
+command typed on that connection, the server prints the output prefix, if any,
+to the player.  Similarly, just after finishing the command, the output suffix,
+if any, is printed to the player.  Initially, these strings are not defined, so
+no extra printing takes place.
+
+@need 1000
+The @code{PREFIX} and @code{SUFFIX} commands are used to set and clear these
+strings.  They have the following simple syntax:
+
+@example
+PREFIX  @var{output-prefix}
+SUFFIX  @var{output-suffix}
+@end example
+
+@noindent
+That is, all text after the command name and any following spaces is used as
+the new value of the appropriate string.  If there is no non-blank text after
+the command string, then the corresponding string is cleared.  For
+compatibility with some general MUD client programs, the server also recognizes
+@code{OUTPUTPREFIX} as a synonym for @code{PREFIX} and @code{OUTPUTSUFFIX} as a
+synonym for @code{SUFFIX}.
+
+These commands are intended for use by programs connected to the MOO, so that
+they can issue MOO commands and (somewhat) reliably determine the beginning and
+end of the resulting output.  For example, one editor-based client program
+sends this sequence of commands on occasion:
+
+@example
+PREFIX >>MOO-Prefix<<
+SUFFIX >>MOO-Suffix<<
+@@list @var{object}:@var{verb} without numbers
+PREFIX
+SUFFIX
+@end example
+
+@noindent
+The effect of which, in a LambdaCore-derived database, is to print out the code
+for the named verb preceded by a line containing only @samp{>>MOO-Prefix<<} and
+followed by a line containing only @samp{>>MOO-Suffix<<}.  This enables the
+editor to (somewhat) reliably extract the program text from the MOO output and show it to
+the user in a separate editor window.  There are many other possible uses.
+
+@quotation
+@strong{Warning:}
+If the command thus bracketed calls @code{suspend()}, its output will be
+deemed ``finished'' then and there; the suffix thus appears at that point and
+@emph{not}, as one might expect, later when the resulting background task has
+finally returned from its top-level verb call.  Thus, use of this feature 
+(which was designed before @code{suspend()} existed) is no longer recommended.
+@end quotation
+
+The built-in function @code{output_delimiters()} can be used by MOO code to
+find out the output prefix and suffix currently in effect on a particular
+network connection.
+
+@node Programming, , Delimiters, Server Builtins
+@comment  node-name,  next,  previous,  up
+@subsection The @code{.program} Command
+
+The @code{.program} command is a common way for programmers to associate a
+particular MOO-code program with a particular verb.  It has the following
+syntax:
+
+@example
+.program @var{object}:@var{verb}
+ @dots{}@var{lines of MOO code}@dots{}
+.
+@end example
+
+@noindent
+That is, after typing the @code{.program} command, then all lines of input from
+the player are considered to be a part of the MOO program being defined.  This
+ends as soon as the player types a line containing only a dot (@samp{.}).  When
+that line is received, the accumulated MOO program is checked for proper MOO
+syntax and, if correct, associated with the named verb.
+
+@quotation
+@emph{Fine point:}
+The lines are entered verbatim; no ``dot-unquoting'' is performed.  
+That is, the translation often performed in other similar contexts 
+(e.g., LambdaCore's @code{$prog:@@program} verb or other LambdaCore commands
+that make use of @code{$command_utils:read_lines()})
+in which a line beginning with two dots (@samp{..}) will have the first 
+dot stripped before being included, does @strong{not} occur here.
+@end quotation
+
+If, at the time the line containing only a dot is processed, (a) the player is
+not a programmer, (b) the player does not have write permission on the named
+verb, or (c) the property @code{$server_options.protect_set_verb_code} exists
+and has a true value and the player is not a wizard, then an error message is
+printed and the named verb's program is not changed.
+
+In the @code{.program} command, @var{object} may have one of three forms:
+
+@itemize @bullet
+@item
+The name of some object visible to the player.  This is exactly like the kind
+of matching done by the server for the direct and indirect objects of ordinary
+commands.  See the chapter on command parsing for details.  Note that the
+special names @samp{me} and @samp{here} may be used.
+
+@item
+An object number, in the form @code{#@var{number}}.
+
+@item
+A @dfn{system property} (that is, a property on @code{#0}), in the form
+@code{$@var{name}}.  In this case, the current value of @code{#0.@var{name}}
+must be a valid object.
+@end itemize
+
+@node Assumptions, Configuration, Server Builtins, Server
 @comment  node-name,  next,  previous,  up
 @section Server Assumptions About the Database
 
@@ -5140,7 +5291,7 @@ section gives a complete list of such circumstances.
 * Checkpointing::            Checkpointing the Database
 * Network Connections::      Accepting and Initiating Network Connections
 * Logging In::               Associating Network Connections with Players
-* Out-of-band Commands::     Out-of-Band Commands
+* Player Input::             Player Input Handlers
 * First Tasks::              The First Tasks Run By the Server
 * Controlling Tasks::        Controlling the Execution of Tasks
 * Aborted Tasks::            Controlling the Handling of Aborted Tasks
@@ -5240,20 +5391,13 @@ connection.
 The user who just logged in on this connection was already logged in on some
 other connection.
 
-@item server_full_msg
-Default:
-@example
-*** Sorry, but the server cannot accept any more connections right now.
-*** Please try again later.
-@end example
-@noindent
+@item server_full_msg = @{@*@w{@code{"*** Sorry, but the server cannot accept any more connections right now.",}}@*@w{@code{"*** Please try again later."@}}}
 This connection arrived when the server really couldn't accept any more
 connections, due to running out of a critical operating system resource.
 
 @item timeout_msg = "*** Timed-out waiting for login. ***"
-This in-bound network connection was idle and un-logged-in for at least
-@code{CONNECT_TIMEOUT} seconds (as defined in the file @samp{options.h} when
-the server was compiled).
+This in-bound network connection was idle and un-logged-in for too long.
+The actual time limit is @code{$server_options.connect_timeout}.
 @end table
 
 @quotation
@@ -5347,7 +5491,7 @@ timeout interval can also be overridden from within the database, by defining
 the property @code{outbound_connect_timeout} on @code{$server_options} with an
 integer as its value.
 
-@node Logging In, Out-of-band Commands, Network Connections, Assumptions
+@node Logging In, Player Input, Network Connections, Assumptions
 @comment  node-name,  next,  previous,  up
 @subsection Associating Network Connections with Players
 
@@ -5355,7 +5499,8 @@ When a network connection is first made to the MOO, it is identified by a
 unique, negative object number.  Such a connection is said to be
 @dfn{un-logged-in} and is not yet associated with any MOO player object.
 
-Each line of input on an un-logged-in connection is first parsed into words in
+Each line of input on an un-logged-in connection that is not a flush command 
+and is not consumed by out-of-band processing is parsed into words in
 the usual way (see the chapter on command parsing for details) and then these
 words are passed as the arguments in a call to the verb
 @code{$do_login_command()}.  For example, the input line
@@ -5459,47 +5604,53 @@ lines of input from un-logged-in connections are simply discarded.  Thus, it is
 verb.
 @end quotation
 
-@node Out-of-band Commands, First Tasks, Logging In, Assumptions
-@comment  node-name,  next,  previous,  up
-@subsection Out-of-Band Commands
-
-It is possible to compile the server with an option defining an
-@dfn{out-of-band prefix} for commands.  This is a string that the server will
-check for at the beginning of every line of input from players, regardless of
-whether or not those players are logged in and regardless of whether or not
-reading tasks are waiting for input from those players.  If a given line of
-input begins with the defined out-of-band prefix (leading spaces, if any, are
-@emph{not} stripped before testing), then it is not treated as a normal command
-or as input to any reading task.  Instead, the line is parsed into a list of
-words in the usual way and those words are given as the arguments in a call to
-@code{$do_out_of_band_command()}.  For example, if the out-of-band prefix were
-defined to be @samp{#$#}, then the line of input
-
-@example
-#$# client-type fancy
-@end example
-
 @noindent
-would result in the following call being made in a new server task:
+Note that a database with a missing or broken @code{$do_login_command} 
+may still be accessed (and perhaps repaired) by running the server with 
+the @code{-e} command line option.  @xref{Emergency Mode,,Emergency Wizard Mode}.
 
-@example
-$do_out_of_band_command("#$#", "client-type", "fancy")
-@end example
+@node Player Input, First Tasks, Logging In, Assumptions
+@comment  node-name,  next,  previous,  up
+@subsection Player Input Handlers
 
-During the call to @code{$do_out_of_band_command()}, the variable @code{player}
-is set to the object number representing the player associated with the
-connection from which the input line came.  Of course, if that connection has
-not yet logged in, the object number will be negative.  Also, the variable
-@code{argstr} will have as its value the unparsed input line as received on the
-network connection.
+@subsubheading $do_out_of_band_command
 
-Out-of-band commands are intended for use by fancy client programs that may
-generate asynchronous @dfn{events} of which the server must be notified.  Since
-the client cannot, in general, know the state of the player's connection
-(logged-in or not, reading task or not), out-of-band commands provide the only
-reliable client-to-server communications channel.
+On any connection,
+any unflushed incoming lines that begin with the out-of-band prefix will be treated as out-of-band commands,
+meaning that if the verb @code{$do_out_of_band_command()} exists and is executable,
+it will be called for each such line.
+For more on this, see @ref{Out-of-band Processing,OOB,Out-of-band Processing}.
 
-@node First Tasks, Controlling Tasks, Out-of-band Commands, Assumptions
+@subsubheading $do_command
+
+As we previously described in @ref{Parsing,,The Built-in Command Parser},
+on any logged-in connection that 
+@itemize
+@item
+is not the subject of a @code{read()} call,
+@item
+does not have a @code{.program} command in progress, and
+@item
+has not had its connection option @code{"hold-input"} set, 
+@end itemize
+@noindent
+any incoming line that 
+@itemize
+@item
+has not been flushed
+@item
+is in-band (i.e., has not been consumed by out-of-band processing) and
+@item
+is not itself @code{.program} or one of the other four intrinsic commands
+@end itemize
+@noindent
+will result in a call to @code{$do_command()}
+provided that verb exists and is executable.
+If this verb suspends or returns a true value, then processing of that line ends at this point, 
+otherwise, whether the verb returned false or did not exist in the first place,
+the remainder of the builtin parsing process is invoked.
+
+@node First Tasks, Controlling Tasks, Player Input, Assumptions
 @comment  node-name,  next,  previous,  up
 @subsection The First Tasks Run By the Server
 
@@ -5562,7 +5713,7 @@ database by defining the @code{max_stack_depth} property on
 maximum stack depth for any task is set at the time that task is created and
 cannot be changed thereafter.  This implies that suspended tasks, even after
 being saved in and restored from the DB, are not affected by later changes to
-$server_options.max_stack_depth.
+@code{$server_options.max_stack_depth}.
 
 Finally, the server can place a limit on the number of forked or suspended
 tasks any player can have queued at a given time.  Each time a @code{fork}
@@ -5580,6 +5731,7 @@ limit.
 @comment  node-name,  next,  previous,  up
 @subsection Controlling the Handling of Aborted Tasks
 
+@noindent
 The server will abort the execution of tasks for either of two reasons:
 @enumerate 1
 @item an error was raised within the task but not caught, or
@@ -5608,9 +5760,11 @@ The specific handler verb, and the set of arguments it is passed, differs for
 the two causes of aborted tasks.
 
 If an error is raised and not caught, then the verb-call
+
 @example
 $handle_uncaught_error(@var{code}, @var{msg}, @var{value}, @var{traceback}, @var{formatted})
 @end example
+
 @noindent
 is made, where @var{code}, @var{msg}, @var{value}, and @var{traceback} are the
 values that would have been passed to a handler in a @code{try}-@code{except}
@@ -5619,9 +5773,11 @@ traceback output that will be printed to the player if
 @code{$handle_uncaught_error} returns false without suspending.
 
 If a task runs out of ticks or seconds, then the verb-call
+
 @example
 $handle_task_timeout(@var{resource}, @var{traceback}, @var{formatted})
 @end example
+
 @noindent
 is made, where @var{resource} is the appropriate one of the strings
 @code{"ticks"} or @code{"seconds"}, and @var{traceback} and @var{formatted} are
@@ -5640,24 +5796,34 @@ For complete details, see the chapter on command parsing.
 @comment  node-name,  next,  previous,  up
 @subsection Restricting Access to Built-in Properties and Functions
 
-Whenever verb code attempts to read the value of a built-in property @var{prop}
-on any object, the server checks to see if the property
-@code{$server_options.protect_@var{prop}} exists and has a true value.  If so,
-then @code{E_PERM} is raised if the programmer is not a wizard.
+@subsubheading Protected Properties
+A built-in property @var{prop} is deemed @emph{protected} if 
+@code{$server_options.protect_@var{prop}} exists and has a true value.
+However, no such property protections are recognized if the compilation option
+@code{IGNORE_PROP_PROTECTED} (@pxref{Compile Options,,Server Compilation Options}) was set when building 
+the server.  (It should be noted that enabling property protection
+has significant performance costs).
 
-Whenever verb code calls a built-in function @code{@var{func}()} and the caller
-is not the object @code{#0}, the server checks to see if the property
-@code{$server_options.protect_@var{func}} exists and has a true value.  If so,
-then the server next checks to see if the verb @code{$bf_@var{func}()} exists
-and its @samp{x} bit is set; if that verb exists and can be executed, then the
-server calls it @emph{instead} of the built-in function, returning or raising
-whatever that verb returns or raises.  If the @code{$bf_@var{func}()} does not
-exist or cannot be executed and the programmer is not a wizard, then the server
-immediately raises @code{E_PERM}, @emph{without} actually calling the function.
-Otherwise (if the caller is @code{#0}, or if
-@code{$server_options.protect_@var{func}} either doesn't exist or has a false
-value, or if the programmer is a wizard and @code{$bf_@var{func}()} does not
-exist), then the built-in function is called normally.
+Whenever verb code attempts to read (on any object) the value of a built-in 
+property that is protected in this way, the server raises @code{E_PERM} if the
+programmer is not a wizard.
+
+@subsubheading Protected Built-in Functions
+A built-in function @code{@var{func}()} is deemed @emph{protected} if
+@code{$server_options.protect_@var{func}} exists and has a true value.
+If, for a given protected built-in function, a corresponding verb
+@code{$bf_@var{func}()} exists and its @samp{x} bit is set, then that built-in 
+function is also considered @emph{overridden}, meaning that any call to 
+@code{@var{func}()} from any object other than @code{#0} will be treated
+as a call to @code{$bf_@var{func}()} with the same arguments,
+returning or raising whatever that verb returns or raises.
+
+A call to a protected built-in function that is not overridden proceeds normally
+as long as either the caller is @code{#0} or has wizard permissions;
+otherwise the server raises @code{E_PERM}.
+
+Note that you must call @code{load_server_options()} in order to ensure that
+changes made in @code{$server_options} take effect.
 
 @node Creating and Recycling, Object Movement, Restricting Built-ins, Assumptions
 @comment  node-name,  next,  previous,  up
@@ -5705,6 +5871,238 @@ ambiguously referring to specific verbs in various built-in functions.  For
 more details, see the discussion given just following the description of the
 @code{verbs()} function.
 
+@node Configuration, , Assumptions, Server
+@comment  node-name,  next,  previous,  up
+@section Server Configuration
+
+This section discusses the options for compiling and running the server that
+can affect the database and how the code within it runs.
+
+@menu
+* Compile Options::     Options for Compiling the Server
+* Run Options::         Options for Running the Server
+* Emergency Mode::      Emergency Wizard Mode
+@end menu
+
+@node Compile Options, Run Options, , Configuration
+@comment  node-name,  next,  previous,  up
+@subsection Server Compilation Options
+
+The following option values are specified (via @code{#define}) in the file @samp{options.h} in the server sources.  Except for those cases where property values on @code{$server_options} take precedence, these settings cannot be changed at runtime.  
+
+This list is not intended to be exhaustive.
+
+
+@subsubheading Network Options
+@table @code
+@item NETWORK_PROTOCOL
+This specifies the underlying protocol for the server to use for all connections and will be one of the following:
+
+@table @code
+@item NP_TCP
+The server uses TCP/IP protocols.
+@item NP_LOCAL
+The server uses local interprocess communication mechanisms (currently either BSD UNIX-domain sockets or SYSV named pipes).
+@item NP_SINGLE
+The server accepts only a single ``connection'' via the standard input and output streams of the server itself.
+Attempts to have multiple simultaneous listening points (via @code{listen()} will likewise fail.
+@end table
+@item DEFAULT_PORT
+(for @code{NP_TCP}) the TCP port number on which the server listens 
+when no @var{port-number} argument is given on the command line.
+@item DEFAULT_CONNECT_FILE
+(for @code{NP_LOCAL}) the local filename through which the server will listen for connections 
+when no @var{connect-file-name} is given on the command line.
+@item OUTBOUND_NETWORK
+The server will include support for @code{open_network_connection()} if this constant is defined.
+The @code{NETWORK_PROTOCOL} must be @code{NP_TCP}.
+@item MAX_QUEUED_OUTPUT
+The maximum number of output characters the server is
+willing to buffer for any given network connection before
+discarding old output to make way for new.  
+@item MAX_QUEUED_INPUT
+The maximum number of input characters the server is
+willing to buffer from any given network connection before
+it stops reading from the connection at all.
+@end table
+
+@subsubheading Other Options
+@table @code
+@item IGNORE_PROP_PROTECTED
+Disables protection of builtin properties via @code{$server_options.protect_@var{property}} when set.
+@xref{Restricting Built-ins,,Protected Properties}.
+@item OUT_OF_BAND_PREFIX
+Specifies the out-of-band prefix.  If this is defined as a non-empty string, then any lines of
+input from any player that begin with that prefix will not be consumed by reading tasks
+and will not undergo normal command parsing.
+@xref{Out-of-band Processing,OOB,Out-of-band Processing}.
+@end table
+
+@noindent
+The following are discussed in @ref{Controlling Tasks,,Controlling the Execution of Tasks}.
+
+@table @code
+@item DEFAULT_MAX_STACK_DEPTH
+Default value for @code{$server_options.max_stack_depth}.
+@item DEFAULT_FG_TICKS
+The number of ticks allotted to foreground tasks.
+Default value for @code{$server_options.fg_ticks}.
+@item DEFAULT_BG_TICKS
+The number of ticks allotted to background tasks.
+Default value for @code{$server_options.bg_ticks}.
+@item DEFAULT_FG_SECONDS
+The number of seconds allotted to foreground tasks.
+Default value for @code{$server_options.fg_seconds}.
+@item DEFAULT_BG_SECONDS
+The number of seconds allotted to background tasks.
+Default value for @code{$server_options.bg_seconds}.
+@item DEFAULT_CONNECT_TIMEOUT
+Default value for @code{$server_options.connect_timeout}.
+@end table
+
+@node Run Options, Emergency Mode, Compile Options, Configuration
+@comment  node-name,  next,  previous,  up
+@subsection Running the Server
+
+@noindent
+The server command line has the following general form:
+
+@example
+moo @var{initial-arguments} @var{db-file-name} @var{dump-db-file-name} @var{network-arguments}
+@end example
+
+@noindent
+The arguments must occur in this order, e.g., a log file name (@code{-l}) must come before @var{db-file-name} and @var{dump-db-file-name} while any port number must come afterwards.
+
+@subsubheading Initial Arguments
+@table @code
+@item -l @var{log-file-name}
+(Optional)
+This specifies a file name for the server log output.  
+If no log file name is specified, log output is directed to @code{stderr}.
+
+@item -e
+(Optional) 
+This specifies that, once the database is loaded, 
+Emergency Wizard Mode will be entered 
+before starting any tasks 
+or doing the initial listen to accept connections.
+@end table
+
+@subsubheading Database Arguments
+@table @code
+@item @var{db-file-name}
+(Required)
+This should be an existing database file in the appropriate format, whether this be a checkpoint or dump file from a prior run of the server, or one of the many distributed database files in existence (e.g., the @samp{Minimal.db} file provided with the server source distribution).
+
+@item @var{dump-db-file-name}
+(Required)
+This should indicate where to write checkpoint and final dump files.  Note that the server does not immediately verify this path, i.e., there is no checking at startup that the file in question is actually writable; in fact, that the directory exists and is writable at the time the dump or checkpoint is attempted is all that really matters.
+@end table
+
+@subsubheading Network Arguments
+
+The particular set of network arguments available depends on which @code{NETWORK_PROTOCOL} the server was compiled with.
+For a server compiled for single-user mode (@code{NP_SINGLE}), there are no additional arguments.
+For a server compiled for local interprocess communication (@code{NP_LOCAL}), there is just
+
+@table @code
+@item @var{connect-file-name}
+(Optional)
+This specifies the pathname for the (UNIX domain) socket or named-pipe that will be used for connecting to the server.
+If no connect file name is specfied, the compiled-in value of @code{DEFAULT_CONNECT_FILE} is used.
+@end table
+
+@noindent
+For a server compiled for general TCP/IP connections (@code{NP_TCP}), we have
+
+@table @code
+@item @var{port-number}
+(Optional)
+This specifies an initial port at which to listen for connections once the server successfully starts.
+If no port number is specfied, the compiled-in value of @code{DEFAULT_PORT} is used.
+@end table
+
+@node Emergency Mode, , Run Options, Configuration
+@comment  node-name,  next,  previous,  up
+@subsubsection Emergency Wizard Mode
+
+This is a mode that allows you to enter commands on standard input to examine
+objects or evaluate arbitrary code with wizard permissions in order to, e.g.,
+blank out a forgotten wizard password or repair a database having a broken
+@code{$do_login_command} verb that otherwise would not allow anyone to connect.
+
+When you start the server and supply the @code{-e} command line option, 
+the database will load and you will then see a prompt indicating the identity of 
+the wizard whose permissions you are using and the current state of the debug flag, 
+e.g., one of
+
+@example
+MOO (#2):
+MOO (#2)[!d]:
+@end example
+
+@noindent
+the latter version of the prompt indicating that the debug flag is unset, 
+and thus that errors will be returned rather than raised, 
+as when you unset the @code{d} flag on a verb.
+
+@need 1000
+@noindent
+The following commands are available in Emergency Mode:
+
+@table @code
+@item ;@var{expression}
+@item ;;@var{statements}
+Evaluate @var{expression} or @var{statements}, print the expression result or the statement return value.
+
+Note that @var{expression} or @var{statement} can be omitted, 
+in which case you will be prompted for multiple lines of input,
+as for the @code{.program} command.  Type a period on a line by itself to finish.
+
+Also note that no background code, whether resulting from @code{fork} statements 
+or @code{suspend()} calls, will run until after the Emergency Mode is exited.
+
+@item program @var{object}:@var{verb}
+Set the code of an existing verb.
+
+@item list @var{object}:@var{verb}
+List the code of an existing verb.
+
+@item disassemble @var{object}:@var{verb}
+List the internal form of an existing verb.
+
+@item debug
+Toggle the debug flag.
+
+@item wizard #@var{objectid}
+Execute future commands as wizard @code{#@var{objectid}}, 
+which must be an existing player object with @samp{.wizard==1}.
+
+@item continue              
+Exit the emergency mode, continuing with normal start-up.  
+That is, the server will perform the initial listen and start accepting connections.
+
+@item quit
+Exit the emergency mode, save the database and shut down the server.
+
+@item abort
+Exit the emergency mode, and shut down the server @emph{without} saving the database.
+This is useful for if you make a mistake
+
+@item help
+Print the list of commands.
+@end table
+
+Note that output from wizard mode commands appears on the server's standard
+output stream (@code{stdout}) and thus can be redirected independently of 
+the log messages if those are being written to the standard error stream 
+(@code{stderr}, i.e., if @code{-l} has not been specified on the command line).
+
+Also note that unless the server has been compiled to use the @code{NP_SINGLE}
+networking variant, Emergency Wizard Mode is the @emph{only} use of the
+server's standard input and output streams.
+
 @ifset INDEX
 @node Function Index,  , Server, Top
 @comment  node-name,  next,  previous,  up
@@ -5723,9 +6121,12 @@ more details, see the discussion given just following the description of the
 
 @bye
 
-@c $Id: ProgrammersManual.texinfo,v 1.1.1.2 2004-05-31 07:04:26 wrog Exp $
+@c $Id: ProgrammersManual.texinfo,v 1.2 2004-06-02 08:04:43 wrog Exp $
 
 @c $Log: not supported by cvs2svn $
+@c Revision 1.1.1.2  2004/05/31 07:04:26  wrog
+@c eostrom last version
+@c
 @c Revision 1.34  1998/04/22 18:47:33  eostrom
 @c Made description of protected functions more accurate.  Still confusing.
 @c
