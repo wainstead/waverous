@@ -108,8 +108,16 @@ doinsert(Var list, Var value, int pos)
 {
     Var new;
     int i;
+    int size = list.v.list[0].v.num + 1;
 
-    new = new_list(list.v.list[0].v.num + 1);
+    if (var_refcount(list) == 1 && pos == size) {
+	list.v.list = (Var *) myrealloc(list.v.list, (size + 1) * sizeof(Var), M_LIST);
+	list.v.list[0].v.num = size;
+	list.v.list[pos] = value;
+	return list;
+    }
+
+    new = new_list(size);
     for (i = 1; i < pos; i++)
 	new.v.list[i] = var_ref(list.v.list[i]);
     new.v.list[pos] = value;
@@ -1127,9 +1135,12 @@ register_list(void)
 }
 
 
-char rcsid_list[] = "$Id: list.c,v 1.3 1997-03-03 06:20:04 bjj Exp $";
+char rcsid_list[] = "$Id: list.c,v 1.3.2.1 1997-03-21 15:22:56 bjj Exp $";
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.3  1997/03/03 06:20:04  bjj
+ * new_list(0) now returns the same empty list to every caller
+ *
  * Revision 1.2  1997/03/03 04:18:46  nop
  * GNU Indent normalization
  *
