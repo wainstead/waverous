@@ -115,10 +115,8 @@ become_integer(Var in, int *ret, int called_from_tonum)
 	    return E_FLOAT;
 	*ret = (int) *in.v.fnum;
 	break;
-    case TYPE_LIST:
-	return E_TYPE;
     default:
-	errlog("BECOME_INTEGER: Impossible var type: %d\n", (int) in.type);
+	return E_TYPE;
     }
     return E_NONE;
 }
@@ -143,10 +141,8 @@ become_float(Var in, double *ret)
     case TYPE_FLOAT:
 	*ret = *in.v.fnum;
 	break;
-    case TYPE_LIST:
-	return E_TYPE;
     default:
-	errlog("BECOME_FLOAT: Impossible var type: %d\n", (int) in.type);
+	return E_TYPE;
     }
     return E_NONE;
 }
@@ -707,10 +703,13 @@ register_numbers(void)
     register_function("trunc", 1, 1, bf_trunc, TYPE_FLOAT);
 }
 
-char rcsid_numbers[] = "$Id: numbers.c,v 1.4 1998-12-14 13:18:37 nop Exp $";
+char rcsid_numbers[] = "$Id: numbers.c,v 1.4.2.1 2002-08-29 06:03:40 bjj Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  1998/12/14 13:18:37  nop
+ * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
+ *
  * Revision 1.3  1997/03/08 06:25:42  nop
  * 1.8.0p6 merge by hand.
  *
