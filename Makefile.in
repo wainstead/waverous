@@ -87,7 +87,9 @@ restart:
 	touch restart
 
 configure: configure.in
-	autoconf
+	# autoconf
+	@echo "Not running autoconf; you must do this by hand."
+	touch configure
 
 config.status: configure
 	env CC= YACC= ./configure --no-create
@@ -142,6 +144,9 @@ depend: ${ALL_CSRCS}
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.1.1.1  1997/03/03 03:45:05  nop
+# LambdaMOO 1.8.0p5
+#
 # Revision 2.10  1996/04/19  01:28:40  pavel
 # Ran a new `make depend'.  Release 1.8.0p4.
 #
