@@ -30,7 +30,8 @@ typedef struct {
 	BI_RETURN,		/* Normal function return */
 	BI_RAISE,		/* Raising an error */
 	BI_CALL,		/* Making a nested verb call */
-	BI_SUSPEND		/* Suspending the current task */
+	BI_SUSPEND,		/* Suspending the current task */
+	BI_KILL			/* Kill the current task */
     } kind;
     union {
 	Var ret;
@@ -52,6 +53,7 @@ typedef struct {
 
 void register_bi_functions();
 
+package make_kill_pack();
 package make_error_pack(enum error err);
 package make_raise_pack(enum error err, const char *msg, Var value);
 package make_var_pack(Var v);
@@ -93,6 +95,9 @@ extern void load_server_options(void);
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  1998/12/14 13:17:54  nop
+ * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
+ *
  * Revision 1.3  1997/03/03 05:03:51  nop
  * steak2: move protectedness into builtin struct, load_server_options()
  * now required for $server_options updates.
