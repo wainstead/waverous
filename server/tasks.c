@@ -776,15 +776,14 @@ enqueue_input_task(tqueue * tq, const char *input, int at_front, int binary)
 
     t->t.input.next_itail = 0;
     if (at_front && tq->first_input) {	/* if nothing there, front == back */
-	t->next = tq->first_input;
-	tq->first_input = t;
-
 	if ((tq->first_input->kind == TASK_OOB) != (t->kind == TASK_OOB)) {
 	    t->t.input.next_itail = tq->first_itail;
 	    tq->first_itail = t;
 	    if (tq->last_itail == &(tq->first_itail))
 		tq->last_itail = &(t->t.input.next_itail);
 	}
+	t->next = tq->first_input;
+	tq->first_input = t;
     }
     else {
 	if (tq->first_input && (((*(tq->last_itail))->kind == TASK_OOB)
@@ -2097,10 +2096,19 @@ register_tasks(void)
     register_function("flush_input", 1, 2, bf_flush_input, TYPE_OBJ, TYPE_ANY);
 }
 
-char rcsid_tasks[] = "$Id: tasks.c,v 1.10.2.4 2003-06-11 10:57:27 wrog Exp $";
+char rcsid_tasks[] = "$Id: tasks.c,v 1.10.2.5 2004-05-20 19:40:32 wrog Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.10.2.4  2003/06/11 10:57:27  wrog
+ * fixed  non-blocking read() to only grab inband lines
+ * fixed "hold-input" to not hold up out-of-band lines
+ * fixed out-of-band line handling to not mess with binary input lines
+ * implemented quoting with OUT_OF_BAND_QUOTE_PREFIX
+ * TASK_INPUT differentiates into TASK_INBAND/OOB/QUOTED/BINARY
+ * input queue is now doubly threaded so that one can dequeue first available (non-)TASK_OOB even if it's not at the front
+ * new connection option "disable-oob"
+ *
  * Revision 1.10.2.3  2003/06/07 14:34:14  wrog
  * removed dequeue_any_task()
  *
