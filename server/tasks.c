@@ -319,9 +319,12 @@ free_task(task * t, int strong)
 	free_str(t->t.input.string);
 	break;
     case TASK_FORKED:
-	if (strong)
+	if (strong) {
 	    free_rt_env(t->t.forked.rt_env,
 			t->t.forked.program->num_var_names);
+	    free_str(t->t.forked.a.verb);
+	    free_str(t->t.forked.a.verbname);
+	}
 	free_program(t->t.forked.program);
 	break;
     case TASK_SUSPENDED:
@@ -1934,9 +1937,12 @@ register_tasks(void)
     register_function("flush_input", 1, 2, bf_flush_input, TYPE_OBJ, TYPE_ANY);
 }
 
-char rcsid_tasks[] = "$Id: tasks.c,v 1.3 1997-03-08 06:25:43 nop Exp $";
+char rcsid_tasks[] = "$Id: tasks.c,v 1.3.2.1 1997-05-21 03:41:34 bjj Exp $";
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.3  1997/03/08 06:25:43  nop
+ * 1.8.0p6 merge by hand.
+ *
  * Revision 1.2  1997/03/03 04:19:31  nop
  * GNU Indent normalization
  *
