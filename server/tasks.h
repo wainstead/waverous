@@ -35,7 +35,7 @@ extern Var tasks_connection_options(task_queue, Var);
 extern int tasks_set_connection_option(task_queue, const char *,
 				       Var);
 
-extern void new_input_task(task_queue, const char *);
+extern void new_input_task(task_queue, const char *, int);
 extern void task_suspend_input(task_queue);
 extern enum error enqueue_forked_task2(activation a, int f_index,
 			       unsigned after_seconds, int vid);
@@ -111,6 +111,12 @@ extern db_verb_handle find_verb_for_programming(Objid player,
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2003/06/12 18:16:57  bjj
+ * Suspend input on connection until :do_login_command() can run.
+ *
+ * Revision 1.3.10.1  2003/06/11 10:40:17  wrog
+ * added binary argument to new_input_task()
+ *
  * Revision 1.3  1998/12/14 13:19:08  nop
  * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
  *
