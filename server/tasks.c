@@ -112,14 +112,15 @@ typedef struct tqueue {
     task *first_bg, **last_bg;
     int usage;			/* a kind of inverted priority */
     int num_bg_tasks;		/* in either here or waiting_tasks */
-    int hold_input;		/* make input tasks wait for read() */
     char *output_prefix, *output_suffix;
     const char *flush_cmd;
     Stream *program_stream;
     Objid program_object;
     const char *program_verb;
 
-    char reading;		/* boolean */
+    /* booleans */
+    char hold_input;		/* input tasks must wait for read() */
+    char reading;		/* some task is blocked on read() */
     vm reading_vm;
 } tqueue;
 
@@ -633,71 +634,46 @@ free_task_queue(task_queue q)
 	ensure_usage(tq);
 }
 
+#define TASK_CO_TABLE(DEFINE, tq, value, _)				\
+    DEFINE(flush-command, _, TYPE_STR, str,				\
+	   tq->flush_cmd ? str_ref(tq->flush_cmd) : str_dup(""),	\
+	   {								\
+	       if (tq->flush_cmd)					\
+		   free_str(tq->flush_cmd);				\
+	       if (value.type == TYPE_STR && value.v.str[0] != '\0')	\
+		   tq->flush_cmd = str_ref(value.v.str);		\
+	       else							\
+		   tq->flush_cmd = 0;					\
+	   })								\
+									\
+    DEFINE(hold-input, _, TYPE_INT, num,				\
+	   tq->hold_input,						\
+	   {								\
+	       tq->hold_input = is_true(value);				\
+	       /* Anything to be done? */				\
+	       if (!tq->hold_input && tq->first_input)			\
+		   ensure_usage(tq);					\
+	   })								\
+
 int
 tasks_set_connection_option(task_queue q, const char *option, Var value)
 {
-    tqueue *tq = q.ptr;
-
-    if (!mystrcasecmp(option, "flush-command")) {
-	if (tq->flush_cmd)
-	    free_str(tq->flush_cmd);
-	if (value.type == TYPE_STR && value.v.str[0] != '\0')
-	    tq->flush_cmd = str_ref(value.v.str);
-	else
-	    tq->flush_cmd = 0;
-
-	return 1;
-    }
-    if (!mystrcasecmp(option, "hold-input")) {
-	tq->hold_input = is_true(value);
-	if (!tq->hold_input && tq->first_input)		/* Anything to be done? */
-	    ensure_usage(tq);
-	return 1;
-    }
-    return 0;
+    CONNECTION_OPTION_SET(TASK_CO_TABLE, (tqueue *)q.ptr, option, value);
 }
 
 int
 tasks_connection_option(task_queue q, const char *option, Var * value)
 {
-    tqueue *tq = q.ptr;
-
-    if (!mystrcasecmp(option, "flush-command")) {
-	value->type = TYPE_STR;
-	value->v.str = (tq->flush_cmd ? str_ref(tq->flush_cmd) : str_dup(""));
-	return 1;
-    }
-    if (!mystrcasecmp(option, "hold-input")) {
-	value->type = TYPE_INT;
-	value->v.num = tq->hold_input;
-	return 1;
-    }
-    return 0;
+    CONNECTION_OPTION_GET(TASK_CO_TABLE, (tqueue *)q.ptr, option, value);
 }
 
 Var
 tasks_connection_options(task_queue q, Var list)
 {
-    tqueue *tq = q.ptr;
-    Var pair;
-
-    pair = new_list(2);
-    pair.v.list[1].type = TYPE_STR;
-    pair.v.list[1].v.str = str_dup("flush-command");
-    pair.v.list[2].type = TYPE_STR;
-    pair.v.list[2].v.str = (tq->flush_cmd ? str_ref(tq->flush_cmd)
-			    : str_dup(""));
-    list = listappend(list, pair);
-
-    pair = new_list(2);
-    pair.v.list[1].type = TYPE_STR;
-    pair.v.list[1].v.str = str_dup("hold-input");
-    pair.v.list[2].type = TYPE_INT;
-    pair.v.list[2].v.num = tq->hold_input;
-    list = listappend(list, pair);
-
-    return list;
+    CONNECTION_OPTION_LIST(TASK_CO_TABLE, (tqueue *)q.ptr, list);
 }
+
+#undef TASK_CO_TABLE
 
 static void
 enqueue_input_task(tqueue * tq, const char *input, int at_front)
@@ -2012,10 +1988,15 @@ register_tasks(void)
     register_function("flush_input", 1, 2, bf_flush_input, TYPE_OBJ, TYPE_ANY);
 }
 
-char rcsid_tasks[] = "$Id: tasks.c,v 1.10.2.1 2003-06-04 21:28:59 wrog Exp $";
+char rcsid_tasks[] = "$Id: tasks.c,v 1.10.2.2 2003-06-07 12:59:04 wrog Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.10.2.1  2003/06/04 21:28:59  wrog
+ * removed useless arguments from resume_from_previous_vm(), do_forked_task();
+ * replaced current_task_kind with is_fg argument for do_task();
+ * made enum task_kind internal to tasks.c
+ *
  * Revision 1.10  2002/09/15 23:21:01  xplat
  * GNU indent normalization.
  *

@@ -23,8 +23,30 @@
 #  include "net_multi.c"
 #endif
 
+Var
+network_connection_options(network_handle nh, Var list)
+{
+    CONNECTION_OPTION_LIST(NETWORK_CO_TABLE, nh, list);
+}
+
+int
+network_connection_option(network_handle nh, const char *option, Var * value)
+{
+    CONNECTION_OPTION_GET(NETWORK_CO_TABLE, nh, option, value);
+}
+
+int
+network_set_connection_option(network_handle nh, const char *option, Var value)
+{
+    CONNECTION_OPTION_SET(NETWORK_CO_TABLE, nh, option, value);
+}
+
+
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  1998/12/14 13:18:35  nop
+ * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
+ *
  * Revision 1.1.1.1  1997/03/03 03:45:00  nop
  * LambdaMOO 1.8.0p5
  *
