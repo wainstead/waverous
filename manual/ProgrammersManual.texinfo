@@ -3058,7 +3058,7 @@ is @code{-@var{x}}; otherwise, the result is @var{x}.  The number @var{x} can
 be either integer or floating-point; the result is of the same kind.
 @end deftypefun
 
-@deftypefun str floatstr(float @var{x}, int @var{precision} [, @var{scientific}])
+@deftypefun str floatstr (float @var{x}, int @var{precision} [, @var{scientific}])
 Converts @var{x} into a string with more control than provided by either
 @code{tostr()} or @code{toliteral()}.  @var{Precision} is the number of digits
 to appear to the right of the decimal point, capped at 4 more than the maximum
@@ -3728,10 +3728,10 @@ then @code{E_INVARG} is raised.  If the programmer is neither a wizard or the
 owner of @var{object}, or if @var{new-parent} is not fertile (i.e., its
 @samp{f} bit is not set) and the programmer is neither the owner of
 @var{new-parent} nor a wizard, then @code{E_PERM} is raised.  If
-@var{new-parent} is equal to @code{object} or one of its current ancestors,
-@code{E_RECMOVE} is raised.  If @var{object} or one of its descendants
-defines a property with the same name as one defined either on @var{new-parent}
-or on one of its ancestors, then @code{E_INVARG} is raised.
+@var{new-parent} is equal to @var{object} or one of its current descendants,
+@code{E_RECMOVE} is raised.  If @var{object} or one of its descendants defines
+a property with the same name as one defined either on @var{new-parent} or on
+one of its ancestors, then @code{E_INVARG} is raised.
 
 Changing an object's parent can have the effect of removing some properties
 from and adding some other properties to that object and all of its descendants
@@ -4215,14 +4215,13 @@ the current task, resuming it when there is input available to be read.  If
 calling task; if there is no input currently available for input, @code{read()}
 simply returns 0 immediately.
 
-If @var{player} is provided, then the programmer must either be a wizard or the
-owner of @code{player}; if @code{player} is not provided, then @code{read()}
+If @var{conn} is provided, then the programmer must either be a wizard or the
+owner of @var{conn}; if @var{conn} is not provided, then @code{read()}
 may only be called by a wizard and only in the task that was last spawned by a
 command from the connection in question.  Otherwise, @code{E_PERM} is raised.
-If the given @code{player} is not currently connected and has no pending lines
-of input, or if the connection is closed while a task is waiting for input but
-before any lines of input are received, then @code{read()} raises
-@code{E_INVARG}.
+If @var{conn} is not currently connected and has no pending lines of input, or
+if the connection is closed while a task is waiting for input but before any
+lines of input are received, then @code{read()} raises @code{E_INVARG}.
 
 The restriction on the use of @code{read()} without any arguments preserves the
 following simple invariant: if input is being read from a player, it is for the
@@ -5649,15 +5648,16 @@ then @code{E_PERM} is raised if the programmer is not a wizard.
 Whenever verb code calls a built-in function @code{@var{func}()} and the caller
 is not the object @code{#0}, the server checks to see if the property
 @code{$server_options.protect_@var{func}} exists and has a true value.  If so,
-then the server next checks to see if the verb @code{$bf_@var{func}()} exists;
-if that verb exists, then the server calls it @emph{instead} of the built-in
-function, returning or raising whatever that verb returns or raises.  If the
-@code{$bf_@var{func}()} does not exist and the programmer is not a wizard, then
-the server immediately raises @code{E_PERM}, @emph{without} actually calling
-the function.  Otherwise (if the caller is @code{#0}, if
+then the server next checks to see if the verb @code{$bf_@var{func}()} exists
+and its @samp{x} bit is set; if that verb exists and can be executed, then the
+server calls it @emph{instead} of the built-in function, returning or raising
+whatever that verb returns or raises.  If the @code{$bf_@var{func}()} does not
+exist or cannot be executed and the programmer is not a wizard, then the server
+immediately raises @code{E_PERM}, @emph{without} actually calling the function.
+Otherwise (if the caller is @code{#0}, or if
 @code{$server_options.protect_@var{func}} either doesn't exist or has a false
-value, or if @code{$bf_@var{func}()} exists but the programmer is a wizard),
-then the built-in function is called normally.
+value, or if the programmer is a wizard and @code{$bf_@var{func}()} does not
+exist), then the built-in function is called normally.
 
 @node Creating and Recycling, Object Movement, Restricting Built-ins, Assumptions
 @comment  node-name,  next,  previous,  up
@@ -5723,9 +5723,15 @@ more details, see the discussion given just following the description of the
 
 @bye
 
-@c $Id: ProgrammersManual.texinfo,v 1.1.1.1 2004-05-31 05:39:46 wrog Exp $
+@c $Id: ProgrammersManual.texinfo,v 1.1.1.2 2004-05-31 07:04:26 wrog Exp $
 
 @c $Log: not supported by cvs2svn $
+@c Revision 1.34  1998/04/22 18:47:33  eostrom
+@c Made description of protected functions more accurate.  Still confusing.
+@c
+@c Revision 1.33  1998/04/22 18:25:51  eostrom
+@c Fixed small documentation bugs in floatstr(), chparent(), read().
+@c
 @c Revision 1.32  1997/03/04 22:17:00  eostrom
 @c Documented that resume(<a task>, <an error>) raises rather than
 @c returns the error in the suspended task.
