@@ -179,7 +179,7 @@
  *			   accepted by a given listener L.
  */
 
-#define MAX_QUEUED_OUTPUT	16384
+#define MAX_QUEUED_OUTPUT	65536
 #define MAX_QUEUED_INPUT	MAX_QUEUED_OUTPUT
 #define DEFAULT_CONNECT_TIMEOUT	300
 
@@ -319,6 +319,9 @@
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  1998/12/14 13:18:41  nop
+ * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
+ *
  * Revision 1.3.2.1  1997/09/09 07:01:17  bjj
  * Change bytecode generation so that x=f(x) calls f() without holding a ref
  * to the value of x in the variable slot.  See the options.h comment for
