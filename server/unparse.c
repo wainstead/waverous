@@ -124,44 +124,46 @@ struct prec {
 
 static struct prec prec_table[] =
 {
-    {EXPR_ASGN, 1},
+    {EXPR_HOT, 1},
 
-    {EXPR_COND, 2},		/* the unparser for this depends on only ASGN having
+    {EXPR_ASGN, 2},
+
+    {EXPR_COND, 3},		/* the unparser for this depends on only ASGN having
 				   lower precedence.  Fix that if this changes. */
-    {EXPR_OR, 3},
-    {EXPR_AND, 3},
+    {EXPR_OR, 4},
+    {EXPR_AND, 4},
 
-    {EXPR_EQ, 4},
-    {EXPR_NE, 4},
-    {EXPR_LT, 4},
-    {EXPR_LE, 4},
-    {EXPR_GT, 4},
-    {EXPR_GE, 4},
-    {EXPR_IN, 4},
+    {EXPR_EQ, 5},
+    {EXPR_NE, 5},
+    {EXPR_LT, 5},
+    {EXPR_LE, 5},
+    {EXPR_GT, 5},
+    {EXPR_GE, 5},
+    {EXPR_IN, 5},
 
-    {EXPR_PLUS, 5},
-    {EXPR_MINUS, 5},
+    {EXPR_PLUS, 6},
+    {EXPR_MINUS, 6},
 
-    {EXPR_TIMES, 6},
-    {EXPR_DIVIDE, 6},
-    {EXPR_MOD, 6},
+    {EXPR_TIMES, 7},
+    {EXPR_DIVIDE, 7},
+    {EXPR_MOD, 7},
 
-    {EXPR_EXP, 7},
+    {EXPR_EXP, 8},
 
-    {EXPR_NEGATE, 8},
-    {EXPR_NOT, 8},
+    {EXPR_NEGATE, 9},
+    {EXPR_NOT, 9},
 
-    {EXPR_PROP, 9},
-    {EXPR_VERB, 9},
-    {EXPR_INDEX, 9},
-    {EXPR_RANGE, 9},
+    {EXPR_PROP, 10},
+    {EXPR_VERB, 10},
+    {EXPR_INDEX, 10},
+    {EXPR_RANGE, 10},
 
-    {EXPR_VAR, 10},
-    {EXPR_ID, 10},
-    {EXPR_LIST, 10},
-    {EXPR_CALL, 10},
-    {EXPR_LENGTH, 10},
-    {EXPR_CATCH, 10}
+    {EXPR_VAR, 11},
+    {EXPR_ID, 11},
+    {EXPR_LIST, 11},
+    {EXPR_CALL, 11},
+    {EXPR_LENGTH, 11},
+    {EXPR_CATCH, 11}
 };
 
 static int expr_prec[SizeOf_Expr_Kind];
@@ -652,6 +654,17 @@ unparse_expr(Stream * str, Expr * expr)
 	stream_add_string(str, "$");
 	break;
 
+    case EXPR_HOT:
+        if (expr->e.hot.pos == HOT_ASSIGN)
+            stream_add_string(str, ":-)= ");
+        else if (expr->e.hot.pos == HOT_DEFAULT)
+            stream_add_string(str, ":-) ");
+        else {
+            errlog("UNPARSE_EXPR: Unknown Hot_Pos: %d\n", expr->e.hot.pos);
+            stream_add_string(str, "(?!?!?!?!?)");
+        }
+        bracket_le(str, EXPR_HOT, expr->e.hot.expr);
+
     default:
 	errlog("UNPARSE_EXPR: Unknown Expr_Kind: %d\n", expr->kind);
 	stream_add_string(str, "(?!?!?!?!?)");
@@ -700,7 +713,16 @@ void
 unparse_program(Program * p, Unparser_Receiver r, void *data,
 		int fully_parenthesize, int indent_lines, int f_index)
 {
-    Stmt *stmt = decompile_program(p, f_index);
+    unparse_program2(p, r, data, fully_parenthesize, indent_lines,
+                     f_index, -1);
+}
+
+void
+unparse_program2(Program * p, Unparser_Receiver r, void *data,
+		 int fully_parenthesize, int indent_lines, int f_index,
+		 int pc)
+{
+    Stmt *stmt = decompile_for_resume(p, f_index, pc);
 
     prog = p;
     receiver = r;
@@ -732,10 +754,13 @@ unparse_to_stderr(Program * p, int fully_parenthesize, int indent_lines,
     unparse_to_file(stderr, p, fully_parenthesize, indent_lines, f_index);
 }
 
-char rcsid_unparse[] = "$Id: unparse.c,v 1.3 1998-12-14 13:19:12 nop Exp $";
+char rcsid_unparse[] = "$Id: unparse.c,v 1.3.6.1 2002-09-12 05:57:40 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  1998/12/14 13:19:12  nop
+ * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
+ *
  * Revision 1.2  1997/03/03 04:19:34  nop
  * GNU Indent normalization
  *

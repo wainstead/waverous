@@ -21,6 +21,7 @@
 #include "config.h"
 #include "program.h"
 #include "version.h"
+#include "sym_table.h"
 
 typedef struct {
     void (*error) (void *, const char *);
@@ -28,13 +29,23 @@ typedef struct {
     int (*getch) (void *);
 } Parser_Client;
 
-extern Program *parse_program(DB_Version, Parser_Client, void *);
+typedef enum {
+    PMODE_COMPAT,
+    PMODE_VERB,
+    PMODE_FORK
+} Parser_Mode;
+
+extern Program *parse_program(DB_Version, Parser_Client, void *,
+			      Parser_Mode, Names **, int *);
 extern Program *parse_list_as_program(Var code, Var * errors);
 
 #endif
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  1998/12/14 13:18:44  nop
+ * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
+ *
  * Revision 1.2  1997/03/03 04:19:16  nop
  * GNU Indent normalization
  *

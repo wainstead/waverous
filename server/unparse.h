@@ -39,10 +39,18 @@ extern void unparse_to_stderr(Program *, int fully_parenthesize,
 extern const char *error_name(enum error);	/* E_NONE -> "E_NONE" */
 extern const char *unparse_error(enum error);	/* E_NONE -> "No error" */
 
+extern void unparse_program2(Program *, Unparser_Receiver, void *,
+			     int fully_parenthesize,
+			     int indent_lines, int f_index,
+			     int pc);
+
 #endif
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  1998/12/14 13:19:13  nop
+ * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
+ *
  * Revision 1.2  1997/03/03 04:19:35  nop
  * GNU Indent normalization
  *

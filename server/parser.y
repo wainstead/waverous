@@ -47,6 +47,7 @@
 static Stmt    	       *prog_start;
 static int		dollars_ok;
 static DB_Version	language_version;
+static Parser_Mode	parsing_mode;
 
 static void	error(const char *, const char *);
 static void	warning(const char *, const char *);
@@ -98,6 +99,7 @@ static void	check_loop_name(const char *, enum loop_exit_kind);
 
 %token	tTO tARROW
 
+%nonassoc tHOT
 %right	'='
 %nonassoc '?' '|'
 %left	tOR tAND
@@ -321,16 +323,19 @@ excepts:
 		    tmp->next = $4;
 		    $$ = $1;
 		}
+	;
 
 except:
 	  opt_id '(' codes ')' statements
 		{ $$ = alloc_except($1 ? find_id($1) : -1, $3, $5); }
+	;
 
 opt_id:
 	  /* NOTHING */
 		{ $$ = 0; }
 	| tID
 		{ $$ = $1; }
+	;
 
 expr:
 	  tINTEGER
@@ -580,23 +585,38 @@ expr:
 		    $$->e.catch.codes = $4;
 		    $$->e.catch.except = $5;
 		}
+	| tHOT expr
+		{
+		    $$ = alloc_expr(EXPR_HOT);
+		    $$->e.hot.expr = $2;
+		    $$->e.hot.pos = HOT_DEFAULT;
+		}
+	| tHOT '=' expr		%prec tHOT
+		{
+		    $$ = alloc_expr(EXPR_HOT);
+		    $$->e.hot.expr = $3;
+		    $$->e.hot.pos = HOT_ASSIGN;
+		}
 	;
 
 dollars_up:
 	  /* NOTHING */
 		{ dollars_ok++; }
+	;
 
 codes:
 	  tANY
 		{ $$ = 0; }
 	| ne_arglist
 		{ $$ = $1; }
+	;
 
 default:
 	  /* NOTHING */
 		{ $$ = 0; }
 	| tARROW expr
 		{ $$ = $2; }
+	;
 
 arglist:
 	  /* NOTHING */
@@ -681,7 +701,7 @@ scatter_item:
 
 %%
 
-static int		lineno, nerrors, must_rename_keywords;
+static int		lineno, nerrors, must_rename_keywords, parsing_activ;
 static Parser_Client	client;
 static void	       *client_data;
 static Names	       *local_names;
@@ -946,6 +966,19 @@ start_over:
       case '&':         return follow('&', tAND, '&');
       normal_dot:
       case '.':		return follow('.', tTO, '.');
+      case ':':         c = follow('-',0,':');
+      			if (c)
+      				return c;
+			c = follow(')',tHOT,0);
+			if (c)
+			{
+				if (parsing_activ)
+					return c;
+				yyerror("Saw :-) in normal code");
+				return 0;
+			}
+			lex_ungetc('-');
+			return ':';
       default:          return c;
     }
 }
@@ -1092,7 +1125,8 @@ check_loop_name(const char *name, enum loop_exit_kind kind)
 }
 
 Program *
-parse_program(DB_Version version, Parser_Client c, void *data)
+parse_program(DB_Version version, Parser_Client c, void *data,
+              Parser_Mode mode, Names **original_names, int *pc)
 {
     extern int	yyparse();
     Program    *prog;
@@ -1105,10 +1139,12 @@ parse_program(DB_Version version, Parser_Client c, void *data)
     lineno = 1;
     client = c;
     client_data = data;
-    local_names = new_builtin_names(version);
+    local_names = new_builtin_names(version, mode != PMODE_COMPAT);
     dollars_ok = 0;
     loop_stack = 0;
     language_version = version;
+    parsing_activ = (pc != 0);
+    parsing_mode = mode;
     
     begin_code_allocation();
     yyparse();
@@ -1127,7 +1163,10 @@ parse_program(DB_Version version, Parser_Client c, void *data)
     }
     
     if (nerrors == 0) {
-	if (must_rename_keywords) {
+        if (original_names)
+            *original_names = copy_names(local_names);
+
+	if (must_rename_keywords && (mode != PMODE_COMPAT)) {
 	    /* One or more new keywords were used as identifiers in this code,
 	     * possibly as local variable names (but maybe only as property or
 	     * verb names).  Such local variables must be renamed to avoid a
@@ -1136,7 +1175,7 @@ parse_program(DB_Version version, Parser_Client c, void *data)
 	     */
 	    unsigned i;
 
-	    for (i = first_user_slot(version); i < local_names->size; i++) {
+	    for (i = first_user_slot(version, 1); i < local_names->size; i++) {
 		const char	*name = local_names->names[i];
 	    
 		if (find_keyword(name)) { /* Got one... */
@@ -1152,7 +1191,41 @@ parse_program(DB_Version version, Parser_Client c, void *data)
 	    }
 	}
 
-	prog = generate_code(prog_start, version);
+	if ((mode != PMODE_COMPAT) && (version < DBV_Float)) {
+	    int bad_slot;
+	    const char *name;
+
+	    bad_slot = find_name(local_names, "FLOAT");
+	    if (bad_slot >= 0) {
+	        name = local_names->names[bad_slot];
+	        stream_add_string(token_stream, name);
+	        do {
+	            stream_add_char(token_stream, '_');
+	        } while (find_name(local_names,
+	                           stream_contents(token_stream)) >= 0);
+	        free_str(name);
+	        local_names->names[bad_slot] =
+	            str_dup(reset_stream(token_stream));
+	    }
+
+	    bad_slot = find_name(local_names, "INT");
+	    if (bad_slot >= 0) {
+	        name = local_names->names[bad_slot];
+	        stream_add_string(token_stream, name);
+	        do {
+	            stream_add_char(token_stream, '_');
+	        } while (find_name(local_names,
+	                           stream_contents(token_stream)) >= 0);
+	        free_str(name);
+	        local_names->names[bad_slot] =
+	            str_dup(reset_stream(token_stream));
+	    }
+
+	    local_names->names[SLOT_FLOAT] = str_dup("FLOAT");
+	    local_names->names[SLOT_INT] = str_dup("INT");
+	}
+
+	prog = generate_code(prog_start, (mode == PMODE_COMPAT) ? version : current_version, pc);
 	prog->num_var_names = local_names->size;
 	prog->var_names = local_names->names;
 
@@ -1216,16 +1289,19 @@ parse_list_as_program(Var code, Var *errors)
     state.cur_string = 1;
     state.cur_char = 0;
     state.errors = new_list(0);
-    program = parse_program(current_version, list_parser_client, &state);
+    program = parse_program(current_version, list_parser_client, &state, PMODE_VERB, 0, 0);
     *errors = state.errors;
 
     return program;
 }
 
-char rcsid_parser[] = "$Id: parser.y,v 1.2 1998-12-14 13:18:45 nop Exp $";
+char rcsid_parser[] = "$Id: parser.y,v 1.2.6.1 2002-09-12 05:57:40 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  1998/12/14 13:18:45  nop
+ * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
+ *
  * Revision 1.1.1.1  1997/03/03 03:45:02  nop
  * LambdaMOO 1.8.0p5
  *

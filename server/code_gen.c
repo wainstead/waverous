@@ -34,7 +34,8 @@
  ***/
 
 enum fixup_kind {
-    FIXUP_LITERAL, FIXUP_FORK, FIXUP_LABEL, FIXUP_VAR_REF, FIXUP_STACK
+    FIXUP_LITERAL, FIXUP_FORK, FIXUP_LABEL, FIXUP_VAR_REF, FIXUP_STACK, FIXUP_PC,
+    /* note--kinds after FIXUP_PC, inclusive, have no placeholder bytes */
 };
 
 struct fixup {
@@ -52,6 +53,7 @@ struct gstate {
     unsigned num_literals, max_literals;
     Var *literals;
     unsigned num_fork_vectors, max_fork_vectors;
+    int hot_pc;
     Bytecodes *fork_vectors;
 };
 typedef struct gstate GState;
@@ -110,6 +112,7 @@ init_gstate(GState * gstate)
     gstate->max_literals = gstate->max_fork_vectors = 0;
     gstate->fork_vectors = 0;
     gstate->literals = 0;
+    gstate->hot_pc = -1;
 }
 
 static void
@@ -186,10 +189,14 @@ emit_byte(Byte b, State * state)
     state->bytes[state->num_bytes++] = b;
 }
 
+static Fixup capture_label(State * state);
+
+#define emit_opcode(op, state)	emit_byte(op, state)
+
 static void
 emit_extended_byte(Byte b, State * state)
 {
-    emit_byte(OP_EXTENDED, state);
+    emit_opcode(OP_EXTENDED, state);
     emit_byte(b, state);
 }
 
@@ -213,7 +220,8 @@ add_known_fixup(Fixup f, State * state)
     f.pc = state->num_bytes;
     state->fixups[i = state->num_fixups++] = f;
 
-    emit_byte(0, state);	/* a placeholder for the eventual value */
+    if (f.kind < FIXUP_PC)
+    	emit_byte(0, state);	/* a placeholder for the eventual value */
 
     return i;
 }
@@ -409,6 +417,12 @@ add_stack_ref(unsigned index, State * state)
 }
 
 static void
+set_hot_pc(State * state)
+{
+    add_fixup(FIXUP_PC, 0, state);
+}
+
+static void
 push_stack(unsigned n, State * state)
 {
     state->cur_stack += n;
@@ -481,7 +495,7 @@ exit_loop(State * state)
 static void
 emit_call_verb_op(Opcode op, State * state)
 {
-    emit_byte(op, state);
+    emit_opcode(op, state);
 #ifdef BYTECODE_REDUCE_REF
     state->pushmap[state->num_bytes - 1] = OP_CALL_VERB;
 #endif /* BYTECODE_REDUCE_REF */
@@ -490,7 +504,7 @@ emit_call_verb_op(Opcode op, State * state)
 static void
 emit_ending_op(Opcode op, State * state)
 {
-    emit_byte(op, state);
+    emit_opcode(op, state);
 #ifdef BYTECODE_REDUCE_REF
     state->pushmap[state->num_bytes - 1] = OP_DONE;
 #endif /* BYTECODE_REDUCE_REF */
@@ -500,10 +514,10 @@ static void
 emit_var_op(Opcode op, unsigned slot, State * state)
 {
     if (slot >= NUM_READY_VARS) {
-	emit_byte(op + NUM_READY_VARS, state);
+	emit_opcode(op + NUM_READY_VARS, state);
 	add_var_ref(slot, state);
     } else {
-	emit_byte(op + slot, state);
+	emit_opcode(op + slot, state);
 #ifdef BYTECODE_REDUCE_REF
         state->pushmap[state->num_bytes - 1] = op;
 #endif /* BYTECODE_REDUCE_REF */
@@ -516,7 +530,7 @@ static void
 generate_arg_list(Arg_List * args, State * state)
 {
     if (!args) {
-	emit_byte(OP_MAKE_EMPTY_LIST, state);
+	emit_opcode(OP_MAKE_EMPTY_LIST, state);
 	push_stack(1, state);
     } else {
 	Opcode normal_op = OP_MAKE_SINGLETON_LIST, splice_op = OP_CHECK_LIST_FOR_SPLICE;
@@ -524,7 +538,7 @@ generate_arg_list(Arg_List * args, State * state)
 
 	for (; args; args = args->next) {
 	    generate_expr(args->expr, state);
-	    emit_byte(args->kind == ARG_NORMAL ? normal_op : splice_op, state);
+	    emit_opcode(args->kind == ARG_NORMAL ? normal_op : splice_op, state);
 	    pop_stack(pop, state);
 	    normal_op = OP_LIST_ADD_TAIL;
 	    splice_op = OP_LIST_APPEND;
@@ -552,7 +566,7 @@ push_lvalue(Expr * expr, int indexed_above, State * state)
 	generate_expr(expr->e.bin.rhs, state);
 	restore_stack_top(old, state);
 	if (indexed_above) {
-	    emit_byte(OP_PUSH_REF, state);
+	    emit_opcode(OP_PUSH_REF, state);
 	    push_stack(1, state);
 	}
 	break;
@@ -566,10 +580,15 @@ push_lvalue(Expr * expr, int indexed_above, State * state)
 	generate_expr(expr->e.bin.lhs, state);
 	generate_expr(expr->e.bin.rhs, state);
 	if (indexed_above) {
-	    emit_byte(OP_PUSH_GET_PROP, state);
+	    emit_opcode(OP_PUSH_GET_PROP, state);
 	    push_stack(1, state);
 	}
 	break;
+    case EXPR_HOT:
+        push_lvalue(expr->e.hot.expr, indexed_above, state);
+        if (expr->e.hot.pos == HOT_DEFAULT)
+            set_hot_pc(state);
+        break;
     default:
 	panic("Bad lvalue in PUSH_LVALUE()");
     }
@@ -581,7 +600,7 @@ generate_codes(Arg_List * codes, State * state)
     if (codes)
 	generate_arg_list(codes, state);
     else {
-	emit_byte(OPTIM_NUM_TO_OPCODE(0), state);
+	emit_opcode(OPTIM_NUM_TO_OPCODE(0), state);
 	push_stack(1, state);
     }
 }
@@ -596,9 +615,9 @@ generate_expr(Expr * expr, State * state)
 
 	    v = expr->e.var;
 	    if (v.type == TYPE_INT && IN_OPTIM_NUM_RANGE(v.v.num))
-		emit_byte(OPTIM_NUM_TO_OPCODE(v.v.num), state);
+		emit_opcode(OPTIM_NUM_TO_OPCODE(v.v.num), state);
 	    else {
-		emit_byte(OP_IMM, state);
+		emit_opcode(OP_IMM, state);
 		add_literal(v, state);
 	    }
 	    push_stack(1, state);
@@ -614,7 +633,7 @@ generate_expr(Expr * expr, State * state)
 	    int end_label;
 
 	    generate_expr(expr->e.bin.lhs, state);
-	    emit_byte(expr->kind == EXPR_AND ? OP_AND : OP_OR, state);
+	    emit_opcode(expr->kind == EXPR_AND ? OP_AND : OP_OR, state);
 	    end_label = add_label(state);
 	    pop_stack(1, state);
 	    generate_expr(expr->e.bin.rhs, state);
@@ -624,7 +643,7 @@ generate_expr(Expr * expr, State * state)
     case EXPR_NEGATE:
     case EXPR_NOT:
 	generate_expr(expr->e.expr, state);
-	emit_byte(expr->kind == EXPR_NOT ? OP_NOT : OP_UNARY_MINUS, state);
+	emit_opcode(expr->kind == EXPR_NOT ? OP_NOT : OP_UNARY_MINUS, state);
 	break;
     case EXPR_EQ:
     case EXPR_NE:
@@ -687,7 +706,7 @@ generate_expr(Expr * expr, State * state)
 	    default:
 		panic("Not a binary operator in GENERATE_EXPR()");
 	    }
-	    emit_byte(op, state);
+	    emit_opcode(op, state);
 	    pop_stack(1, state);
 	}
 	break;
@@ -705,7 +724,7 @@ generate_expr(Expr * expr, State * state)
 	    old = save_stack_top(state);
 	    generate_expr(expr->e.bin.rhs, state);
 	    restore_stack_top(old, state);
-	    emit_byte(OP_REF, state);
+	    emit_opcode(OP_REF, state);
 	    pop_stack(1, state);
 	}
 	break;
@@ -718,7 +737,7 @@ generate_expr(Expr * expr, State * state)
 	    generate_expr(expr->e.range.from, state);
 	    generate_expr(expr->e.range.to, state);
 	    restore_stack_top(old, state);
-	    emit_byte(OP_RANGE_REF, state);
+	    emit_opcode(OP_RANGE_REF, state);
 	    pop_stack(2, state);
 	}
 	break;
@@ -739,7 +758,7 @@ generate_expr(Expr * expr, State * state)
 	break;
     case EXPR_CALL:
 	generate_arg_list(expr->e.call.args, state);
-	emit_byte(OP_BI_FUNC_CALL, state);
+	emit_opcode(OP_BI_FUNC_CALL, state);
 	emit_byte(expr->e.call.func, state);
 	break;
     case EXPR_VERB:
@@ -754,11 +773,11 @@ generate_expr(Expr * expr, State * state)
 	    int else_label, end_label;
 
 	    generate_expr(expr->e.cond.condition, state);
-	    emit_byte(OP_IF_QUES, state);
+	    emit_opcode(OP_IF_QUES, state);
 	    else_label = add_label(state);
 	    pop_stack(1, state);
 	    generate_expr(expr->e.cond.consequent, state);
-	    emit_byte(OP_JUMP, state);
+	    emit_opcode(OP_JUMP, state);
 	    end_label = add_label(state);
 	    pop_stack(1, state);
 	    define_label(else_label, state);
@@ -804,7 +823,7 @@ generate_expr(Expr * expr, State * state)
 			define_label(sc->label, state);
 			generate_expr(sc->expr, state);
 			emit_var_op(OP_PUT, sc->id, state);
-			emit_byte(OP_POP, state);
+			emit_opcode(OP_POP, state);
 			pop_stack(1, state);
 		    }
 		define_label(done, state);
@@ -814,7 +833,7 @@ generate_expr(Expr * expr, State * state)
 		push_lvalue(e, 0, state);
 		generate_expr(expr->e.bin.rhs, state);
 		if (e->kind == EXPR_RANGE || e->kind == EXPR_INDEX)
-		    emit_byte(OP_PUT_TEMP, state);
+		    emit_opcode(OP_PUT_TEMP, state);
 		while (1) {
 		    switch (e->kind) {
 		    case EXPR_RANGE:
@@ -824,7 +843,7 @@ generate_expr(Expr * expr, State * state)
 			is_indexed = 1;
 			continue;
 		    case EXPR_INDEX:
-			emit_byte(OP_INDEXSET, state);
+			emit_opcode(OP_INDEXSET, state);
 			pop_stack(2, state);
 			e = e->e.bin.lhs;
 			is_indexed = 1;
@@ -833,17 +852,22 @@ generate_expr(Expr * expr, State * state)
 			emit_var_op(OP_PUT, e->e.id, state);
 			break;
 		    case EXPR_PROP:
-			emit_byte(OP_PUT_PROP, state);
+			emit_opcode(OP_PUT_PROP, state);
 			pop_stack(2, state);
 			break;
+		    case EXPR_HOT:
+		        if (e->e.hot.pos == HOT_ASSIGN)
+		            set_hot_pc(state);
+		        e = e->e.hot.expr;
+		    	continue;
 		    default:
 			panic("Bad lvalue in GENERATE_EXPR()");
 		    }
 		    break;
 		}
 		if (is_indexed) {
-		    emit_byte(OP_POP, state);
-		    emit_byte(OP_PUSH_TEMP, state);
+		    emit_opcode(OP_POP, state);
+		    emit_opcode(OP_PUSH_TEMP, state);
 		}
 	    }
 	}
@@ -870,17 +894,24 @@ generate_expr(Expr * expr, State * state)
 	     * the exception tuple pushed before entering the handler.
 	     */
 	    if (expr->e.catch.except) {
-		emit_byte(OP_POP, state);
+		emit_opcode(OP_POP, state);
 		pop_stack(1, state);
 		generate_expr(expr->e.catch.except, state);
 	    } else {
 		/* Select code from tuple */
-		emit_byte(OPTIM_NUM_TO_OPCODE(1), state);
-		emit_byte(OP_REF, state);
+		emit_opcode(OPTIM_NUM_TO_OPCODE(1), state);
+		emit_opcode(OP_REF, state);
 	    }
 	    define_label(end_label, state);
 	}
 	break;
+    case EXPR_HOT:
+        generate_expr(expr->e.hot.expr, state);
+    	if (expr->e.hot.pos == HOT_DEFAULT)
+    	    set_hot_pc(state);
+    	else
+    	    panic("Illegal hot position in GENERATE_EXPR()");
+    	break;
     default:
 	panic("Can't happen in GENERATE_EXPR()");
     }
@@ -903,11 +934,11 @@ generate_stmt(Stmt * stmt, State * state)
 		    int else_label;
 
 		    generate_expr(arms->condition, state);
-		    emit_byte(if_op, state);
+		    emit_opcode(if_op, state);
 		    else_label = add_label(state);
 		    pop_stack(1, state);
 		    generate_stmt(arms->stmt, state);
-		    emit_byte(OP_JUMP, state);
+		    emit_opcode(OP_JUMP, state);
 		    end_label = add_linked_label(end_label, state);
 		    define_label(else_label, state);
 		    if_op = OP_EIF;
@@ -924,17 +955,17 @@ generate_stmt(Stmt * stmt, State * state)
 		int end_label;
 
 		generate_expr(stmt->s.list.expr, state);
-		emit_byte(OPTIM_NUM_TO_OPCODE(1), state);	/* loop list index */
+		emit_opcode(OPTIM_NUM_TO_OPCODE(1), state);	/* loop list index */
 		push_stack(1, state);
 		loop_top = capture_label(state);
-		emit_byte(OP_FOR_LIST, state);
+		emit_opcode(OP_FOR_LIST, state);
 		add_var_ref(stmt->s.list.id, state);
 		end_label = add_label(state);
 		enter_loop(stmt->s.list.id, loop_top, state->cur_stack,
 			   end_label, state->cur_stack - 2, state);
 		generate_stmt(stmt->s.list.body, state);
 		end_label = exit_loop(state);
-		emit_byte(OP_JUMP, state);
+		emit_opcode(OP_JUMP, state);
 		add_known_label(loop_top, state);
 		define_label(end_label, state);
 		pop_stack(2, state);
@@ -948,14 +979,14 @@ generate_stmt(Stmt * stmt, State * state)
 		generate_expr(stmt->s.range.from, state);
 		generate_expr(stmt->s.range.to, state);
 		loop_top = capture_label(state);
-		emit_byte(OP_FOR_RANGE, state);
+		emit_opcode(OP_FOR_RANGE, state);
 		add_var_ref(stmt->s.range.id, state);
 		end_label = add_label(state);
 		enter_loop(stmt->s.range.id, loop_top, state->cur_stack,
 			   end_label, state->cur_stack - 2, state);
 		generate_stmt(stmt->s.range.body, state);
 		end_label = exit_loop(state);
-		emit_byte(OP_JUMP, state);
+		emit_opcode(OP_JUMP, state);
 		add_known_label(loop_top, state);
 		define_label(end_label, state);
 		pop_stack(2, state);
@@ -969,7 +1000,7 @@ generate_stmt(Stmt * stmt, State * state)
 		loop_top = capture_label(state);
 		generate_expr(stmt->s.loop.condition, state);
 		if (stmt->s.loop.id == -1)
-		    emit_byte(OP_WHILE, state);
+		    emit_opcode(OP_WHILE, state);
 		else {
 		    emit_extended_byte(EOP_WHILE_ID, state);
 		    add_var_ref(stmt->s.loop.id, state);
@@ -980,7 +1011,7 @@ generate_stmt(Stmt * stmt, State * state)
 			   end_label, state->cur_stack, state);
 		generate_stmt(stmt->s.loop.body, state);
 		end_label = exit_loop(state);
-		emit_byte(OP_JUMP, state);
+		emit_opcode(OP_JUMP, state);
 		add_known_label(loop_top, state);
 		define_label(end_label, state);
 	    }
@@ -988,9 +1019,9 @@ generate_stmt(Stmt * stmt, State * state)
 	case STMT_FORK:
 	    generate_expr(stmt->s.fork.time, state);
 	    if (stmt->s.fork.id >= 0)
-		emit_byte(OP_FORK_WITH_ID, state);
+		emit_opcode(OP_FORK_WITH_ID, state);
 	    else
-		emit_byte(OP_FORK, state);
+		emit_opcode(OP_FORK, state);
 	    add_fork(stmt_to_code(stmt->s.fork.body, state->gstate), state);
 	    if (stmt->s.fork.id >= 0)
 		add_var_ref(stmt->s.fork.id, state);
@@ -998,7 +1029,7 @@ generate_stmt(Stmt * stmt, State * state)
 	    break;
 	case STMT_EXPR:
 	    generate_expr(stmt->s.expr, state);
-	    emit_byte(OP_POP, state);
+	    emit_opcode(OP_POP, state);
 	    pop_stack(1, state);
 	    break;
 	case STMT_RETURN:
@@ -1035,11 +1066,11 @@ generate_stmt(Stmt * stmt, State * state)
 		    push_stack(1, state);	/* exception tuple */
 		    if (ex->id >= 0)
 			emit_var_op(OP_PUT, ex->id, state);
-		    emit_byte(OP_POP, state);
+		    emit_opcode(OP_POP, state);
 		    pop_stack(1, state);
 		    generate_stmt(ex->stmt, state);
 		    if (ex->next) {
-			emit_byte(OP_JUMP, state);
+			emit_opcode(OP_JUMP, state);
 			end_label = add_linked_label(end_label, state);
 		    }
 		}
@@ -1279,6 +1310,10 @@ stmt_to_code(Stmt * stmt, GState * gstate)
 		    + fixup->prev_stacks * (bc.numbytes_stack - 1);
 		size = bc.numbytes_label;
 		break;
+	    case FIXUP_PC:
+	        gstate->hot_pc = new_i;
+		size = 0;
+	        break;
 	    default:
 		panic("Can't happen #1 in STMT_TO_CODE()");
 	    }
@@ -1291,6 +1326,10 @@ stmt_to_code(Stmt * stmt, GState * gstate)
 		bc.vector[new_i++] = value >> 8;
 	    case 1:
 		bc.vector[new_i++] = value;
+		break;
+	    case 0:
+	        /* There's either another fixup or a plain byte here. */
+	        old_i--;
 		break;
 	    default:
 		panic("Can't happen #2 in STMT_TO_CODE()");
@@ -1308,7 +1347,7 @@ stmt_to_code(Stmt * stmt, GState * gstate)
 }
 
 Program *
-generate_code(Stmt * stmt, DB_Version version)
+generate_code(Stmt * stmt, DB_Version version, int *pc)
 {
     Program *prog = new_program();
     GState gstate;
@@ -1345,15 +1384,21 @@ generate_code(Stmt * stmt, DB_Version version)
 	prog->fork_vectors_size = 0;
     }
 
+    if (pc)
+        *pc = gstate.hot_pc;
+
     free_gstate(gstate);
 
     return prog;
 }
 
-char rcsid_code_gen[] = "$Id: code_gen.c,v 1.10 2002-08-23 13:00:18 bjj Exp $";
+char rcsid_code_gen[] = "$Id: code_gen.c,v 1.10.4.1 2002-09-12 05:57:40 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2002/08/23 13:00:18  bjj
+ * Removed a spurious EXPR_INDEX case left over from before x[$]
+ *
  * Revision 1.9  1999/08/14 19:44:15  bjj
  * Code generator will no longer PUSH_CLEAR things like dobj/dobjstr/prepstr
  * around CALL_VERB operations, since those variables are passed directly

@@ -27,11 +27,12 @@ typedef struct {
     const char **names;
 } Names;
 
-extern Names *new_builtin_names(DB_Version);
-extern int first_user_slot(DB_Version);
+extern Names *new_builtin_names(DB_Version, int);
+extern int first_user_slot(DB_Version, int);
 extern unsigned find_or_add_name(Names **, const char *);
 extern int find_name(Names *, const char *);
 extern void free_names(Names *);
+extern Names *copy_names(Names *);
 
 /* Environment slots for built-in variables */
 #define SLOT_NUM	0
@@ -59,6 +60,9 @@ extern void free_names(Names *);
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  1998/12/14 13:19:06  nop
+ * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
+ *
  * Revision 1.2  1997/03/03 04:19:30  nop
  * GNU Indent normalization
  *
