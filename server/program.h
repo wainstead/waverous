@@ -46,6 +46,9 @@ typedef struct {
 
     unsigned num_var_names;
     const char **var_names;
+
+    unsigned cached_lineno;
+    unsigned cached_lineno_pc;
 } Program;
 
 #define MAIN_VECTOR 	-1	/* As opposed to an index into fork_vectors */
@@ -59,6 +62,9 @@ extern void free_program(Program *);
 #endif				/* !Program_H */
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.2  1997/03/03 04:19:18  nop
+ * GNU Indent normalization
+ *
  * Revision 1.1.1.1  1997/03/03 03:45:04  nop
  * LambdaMOO 1.8.0p5
  *
