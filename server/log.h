@@ -30,8 +30,17 @@ extern void reset_command_history(void);
 extern void log_command_history(void);
 extern void add_command_to_history(Objid player, const char *command);
 
+
+#define log_report_progress()  ((--log_pcount <= 0) && log_report_progress_cktime())
+
+extern int log_pcount;
+extern int log_report_progress_cktime();
+
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  1998/12/14 13:18:00  nop
+ * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
+ *
  * Revision 1.2  1997/03/03 04:18:48  nop
  * GNU Indent normalization
  *
