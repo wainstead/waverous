@@ -916,6 +916,11 @@ generate_expr(Expr * expr, State * state)
 	else
 	    panic("Illegal hot position in GENERATE_EXPR()");
 	break;
+    case EXPR_CONSTANT:
+    	emit_extended_byte(EOP_CONSTANT, state);
+    	emit_byte(expr->e.constant, state);
+    	push_stack(1, state);
+    	break;
     default:
 	panic("Can't happen in GENERATE_EXPR()");
     }
@@ -1403,10 +1408,13 @@ generate_code(Stmt * stmt, DB_Version version, int *pc_vector, int *pc)
     return prog;
 }
 
-char rcsid_code_gen[] = "$Id: code_gen.c,v 1.10.4.5 2002-10-27 22:48:12 xplat Exp $";
+char rcsid_code_gen[] = "$Id: code_gen.c,v 1.10.4.5.2.1 2002-11-03 03:37:58 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.10.4.5  2002/10/27 22:48:12  xplat
+ * Changes to support PCs located in vectors other than MAIN_VECTOR.
+ *
  * Revision 1.10.4.4  2002/09/17 15:35:04  xplat
  * GNU indent normalization.
  *

@@ -73,31 +73,6 @@ copy_rt_env(Var * from, unsigned size)
 }
 
 void
-fill_in_rt_consts(Var * env, DB_Version version)
-{
-    Var v;
-
-    v.type = TYPE_INT;
-    v.v.num = (int) TYPE_ERR;
-    env[SLOT_ERR] = var_ref(v);
-    v.v.num = (int) TYPE_INT;
-    env[SLOT_NUM] = var_ref(v);
-    v.v.num = (int) _TYPE_STR;
-    env[SLOT_STR] = var_ref(v);
-    v.v.num = (int) TYPE_OBJ;
-    env[SLOT_OBJ] = var_ref(v);
-    v.v.num = (int) _TYPE_LIST;
-    env[SLOT_LIST] = var_ref(v);
-
-    if (version >= DBV_Float) {
-	v.v.num = (int) TYPE_INT;
-	env[SLOT_INT] = var_ref(v);
-	v.v.num = (int) _TYPE_FLOAT;
-	env[SLOT_FLOAT] = var_ref(v);
-    }
-}
-
-void
 set_rt_env_obj(Var * env, int slot, Objid o)
 {
     Var v;
@@ -121,11 +96,14 @@ set_rt_env_var(Var * env, int slot, Var v)
     env[slot] = v;
 }
 
-char rcsid_rt_env[] = "$Id: eval_env.c,v 1.5 1998-12-14 13:17:44 nop Exp $";
+char rcsid_rt_env[] = "$Id: eval_env.c,v 1.5.8.1 2002-11-03 03:37:58 xplat Exp $";
 
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  1998/12/14 13:17:44  nop
+ * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
+ *
  * Revision 1.4  1997/07/07 03:24:53  nop
  * Merge UNSAFE_OPTS (r5) after extensive testing.
  *

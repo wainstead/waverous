@@ -20,6 +20,7 @@
 #include "exceptions.h"
 #include "opcode.h"
 #include "program.h"
+#include "rt_const.h"
 #include "storage.h"
 #include "utils.h"
 
@@ -644,6 +645,15 @@ decompile(Bytecodes bc, Byte * start, Byte * end, Stmt ** stmt_sink,
 		case EOP_EXP:
 		    kind = EXPR_EXP;
 		    goto finish_binary;
+		case EOP_CONSTANT:
+		    {
+		        enum Constant_Slot slot = READ_BYTES(1);
+
+		        e = alloc_expr(EXPR_CONSTANT);
+		        e->e.constant = slot;
+		        push_expr(HOTX_OP(e));
+		    }
+		    break;
 		case EOP_SCATTER:
 		    {
 			/* Can't resume inside scatter machinery either. 
@@ -1086,10 +1096,13 @@ find_line_number(Program * prog, int vector, int pc)
     return lineno;
 }
 
-char rcsid_decompile[] = "$Id: decompile.c,v 1.5.6.5 2002-10-27 22:48:12 xplat Exp $";
+char rcsid_decompile[] = "$Id: decompile.c,v 1.5.6.5.2.1 2002-11-03 03:37:58 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5.6.5  2002/10/27 22:48:12  xplat
+ * Changes to support PCs located in vectors other than MAIN_VECTOR.
+ *
  * Revision 1.5.6.4  2002/09/17 15:35:04  xplat
  * GNU indent normalization.
  *

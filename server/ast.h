@@ -20,6 +20,7 @@
 
 #include "config.h"
 #include "parser.h"
+#include "rt_const.h"
 #include "structures.h"
 #include "sym_table.h"
 
@@ -102,6 +103,7 @@ enum Expr_Kind {
     EXPR_IN, EXPR_LIST, EXPR_COND,
     EXPR_CATCH, EXPR_LENGTH, EXPR_SCATTER,
     EXPR_HOT,
+    EXPR_CONSTANT,
     SizeOf_Expr_Kind		/* The last element is also the number of elements... */
 };
 
@@ -118,6 +120,7 @@ union Expr_Data {
     Expr *expr;
     Arg_List *list;
     Scatter *scatter;
+    enum Constant_Slot constant;
 };
 
 struct Expr {
@@ -226,6 +229,9 @@ extern void free_stmt(Stmt *);
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3.6.1  2002/09/12 05:57:40  xplat
+ * Changes for inline PC saving and patch tags in the on-disk DB.
+ *
  * Revision 1.3  1998/12/14 13:17:28  nop
  * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
  *

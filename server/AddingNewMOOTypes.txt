@@ -19,13 +19,14 @@ For all new types, both visible and invisible, you must:
 
 In addition, for visible types, you must:
 -- consider adding a new built-in MOO variable like OBJ, STR, and LIST:
-	-- add a new SLOT_XXX constant *at the end* of the list in sym_table.h
+	-- add a new CSLOT_XXX constant *at the end* of the list in rt_const.h
+	-- add a clause to initialize_rt_consts(), in rt_const.c
+	-- add the name of your constant at the end of rt_const_names[] in
+	   rt_const.c
 	-- add a new DB version number *just before the end* of the
 	   `DB_Version' enumeration in version.h
-	-- add a version-contingent clause to fill_in_rt_consts(),
-	   in eval_env.c
-	-- add a version-contingent clause to each of new_builtin_names() and
-	   first_user_slot(), in sym_table.c
+	-- add a version-contingent keyword to keywords.gperf, and make sure
+	   you have a properly hacked gperf to regenerate keywords.c
 -- consider adding a new kind of MOO literal or expression that produces values
    of the new type.
 -- add a case to each of list2str() and print_to_stream(), in list.c; the

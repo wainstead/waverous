@@ -32,7 +32,7 @@
 enum Extended_Opcode {
     EOP_RANGESET, EOP_LENGTH,
     EOP_PUSH_LABEL, EOP_END_CATCH, EOP_END_EXCEPT, EOP_END_FINALLY,
-    EOP_CONTINUE,
+    EOP_CONTINUE, EOP_CONSTANT,
 
     /* ops after this point cost one tick */
     EOP_CATCH, EOP_TRY_EXCEPT, EOP_TRY_FINALLY,
@@ -131,6 +131,9 @@ typedef enum Extended_Opcode Extended_Opcode;
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3.6.2  2002/09/17 15:04:06  xplat
+ * Updated to INLINEPC_updater_1 in trunk.
+ *
  * Revision 1.3.6.1  2002/09/12 05:57:40  xplat
  * Changes for inline PC saving and patch tags in the on-disk DB.
  *

@@ -36,6 +36,7 @@
 #include "options.h"
 #include "parser.h"
 #include "random.h"
+#include "rt_const.h"
 #include "server.h"
 #include "storage.h"
 #include "streams.h"
@@ -1223,6 +1224,7 @@ main(int argc, char **argv)
     oklog("          (Task timeouts measured in %s seconds.)\n",
 	  virtual_timer_available()? "server CPU" : "wall-clock");
 
+    initialize_rt_consts();
     register_bi_functions();
 
     l = new_slistener(SYSTEM_OBJECT, desc, 1, 0);
@@ -1735,10 +1737,13 @@ register_server(void)
 		      bf_buffered_output_length, TYPE_OBJ);
 }
 
-char rcsid_server[] = "$Id: server.c,v 1.5 1998-12-29 06:56:32 nop Exp $";
+char rcsid_server[] = "$Id: server.c,v 1.5.8.1 2002-11-03 03:37:58 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  1998/12/29 06:56:32  nop
+ * Fixed leak in onc().
+ *
  * Revision 1.4  1998/12/14 13:18:57  nop
  * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
  *

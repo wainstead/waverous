@@ -57,7 +57,10 @@ first_user_slot(DB_Version version, int upgrading)
 {
     int count = 16;		/* DBV_Prehistory count */
 
-    if (version >= DBV_Float || upgrading)
+    if (version >= DBV_Constants || upgrading)
+        return 11;
+
+    if (version >= DBV_Float)
 	count += 2;
 
     return count;
@@ -77,30 +80,40 @@ new_builtin_names(DB_Version version, int upgrading)
 	my_builtins[version] = bi;
 	bi->size = bi->max_size;
 
-	bi->names[SLOT_NUM] = str_dup("NUM");
-	bi->names[SLOT_OBJ] = str_dup("OBJ");
-	bi->names[SLOT_STR] = str_dup("STR");
-	bi->names[SLOT_LIST] = str_dup("LIST");
-	bi->names[SLOT_ERR] = str_dup("ERR");
-	bi->names[SLOT_PLAYER] = str_dup("player");
-	bi->names[SLOT_THIS] = str_dup("this");
-	bi->names[SLOT_CALLER] = str_dup("caller");
-	bi->names[SLOT_VERB] = str_dup("verb");
-	bi->names[SLOT_ARGS] = str_dup("args");
-	bi->names[SLOT_ARGSTR] = str_dup("argstr");
-	bi->names[SLOT_DOBJ] = str_dup("dobj");
-	bi->names[SLOT_DOBJSTR] = str_dup("dobjstr");
-	bi->names[SLOT_PREPSTR] = str_dup("prepstr");
-	bi->names[SLOT_IOBJ] = str_dup("iobj");
-	bi->names[SLOT_IOBJSTR] = str_dup("iobjstr");
+	if (upgrading || (version >= DBV_Constants)) {
+	    bi->names[SLOT_PLAYER] = str_dup("player");
+	    bi->names[SLOT_THIS] = str_dup("this");
+	    bi->names[SLOT_CALLER] = str_dup("caller");
+	    bi->names[SLOT_VERB] = str_dup("verb");
+	    bi->names[SLOT_ARGS] = str_dup("args");
+	    bi->names[SLOT_ARGSTR] = str_dup("argstr");
+	    bi->names[SLOT_DOBJ] = str_dup("dobj");
+	    bi->names[SLOT_DOBJSTR] = str_dup("dobjstr");
+	    bi->names[SLOT_PREPSTR] = str_dup("prepstr");
+	    bi->names[SLOT_IOBJ] = str_dup("iobj");
+	    bi->names[SLOT_IOBJSTR] = str_dup("iobjstr");
+	} else {
+	    bi->names[OLD_SLOT_NUM] = str_dup("NUM");
+	    bi->names[OLD_SLOT_OBJ] = str_dup("OBJ");
+	    bi->names[OLD_SLOT_STR] = str_dup("STR");
+	    bi->names[OLD_SLOT_LIST] = str_dup("LIST");
+	    bi->names[OLD_SLOT_ERR] = str_dup("ERR");
+	    bi->names[OLD_SLOT_PLAYER] = str_dup("player");
+	    bi->names[OLD_SLOT_THIS] = str_dup("this");
+	    bi->names[OLD_SLOT_CALLER] = str_dup("caller");
+	    bi->names[OLD_SLOT_VERB] = str_dup("verb");
+	    bi->names[OLD_SLOT_ARGS] = str_dup("args");
+	    bi->names[OLD_SLOT_ARGSTR] = str_dup("argstr");
+	    bi->names[OLD_SLOT_DOBJ] = str_dup("dobj");
+	    bi->names[OLD_SLOT_DOBJSTR] = str_dup("dobjstr");
+	    bi->names[OLD_SLOT_PREPSTR] = str_dup("prepstr");
+	    bi->names[OLD_SLOT_IOBJ] = str_dup("iobj");
+	    bi->names[OLD_SLOT_IOBJSTR] = str_dup("iobjstr");
 
-	if (version >= DBV_Float) {
-	    bi->names[SLOT_INT] = str_dup("INT");
-	    bi->names[SLOT_FLOAT] = str_dup("FLOAT");
-	} else if (upgrading) {
-	    /* nameless so they won't match anything */
-	    bi->names[SLOT_INT] = str_dup("");
-	    bi->names[SLOT_FLOAT] = str_dup("");
+	    if (version >= DBV_Float) {
+	    	bi->names[OLD_SLOT_INT] = str_dup("INT");
+	    	bi->names[OLD_SLOT_FLOAT] = str_dup("FLOAT");
+	    }
 	}
     }
     return copy_names(my_builtins[version]);
@@ -153,10 +166,13 @@ free_names(Names * names)
     myfree(names, M_NAMES);
 }
 
-char rcsid_sym_table[] = "$Id: sym_table.c,v 1.3.6.1 2002-09-12 05:57:40 xplat Exp $";
+char rcsid_sym_table[] = "$Id: sym_table.c,v 1.3.6.1.2.1 2002-11-03 03:37:58 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3.6.1  2002/09/12 05:57:40  xplat
+ * Changes for inline PC saving and patch tags in the on-disk DB.
+ *
  * Revision 1.3  1998/12/14 13:19:05  nop
  * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
  *

@@ -18,6 +18,7 @@
  *****************************************************************************/
 
 #include "my-string.h"
+#include "my-ctype.h"
 
 #include "config.h"
 #include "keywords.h"
@@ -62,6 +63,13 @@ E_NACC,		DBV_Prehistory, tERROR,	E_NACC
 E_INVARG,	DBV_Prehistory, tERROR,	E_INVARG
 E_QUOTA,	DBV_Prehistory, tERROR,	E_QUOTA
 E_FLOAT,	DBV_Float,	tERROR,	E_FLOAT
+NUM,		DBV_Prehistory,	tCONSTANT,	E_NONE,	CSLOT_NUM
+OBJ,		DBV_Prehistory, tCONSTANT,	E_NONE,	CSLOT_OBJ
+STR,		DBV_Prehistory,	tCONSTANT,	E_NONE,	CSLOT_STR
+LIST,		DBV_Prehistory, tCONSTANT,	E_NONE,	CSLOT_LIST
+ERR,		DBV_Prehistory, tCONSTANT,	E_NONE,	CSLOT_ERR
+INT,		DBV_Float,	tCONSTANT,	E_NONE,	CSLOT_INT
+FLOAT,		DBV_Float,	tCONSTANT,	E_NONE,	CSLOT_FLOAT
 %%
 
 const struct keyword *
@@ -70,9 +78,13 @@ find_keyword(const char *word)
     return in_word_set(word, strlen(word));
 }
 
-char rcsid_keywords[] = "$Id: keywords.gperf,v 1.1.1.1 1997-03-03 03:45:02 nop Exp $";
+char rcsid_keywords[] = "$Id: keywords.gperf,v 1.1.1.1.10.1 2002-11-03 03:37:58 xplat Exp $";
 
-/* $Log: not supported by cvs2svn $
+/*
+ * $Log: not supported by cvs2svn $
+ * Revision 1.1.1.1  1997/03/03 03:45:02  nop
+ * LambdaMOO 1.8.0p5
+ *
  * Revision 2.2  1996/02/08  06:33:21  pavel
  * Added `break', `continue', and E_FLOAT.  Updated copyright notice for 1996.
  * Release 1.8.0beta1.

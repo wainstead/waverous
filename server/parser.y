@@ -27,6 +27,7 @@
 #include "my-string.h"
 
 #include "ast.h"
+#include "ast_c2v.h"
 #include "code_gen.h" 
 #include "config.h"
 #include "functions.h"
@@ -45,7 +46,7 @@
 #include "version.h" 
 
 static Stmt    	       *prog_start;
-static int		dollars_ok;
+static int		dollars_ok, may_const2var, must_const2var;
 static DB_Version	language_version;
 static Parser_Mode	parsing_mode;
 
@@ -61,6 +62,7 @@ static void	push_loop_name(const char *);
 static void	pop_loop_name(void);
 static void	suspend_loop_scope(void);
 static void	resume_loop_scope(void);
+static char    *constant_used_as_lvalue(enum Constant_Slot);
 
 enum loop_exit_kind { LOOP_BREAK, LOOP_CONTINUE };
 
@@ -79,6 +81,7 @@ static void	check_loop_name(const char *, enum loop_exit_kind);
   Cond_Arm     *arm;
   Except_Arm   *except;
   Scatter      *scatter;
+  enum Constant_Slot constant;
 }
 
 %type	<stmt>   statements statement elsepart 
@@ -86,7 +89,7 @@ static void	check_loop_name(const char *, enum loop_exit_kind);
 %type   <expr>   expr default
 %type   <args>   arglist ne_arglist codes
 %type	<except> except excepts
-%type	<string> opt_id
+%type	<string> opt_id var_id member_id
 %type	<scatter> scatter scatter_item
 
 %token	<integer> tINTEGER
@@ -94,6 +97,7 @@ static void	check_loop_name(const char *, enum loop_exit_kind);
 %token	<real> tFLOAT
 %token	<string> tSTRING tID
 %token	<error> tERROR
+%token  <constant> tCONSTANT
 %token	tIF tELSE tELSEIF tENDIF tFOR tIN tENDFOR tRETURN tFORK tENDFORK
 %token  tWHILE tENDWHILE tTRY tENDTRY tEXCEPT tFINALLY tANY tBREAK tCONTINUE
 
@@ -142,7 +146,7 @@ statement:
 		    $$->s.cond.arms->next = $6;
 		    $$->s.cond.otherwise = $7;
 		}
-	| tFOR tID tIN '(' expr ')'
+	| tFOR var_id tIN '(' expr ')'
 		{
 		    push_loop_name($2);
 		}
@@ -154,7 +158,7 @@ statement:
 		    $$->s.list.body = $8;
 		    pop_loop_name();
 		}
-	| tFOR tID tIN '[' expr tTO expr ']'
+	| tFOR var_id tIN '[' expr tTO expr ']'
 		{
 		    push_loop_name($2);
 		}
@@ -167,50 +171,26 @@ statement:
 		    $$->s.range.body = $10;
 		    pop_loop_name();
 		}
-	| tWHILE '(' expr ')'
-		{
-		    push_loop_name(0);
-		}
-	  statements tENDWHILE
-		{
-		    $$ = alloc_stmt(STMT_WHILE);
-		    $$->s.loop.id = -1;
-		    $$->s.loop.condition = $3;
-		    $$->s.loop.body = $6;
-		    pop_loop_name();
-		}
-	| tWHILE tID '(' expr ')'
+	| tWHILE opt_id '(' expr ')'
 		{
 		    push_loop_name($2);
 		}
 	  statements tENDWHILE
 		{
 		    $$ = alloc_stmt(STMT_WHILE);
-		    $$->s.loop.id = find_id($2);
+		    $$->s.loop.id = $2 ? find_id($2) : -1;
 		    $$->s.loop.condition = $4;
 		    $$->s.loop.body = $7;
 		    pop_loop_name();
 		}
-	| tFORK '(' expr ')'
+	| tFORK opt_id '(' expr ')'
 		{
 		    suspend_loop_scope();
 		}
 	  statements tENDFORK
 		{
 		    $$ = alloc_stmt(STMT_FORK);
-		    $$->s.fork.id = -1;
-		    $$->s.fork.time = $3;
-		    $$->s.fork.body = $6;
-		    resume_loop_scope();
-		}
-	| tFORK tID '(' expr ')'
-		{
-		    suspend_loop_scope();
-		}
-	  statements tENDFORK
-		{
-		    $$ = alloc_stmt(STMT_FORK);
-		    $$->s.fork.id = find_id($2);
+		    $$->s.fork.id = $2 ? find_id($2) : -1;
 		    $$->s.fork.time = $4;
 		    $$->s.fork.body = $7;
 		    resume_loop_scope();
@@ -220,29 +200,17 @@ statement:
 		    $$ = alloc_stmt(STMT_EXPR);
 		    $$->s.expr = $1;
 		}
-	| tBREAK ';'
-		{
-		    check_loop_name(0, LOOP_BREAK);
-		    $$ = alloc_stmt(STMT_BREAK);
-		    $$->s.exit = -1;
-		}
-	| tBREAK tID ';'
+	| tBREAK opt_id ';'
 		{
 		    check_loop_name($2, LOOP_BREAK);
 		    $$ = alloc_stmt(STMT_BREAK);
-		    $$->s.exit = find_id($2);
+		    $$->s.exit = $2 ? find_id($2) : -1;
 		}
-	| tCONTINUE ';'
-		{
-		    check_loop_name(0, LOOP_CONTINUE);
-		    $$ = alloc_stmt(STMT_CONTINUE);
-		    $$->s.exit = -1;
-		}
-	| tCONTINUE tID ';'
+	| tCONTINUE opt_id ';'
 		{
 		    check_loop_name($2, LOOP_CONTINUE);
 		    $$ = alloc_stmt(STMT_CONTINUE);
-		    $$->s.exit = find_id($2);
+		    $$->s.exit = $2 ? find_id($2) : -1;
 		}
 	| tRETURN expr ';'
 		{
@@ -330,11 +298,39 @@ except:
 		{ $$ = alloc_except($1 ? find_id($1) : -1, $3, $5); }
 	;
 
+member_id:
+	  tID
+		{ $$ = $1; }
+	| tCONSTANT
+		{ 
+		    if (!may_const2var) {
+		        yyerror("Constant name used as member specifier");
+		        $$ = alloc_string("rumplestiltskin");
+		    } else {
+		        char *p;
+
+		        $$ = alloc_string(rt_const_names[$1]);
+		        /* XXX should use original string rather than this hack */
+		        for (p = $$; *p; p++)
+		            *p = tolower(*p);
+		    }
+		}
+	;
+
+var_id:
+	  tID
+		{ $$ = $1; }
+	| tCONSTANT
+		{ $$ = constant_used_as_lvalue($1); }
+	;
+
 opt_id:
 	  /* NOTHING */
 		{ $$ = 0; }
 	| tID
 		{ $$ = $1; }
+	| tCONSTANT
+		{ $$ = constant_used_as_lvalue($1); }
 	;
 
 expr:
@@ -368,7 +364,7 @@ expr:
 		    $$ = alloc_expr(EXPR_ID);
 		    $$->e.id = find_id($1);
 		}
-	| '$' tID
+	| '$' member_id
 		{
 		    /* Treat $foo like #0.("foo") */
 		    Expr *obj = alloc_var(TYPE_OBJ);
@@ -377,7 +373,7 @@ expr:
 		    prop->e.var.v.str = $2;
 		    $$ = alloc_binary(EXPR_PROP, obj, prop);
 		}
-	| expr '.' tID
+	| expr '.' member_id
 		{
 		    /* Treat foo.bar like foo.("bar") for simplicity */
 		    Expr *prop = alloc_var(TYPE_STR);
@@ -388,14 +384,14 @@ expr:
     		{
 		    $$ = alloc_binary(EXPR_PROP, $1, $4);
 		}
-	| expr ':' tID '(' arglist ')'
+	| expr ':' member_id '(' arglist ')'
 		{
 		    /* treat foo:bar(args) like foo:("bar")(args) */
 		    Expr *verb = alloc_var(TYPE_STR);
 		    verb->e.var.v.str = $3;
 		    $$ = alloc_verb($1, verb, $5);
 		}
-	| '$' tID '(' arglist ')'
+	| '$' member_id '(' arglist ')'
 		{
 		    /* treat $bar(args) like #0:("bar")(args) */
 		    Expr *obj = alloc_var(TYPE_OBJ);
@@ -443,6 +439,20 @@ expr:
 			    e = e->e.range.base;
 			while ((e->kind == EXPR_INDEX) || (e->kind == EXPR_HOT))
 			    e = e->kind == EXPR_INDEX ? e->e.bin.lhs : e->e.hot.expr;
+			if (e->kind == EXPR_CONSTANT) {
+			    enum Constant_Slot slot = e->e.constant;
+
+			    if (may_const2var) {
+			        if (!must_const2var)
+			            warning("Changing modified constant to a variable: ",
+			                rt_const_names[slot]);
+			        must_const2var = 1;
+			        e->kind = EXPR_ID;
+			        e->e.id = find_id(alloc_string(rt_const_names[slot]));
+			    } else {
+			        yyerror("Constant used on left side of assignment.");
+			    }
+			}
 			if (e->kind != EXPR_ID  &&  e->kind != EXPR_PROP)
 			    yyerror("Illegal expression on left side of"
 				    " assignment.");
@@ -597,6 +607,11 @@ expr:
 		    $$->e.hot.expr = $3;
 		    $$->e.hot.pos = HOT_ASSIGN;
 		}
+	| tCONSTANT
+		{
+		    $$ = alloc_expr(EXPR_CONSTANT);
+		    $$->e.constant = $1;
+		}
 	;
 
 dollars_up:
@@ -674,12 +689,12 @@ scatter:
 		{
 		    $$ = add_scatter_item($1, $3);
 		}
-	| scatter ',' tID
+	| scatter ',' var_id
 		{
 		    $$ = add_scatter_item($1, alloc_scatter(SCAT_REQUIRED,
 							    find_id($3), 0));
 		}
-	| scatter ',' '@' tID
+	| scatter ',' '@' var_id
 		{
 		    $$ = add_scatter_item($1, alloc_scatter(SCAT_REST,
 							    find_id($4), 0));
@@ -689,11 +704,11 @@ scatter:
 	;
 
 scatter_item:
-	  '?' tID
+	  '?' var_id
 		{
 		    $$ = alloc_scatter(SCAT_OPTIONAL, find_id($2), 0);
 		}
-	| '?' tID '=' expr
+	| '?' var_id '=' expr
 		{
 		    $$ = alloc_scatter(SCAT_OPTIONAL, find_id($2), $4);
 		}
@@ -701,7 +716,7 @@ scatter_item:
 
 %%
 
-static int		lineno, nerrors, must_rename_keywords, parsing_activ;
+static int		lineno, nerrors, must_rename_keywords, parsing_activ, ignoring_constants;
 static Parser_Client	client;
 static void	       *client_data;
 static Names	       *local_names;
@@ -926,9 +941,19 @@ start_over:
 
 		if (t == tERROR)
 		    yylval.error = k->error;
+		else if (t == tCONSTANT) {
+		    if (ignoring_constants) {
+		    	if (!must_rename_keywords && parsing_mode != PARSE_COMPAT)
+		    	    warning("Renaming old use of new keyword: ", buf);
+		    	must_rename_keywords = 1;
+		    	yylval.string = alloc_string(buf);
+		    	return tID;
+		    }
+		    yylval.constant = k->constant;
+		}
 		return t;
 	    } else {		/* New keyword being used as an identifier */
-		if (!must_rename_keywords)
+		if (!must_rename_keywords && parsing_mode != PARSE_COMPAT)
 		    warning("Renaming old use of new keyword: ", buf);
 		must_rename_keywords = 1;
 	    }
@@ -1009,6 +1034,25 @@ scatter_from_arglist(Arg_List *a)
 	    anext = a->next;
 	    dealloc_node(a->expr);
 	    dealloc_node(a);
+	} else if (a->expr->kind == EXPR_CONSTANT) {
+            enum Constant_Slot slot = a->expr->e.constant;
+
+            if (may_const2var) {
+                if (!must_const2var)
+                    warning("Changing modified constant to a variable: ",
+                        rt_const_names[slot]);
+                must_const2var = 1;
+
+                *scp = alloc_scatter(a->kind == ARG_NORMAL ? SCAT_REQUIRED
+                                                           : SCAT_REST,
+                                     find_id(alloc_string(rt_const_names[slot])), 0);
+                anext = a->next;
+                dealloc_node(a->expr);
+                dealloc_node(a);
+            } else {
+                yyerror("Tried to modify constant.");
+                return 0;
+            }
 	} else {
 	    yyerror("Scattering assignment targets must be simple variables.");
 	    return 0;
@@ -1124,6 +1168,22 @@ check_loop_name(const char *name, enum loop_exit_kind kind)
 	error("Invalid loop name in `continue' statement: ", name);
 }
 
+static char *
+constant_used_as_lvalue(enum Constant_Slot slot)
+{
+    if (!may_const2var) {
+        yyerror("Tried to modify constant.");
+        return 0;
+    } else {
+        char *name = alloc_string(rt_const_names[slot]);
+
+	if (!must_const2var)
+    	    warning("Changing modified constant to a variable: ", name);
+    	must_const2var = 1;
+    	return name;
+    }
+}
+
 Program *
 parse_program(DB_Version version, Parser_Client c, void *data,
               Parser_Mode mode, Names **original_names, int *pc_vector, int *pc)
@@ -1145,6 +1205,9 @@ parse_program(DB_Version version, Parser_Client c, void *data,
     language_version = version;
     parsing_activ = (pc != 0);
     parsing_mode = mode;
+    ignoring_constants = ((version < DBV_Constants) && (mode != PARSE_VERB));
+    may_const2var = ((version < DBV_Constants) && (mode == PARSE_VERB));
+    must_const2var = 0;
     
     begin_code_allocation();
     yyparse();
@@ -1163,6 +1226,44 @@ parse_program(DB_Version version, Parser_Client c, void *data,
     }
     
     if (nerrors == 0) {
+        if (must_const2var) {
+            /* One or more constants were used as variables in this code,
+             * and the code is old enough that you COULD use constants as
+             * variables and still get their initial values.  Thus we
+             * need to change references to the constants to references
+             * to the variables, and add initialization code to the top
+             * of the verb.  (This breaks the popular 'verbdoc' system used
+             * in many cores, but, hey, life's not fair.)
+             */
+            int const2var_map[CSLOT_FLOAT + 1] =
+                { -1, -1, -1, -1, -1, -1, -1 };
+            Stmt *new_prog_start = prog_start;
+            int i;
+
+            for (i = local_names->size - 1; i >= 0; i--) {
+            	const char	*name = local_names->names[i];
+		Keyword		*k    = find_keyword(name);
+
+            	if (k && k->token == tCONSTANT && k->version <= version) {
+            	    Stmt *new_init = alloc_stmt(STMT_EXPR);
+
+		    new_init->s.expr = alloc_binary(EXPR_ASGN,
+		        alloc_expr(EXPR_ID), alloc_expr(EXPR_CONSTANT));
+		    new_init->s.expr->e.bin.lhs->e.id = i;
+		    new_init->s.expr->e.bin.rhs->e.constant = k->constant;
+            	    new_init->next = new_prog_start;
+            	    new_prog_start = new_init;
+
+            	    const2var_map[k->constant] = i;
+            	}
+            }
+
+	    const2var_program(const2var_map, prog_start);
+	    prog_start = new_prog_start;
+
+            must_rename_keywords = 1;
+        }
+
         if (original_names)
             *original_names = copy_names(local_names);
 
@@ -1189,40 +1290,6 @@ parse_program(DB_Version version, Parser_Client c, void *data,
 			str_dup(reset_stream(token_stream));
 		}
 	    }
-	}
-
-	if ((mode != PARSE_COMPAT) && (version < DBV_Float)) {
-	    int bad_slot;
-	    const char *name;
-
-	    bad_slot = find_name(local_names, "FLOAT");
-	    if (bad_slot >= 0) {
-	        name = local_names->names[bad_slot];
-	        stream_add_string(token_stream, name);
-	        do {
-	            stream_add_char(token_stream, '_');
-	        } while (find_name(local_names,
-	                           stream_contents(token_stream)) >= 0);
-	        free_str(name);
-	        local_names->names[bad_slot] =
-	            str_dup(reset_stream(token_stream));
-	    }
-
-	    bad_slot = find_name(local_names, "INT");
-	    if (bad_slot >= 0) {
-	        name = local_names->names[bad_slot];
-	        stream_add_string(token_stream, name);
-	        do {
-	            stream_add_char(token_stream, '_');
-	        } while (find_name(local_names,
-	                           stream_contents(token_stream)) >= 0);
-	        free_str(name);
-	        local_names->names[bad_slot] =
-	            str_dup(reset_stream(token_stream));
-	    }
-
-	    local_names->names[SLOT_FLOAT] = str_dup("FLOAT");
-	    local_names->names[SLOT_INT] = str_dup("INT");
 	}
 
 	prog = generate_code(prog_start, (mode == PARSE_COMPAT) ? version : current_version, pc_vector, pc);
@@ -1295,10 +1362,13 @@ parse_list_as_program(Var code, Var *errors)
     return program;
 }
 
-char rcsid_parser[] = "$Id: parser.y,v 1.2.6.4 2002-10-29 01:00:24 xplat Exp $";
+char rcsid_parser[] = "$Id: parser.y,v 1.2.6.4.2.1 2002-11-03 03:37:58 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2.6.4  2002/10/29 01:00:24  xplat
+ * Changed PMODE_* to PARSE_* for clarity.
+ *
  * Revision 1.2.6.3  2002/10/27 22:48:12  xplat
  * Changes to support PCs located in vectors other than MAIN_VECTOR.
  *

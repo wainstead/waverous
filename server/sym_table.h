@@ -34,32 +34,48 @@ extern int find_name(Names *, const char *);
 extern void free_names(Names *);
 extern Names *copy_names(Names *);
 
-/* Environment slots for built-in variables */
-#define SLOT_NUM	0
-#define SLOT_OBJ	1
-#define SLOT_STR	2
-#define SLOT_LIST	3
-#define SLOT_ERR	4
-#define SLOT_PLAYER	5
-#define SLOT_THIS	6
-#define SLOT_CALLER	7
-#define SLOT_VERB	8
-#define SLOT_ARGS	9
-#define SLOT_ARGSTR	10
-#define SLOT_DOBJ	11
-#define SLOT_DOBJSTR	12
-#define SLOT_PREPSTR	13
-#define SLOT_IOBJ	14
-#define SLOT_IOBJSTR	15
+/* Old environment slots for built-in variables */
+#define OLD_SLOT_NUM	0
+#define OLD_SLOT_OBJ	1
+#define OLD_SLOT_STR	2
+#define OLD_SLOT_LIST	3
+#define OLD_SLOT_ERR	4
+#define OLD_SLOT_PLAYER	5
+#define OLD_SLOT_THIS	6
+#define OLD_SLOT_CALLER	7
+#define OLD_SLOT_VERB	8
+#define OLD_SLOT_ARGS	9
+#define OLD_SLOT_ARGSTR	10
+#define OLD_SLOT_DOBJ	11
+#define OLD_SLOT_DOBJSTR	12
+#define OLD_SLOT_PREPSTR	13
+#define OLD_SLOT_IOBJ	14
+#define OLD_SLOT_IOBJSTR	15
 
 /* Added in DBV_Float: */
-#define SLOT_INT	16
-#define SLOT_FLOAT	17
+#define OLD_SLOT_INT	16
+#define OLD_SLOT_FLOAT	17
+
+/* Current slots as of DBV_Constants */
+#define SLOT_PLAYER	0
+#define SLOT_THIS	1
+#define SLOT_CALLER	2
+#define SLOT_VERB	3
+#define SLOT_ARGS	4
+#define SLOT_ARGSTR	5
+#define SLOT_DOBJ	6
+#define SLOT_DOBJSTR	7
+#define SLOT_PREPSTR	8
+#define SLOT_IOBJ	9
+#define SLOT_IOBJSTR	10
 
 #endif				/* !Sym_Table_h */
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3.6.1  2002/09/12 05:57:40  xplat
+ * Changes for inline PC saving and patch tags in the on-disk DB.
+ *
  * Revision 1.3  1998/12/14 13:19:06  nop
  * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
  *

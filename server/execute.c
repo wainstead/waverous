@@ -33,6 +33,7 @@
 #include "options.h"
 #include "parse_cmd.h"
 #include "parser.h"
+#include "rt_const.h"
 #include "server.h"
 #include "storage.h"
 #include "streams.h"
@@ -606,8 +607,6 @@ call_verb2(Objid this, const char *vname, Var args, int do_pass)
     RUN_ACTIV.temp.type = TYPE_NONE;
 
     RUN_ACTIV.rt_env = env = new_rt_env(RUN_ACTIV.prog->num_var_names);
-
-    fill_in_rt_consts(env, program->version);
 
     set_rt_env_obj(env, SLOT_THIS, this);
     set_rt_env_obj(env, SLOT_CALLER, CALLER_ACTIV.this);
@@ -1910,6 +1909,15 @@ do {    						    	\
 		    }
 		    break;
 
+		case EOP_CONSTANT:
+	    	    {
+			int slot;
+
+			slot = READ_BYTES(bv, 1);
+			PUSH_REF(rt_const_values[slot]);
+	    	    }
+	    	    break;
+
 		default:
 		    panic("Unknown extended opcode!");
 		}
@@ -2268,7 +2276,6 @@ do_server_program_task(Objid this, const char *verb, Var args, Objid vloc,
     RUN_ACTIV.verb = str_dup(verb);
     RUN_ACTIV.verbname = str_dup(verbname);
     RUN_ACTIV.debug = debug;
-    fill_in_rt_consts(env, program->version);
     set_rt_env_obj(env, SLOT_PLAYER, player);
     set_rt_env_obj(env, SLOT_CALLER, -1);
     set_rt_env_obj(env, SLOT_THIS, this);
@@ -2302,7 +2309,6 @@ do_input_task(Objid user, Parsed_Command * pc, Objid this, db_verb_handle vh)
     RUN_ACTIV.verb = str_ref(pc->verb);
     RUN_ACTIV.verbname = str_ref(db_verb_names(vh));
     RUN_ACTIV.debug = (db_verb_flags(vh) & VF_DEBUG);
-    fill_in_rt_consts(env, prog->version);
     set_rt_env_obj(env, SLOT_PLAYER, user);
     set_rt_env_obj(env, SLOT_CALLER, user);
     set_rt_env_obj(env, SLOT_THIS, this);
@@ -2344,7 +2350,6 @@ setup_activ_for_eval(Program * prog)
     RUN_ACTIV.prog = prog;
 
     RUN_ACTIV.rt_env = env = new_rt_env(prog->num_var_names);
-    fill_in_rt_consts(env, prog->version);
     set_rt_env_obj(env, SLOT_PLAYER, CALLER_ACTIV.player);
     set_rt_env_obj(env, SLOT_CALLER, CALLER_ACTIV.this);
     set_rt_env_obj(env, SLOT_THIS, NOTHING);
@@ -2838,6 +2843,7 @@ regenerate_error_pc(Program * prog, int which_vector, unsigned pc)
 		    break;
 
 		case EOP_TRY_EXCEPT:
+		case EOP_CONSTANT:
 		    SKIP_BYTES(bv, 1);
 		    break;
 
@@ -3096,10 +3102,13 @@ upgrade_activ(activation * a, int *which_vector, int is_root)
     return 1;
 }
 
-char rcsid_execute[] = "$Id: execute.c,v 1.13.6.7 2002-10-29 01:00:13 xplat Exp $";
+char rcsid_execute[] = "$Id: execute.c,v 1.13.6.7.2.1 2002-11-03 03:37:58 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.13.6.7  2002/10/29 01:00:13  xplat
+ * Changed PMODE_* to PARSE_* for clarity.
+ *
  * Revision 1.13.6.6  2002/10/27 22:48:12  xplat
  * Changes to support PCs located in vectors other than MAIN_VECTOR.
  *

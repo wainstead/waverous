@@ -16,6 +16,7 @@
  *****************************************************************************/
 
 #include "config.h"
+#include "rt_const.h"
 #include "structures.h"
 #include "version.h"
 
@@ -24,6 +25,7 @@ struct keyword {
     DB_Version version;		/* the DB version when it was introduced */
     int token;			/* the type of token the scanner should use */
     enum error error;		/* for token == ERROR, the value */
+    enum Constant_Slot constant;/* for token == CONSTANT, the constant slot */
 };
 
 typedef const struct keyword Keyword;
@@ -32,6 +34,9 @@ extern Keyword *find_keyword(const char *);
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  1998/12/14 13:17:56  nop
+ * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
+ *
  * Revision 1.2  1997/03/03 04:18:46  nop
  * GNU Indent normalization
  *

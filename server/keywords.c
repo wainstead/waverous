@@ -1,9 +1,6 @@
-/* C code produced by gperf version 2.1p1 (K&R C version, modified by Pavel) */
-/* Command-line: pgperf -aCIptT -k1,3,$ keywords.gperf  */
-
-#include "my-ctype.h"
-
-	/* -*- C -*- */
+/* C code produced by gperf version 2.7.2 */
+/* Hacked by Xplat after an old patch by Pavel Curtis */
+/* Command-line: ./igperf -aCxptT -k'1,3,$' keywords.gperf  */	/* -*- C -*- */
 
 /******************************************************************************
   Copyright (c) 1992, 1995, 1996 Xerox Corporation.  All rights reserved.
@@ -23,6 +20,7 @@
  *****************************************************************************/
 
 #include "my-string.h"
+#include "my-ctype.h"
 
 #include "config.h"
 #include "keywords.h"
@@ -30,184 +28,169 @@
 #include "utils.h"
 
 
+#define TOTAL_KEYWORDS 42
 #define MIN_WORD_LENGTH 2
 #define MAX_WORD_LENGTH 9
 #define MIN_HASH_VALUE 3
-#define MAX_HASH_VALUE 106
-/*
-   35 keywords
-   104 is the maximum key range
- */
+#define MAX_HASH_VALUE 103
+/* maximum key range = 101, duplicates = 0 */
 
-static int
-hash(register const char *str, register int len)
+#ifdef __GNUC__
+__inline
+#else
+#ifdef __cplusplus
+inline
+#endif
+#endif
+static unsigned int
+hash (str, len)
+     register const char *str;
+     register unsigned int len;
 {
-    static const unsigned char hash_table[] =
+  static const unsigned char asso_values[] =
     {
-	106, 106, 106, 106, 106, 106, 106, 106, 106, 106,
-	106, 106, 106, 106, 106, 106, 106, 106, 106, 106,
-	106, 106, 106, 106, 106, 106, 106, 106, 106, 106,
-	106, 106, 106, 106, 106, 106, 106, 106, 106, 106,
-	106, 106, 106, 106, 106, 106, 106, 106, 106, 106,
-	106, 106, 106, 106, 106, 106, 106, 106, 106, 106,
-	106, 106, 106, 106, 106, 106, 106, 106, 106, 106,
-	106, 106, 106, 106, 106, 106, 106, 106, 106, 106,
-	106, 106, 106, 106, 106, 106, 106, 106, 106, 106,
-	106, 106, 106, 106, 106, 106, 106, 10, 0, 45,
-	0, 0, 0, 10, 106, 45, 106, 10, 106, 35,
-	5, 106, 5, 10, 0, 25, 55, 106, 35, 5,
-	106, 10, 106, 106, 106, 106, 106, 106,
+      104, 104, 104, 104, 104, 104, 104, 104, 104, 104,
+      104, 104, 104, 104, 104, 104, 104, 104, 104, 104,
+      104, 104, 104, 104, 104, 104, 104, 104, 104, 104,
+      104, 104, 104, 104, 104, 104, 104, 104, 104, 104,
+      104, 104, 104, 104, 104, 104, 104, 104, 104, 104,
+      104, 104, 104, 104, 104, 104, 104, 104, 104, 104,
+      104, 104, 104, 104, 104,  30,   0,  50,   0,   0,
+       27,   5, 104,  30,   5,  50,   0,  10,   5,   0,
+       40,   5,   0,  15,  20, 104,  45,   5, 104,  35,
+      104, 104, 104, 104, 104, 104, 104,  30,   0,  50,
+        0,   0,  27,   5, 104,  30,   5,  50,   0,  10,
+        5,   0,  40,   5,   0,  15,  20, 104,  45,   5,
+      104,  35, 104, 104, 104, 104, 104, 104, 104, 104,
+      104, 104, 104, 104, 104, 104, 104, 104, 104, 104,
+      104, 104, 104, 104, 104, 104, 104, 104, 104, 104,
+      104, 104, 104, 104, 104, 104, 104, 104, 104, 104,
+      104, 104, 104, 104, 104, 104, 104, 104, 104, 104,
+      104, 104, 104, 104, 104, 104, 104, 104, 104, 104,
+      104, 104, 104, 104, 104, 104, 104, 104, 104, 104,
+      104, 104, 104, 104, 104, 104, 104, 104, 104, 104,
+      104, 104, 104, 104, 104, 104, 104, 104, 104, 104,
+      104, 104, 104, 104, 104, 104, 104, 104, 104, 104,
+      104, 104, 104, 104, 104, 104, 104, 104, 104, 104,
+      104, 104, 104, 104, 104, 104, 104, 104, 104, 104,
+      104, 104, 104, 104, 104, 104, 104, 104, 104, 104,
+      104, 104, 104, 104, 104, 104
     };
-    register int hval = len;
+  register int hval = len;
 
-    switch (hval) {
-    default:
-    case 3:
-	hval += hash_table[tolower((unsigned char) str[2])];
-    case 2:
-    case 1:
-	hval += hash_table[tolower((unsigned char) str[0])];
+  switch (hval)
+    {
+      default:
+      case 3:
+        hval += asso_values[(unsigned char)str[2]];
+      case 2:
+      case 1:
+        hval += asso_values[(unsigned char)str[0]];
+        break;
     }
-    return hval + hash_table[tolower((unsigned char) str[len - 1])];
+  return hval + asso_values[(unsigned char)str[len - 1]];
 }
 
 static int
-case_strcmp(register const char *str, register const char *key)
+case_strcmp (str, key)
+     register char *str, *key;
 {
-    int ans = 0;
+  int ans = 0;
 
-    while (!(ans = tolower(*str) - (int) *key) && *str)
-	str++, key++;
+  while (!(ans = tolower(*str) - (int) *key) && *str)
+    str++, key++;
 
-    return ans;
+  return ans;
 }
 
+#ifdef __GNUC__
+__inline
+#endif
 const struct keyword *
-in_word_set(register const char *str, register int len)
+in_word_set (str, len)
+     register const char *str;
+     register unsigned int len;
 {
-
-    static const struct keyword wordlist[] =
+  static const struct keyword wordlist[] =
     {
-	{"",},
-	{"",},
-	{"",},
-	{"for", DBV_Prehistory, tFOR},
-	{"",},
-	{"endif", DBV_Prehistory, tENDIF},
-	{"endfor", DBV_Prehistory, tENDFOR},
-	{"e_range", DBV_Prehistory, tERROR, E_RANGE},
-	{"endwhile", DBV_Prehistory, tENDWHILE},
-	{"e_recmove", DBV_Prehistory, tERROR, E_RECMOVE},
-	{"",},
-	{"e_none", DBV_Prehistory, tERROR, E_NONE},
-	{"",},
-	{"e_propnf", DBV_Prehistory, tERROR, E_PROPNF},
-	{"fork", DBV_Prehistory, tFORK},
-	{"break", DBV_BreakCont, tBREAK},
-	{"endtry", DBV_Exceptions, tENDTRY},
-	{"endfork", DBV_Prehistory, tENDFORK},
-	{"",},
-	{"",},
-	{"",},
-	{"",},
-	{"finally", DBV_Exceptions, tFINALLY},
-	{"",},
-	{"",},
-	{"",},
-	{"",},
-	{"e_quota", DBV_Prehistory, tERROR, E_QUOTA},
-	{"",},
-	{"else", DBV_Prehistory, tELSE},
-	{"",},
-	{"elseif", DBV_Prehistory, tELSEIF},
-	{"",},
-	{"any", DBV_Exceptions, tANY},
-	{"",},
-	{"",},
-	{"",},
-	{"",},
-	{"",},
-	{"",},
-	{"e_div", DBV_Prehistory, tERROR, E_DIV},
-	{"e_args", DBV_Prehistory, tERROR, E_ARGS},
-	{"e_varnf", DBV_Prehistory, tERROR, E_VARNF},
-	{"e_verbnf", DBV_Prehistory, tERROR, E_VERBNF},
-	{"",},
-	{"",},
-	{"e_perm", DBV_Prehistory, tERROR, E_PERM},
-	{"if", DBV_Prehistory, tIF},
-	{"",},
-	{"",},
-	{"",},
-	{"",},
-	{"in", DBV_Prehistory, tIN},
-	{"e_invind", DBV_Prehistory, tERROR, E_INVIND},
-	{"",},
-	{"while", DBV_Prehistory, tWHILE},
-	{"e_nacc", DBV_Prehistory, tERROR, E_NACC},
-	{"",},
-	{"continue", DBV_BreakCont, tCONTINUE},
-	{"",},
-	{"",},
-	{"e_type", DBV_Prehistory, tERROR, E_TYPE},
-	{"e_float", DBV_Float, tERROR, E_FLOAT},
-	{"e_invarg", DBV_Prehistory, tERROR, E_INVARG},
-	{"",},
-	{"",},
-	{"return", DBV_Prehistory, tRETURN},
-	{"",},
-	{"",},
-	{"",},
-	{"",},
-	{"",},
-	{"",},
-	{"",},
-	{"",},
-	{"",},
-	{"",},
-	{"",},
-	{"try", DBV_Exceptions, tTRY},
-	{"",},
-	{"",},
-	{"",},
-	{"",},
-	{"",},
-	{"",},
-	{"",},
-	{"",},
-	{"",},
-	{"e_maxrec", DBV_Prehistory, tERROR, E_MAXREC},
-	{"",},
-	{"",},
-	{"",},
-	{"",},
-	{"",},
-	{"",},
-	{"",},
-	{"",},
-	{"",},
-	{"",},
-	{"",},
-	{"",},
-	{"",},
-	{"",},
-	{"",},
-	{"",},
-	{"",},
-	{"except", DBV_Exceptions, tEXCEPT},
+      {""}, {""}, {""},
+      {"err",		DBV_Prehistory, tCONSTANT,	E_NONE,	CSLOT_ERR},
+      {""}, {""},
+      {"endfor",		DBV_Prehistory, tENDFOR},
+      {"e_range",	DBV_Prehistory, tERROR,	E_RANGE},
+      {"endwhile",	DBV_Prehistory, tENDWHILE},
+      {"e_recmove",	DBV_Prehistory, tERROR,	E_RECMOVE},
+      {""},
+      {"e_none",		DBV_Prehistory, tERROR,	E_NONE},
+      {""},
+      {"obj",		DBV_Prehistory, tCONSTANT,	E_NONE,	CSLOT_OBJ},
+      {""}, {""}, {""}, {""},
+      {"str",		DBV_Prehistory,	tCONSTANT,	E_NONE,	CSLOT_STR},
+      {"else",		DBV_Prehistory, tELSE},
+      {""}, {""}, {""}, {""}, {""}, {""},
+      {"e_type",		DBV_Prehistory, tERROR,	E_TYPE},
+      {""},
+      {"num",		DBV_Prehistory,	tCONSTANT,	E_NONE,	CSLOT_NUM},
+      {""},
+      {"for",		DBV_Prehistory, tFOR},
+      {"return",		DBV_Prehistory, tRETURN},
+      {"endif",		DBV_Prehistory, tENDIF},
+      {""}, {""}, {""}, {""},
+      {"in",		DBV_Prehistory, tIN},
+      {"e_invind",	DBV_Prehistory, tERROR,	E_INVIND},
+      {"list",		DBV_Prehistory, tCONSTANT,	E_NONE,	CSLOT_LIST},
+      {"while",		DBV_Prehistory, tWHILE},
+      {"endtry",		DBV_Exceptions, tENDTRY},
+      {"e_quota",	DBV_Prehistory, tERROR,	E_QUOTA},
+      {"e_invarg",	DBV_Prehistory, tERROR,	E_INVARG},
+      {""}, {""}, {""}, {""},
+      {"elseif",		DBV_Prehistory, tELSEIF},
+      {""},
+      {"e_div",		DBV_Prehistory, tERROR,	E_DIV},
+      {"e_args",		DBV_Prehistory, tERROR,	E_ARGS},
+      {"float",		DBV_Float,	tCONSTANT,	E_NONE,	CSLOT_FLOAT},
+      {""},
+      {"e_float",	DBV_Float,	tERROR,	E_FLOAT},
+      {"break",		DBV_BreakCont, tBREAK},
+      {"e_perm",		DBV_Prehistory, tERROR,	E_PERM},
+      {"endfork",	DBV_Prehistory, tENDFORK},
+      {""},
+      {"if",		DBV_Prehistory, tIF},
+      {""},
+      {"e_nacc",		DBV_Prehistory, tERROR,	E_NACC},
+      {""},
+      {"continue",	DBV_BreakCont, tCONTINUE},
+      {""}, {""}, {""}, {""},
+      {"e_maxrec",	DBV_Prehistory, tERROR,	E_MAXREC},
+      {""}, {""}, {""}, {""},
+      {"int",		DBV_Float,	tCONSTANT,	E_NONE,	CSLOT_INT},
+      {"finally",	DBV_Exceptions, tFINALLY},
+      {"e_propnf",	DBV_Prehistory, tERROR,	E_PROPNF},
+      {"except",		DBV_Exceptions, tEXCEPT},
+      {""}, {""},
+      {"e_varnf",	DBV_Prehistory, tERROR,	E_VARNF},
+      {"e_verbnf",	DBV_Prehistory, tERROR,	E_VERBNF},
+      {"fork",		DBV_Prehistory, tFORK},
+      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
+      {""}, {""},
+      {"try",		DBV_Exceptions, tTRY},
+      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
+      {"any",		DBV_Exceptions, tANY}
     };
 
-    if (len <= MAX_WORD_LENGTH && len >= MIN_WORD_LENGTH) {
-	register int key = hash(str, len);
+  if (len <= MAX_WORD_LENGTH && len >= MIN_WORD_LENGTH)
+    {
+      register int key = hash (str, len);
 
-	if (key <= MAX_HASH_VALUE && key >= MIN_HASH_VALUE) {
-	    register const char *s = wordlist[key].name;
+      if (key <= MAX_HASH_VALUE && key >= 0)
+        {
+          register const char *s = wordlist[key].name;
 
-	    if (*s == tolower(*str) && !case_strcmp(str + 1, s + 1))
-		return &wordlist[key];
-	}
+          if (tolower(*str) == *s && !case_strcmp (str + 1, s + 1))
+            return &wordlist[key];
+        }
     }
-    return 0;
+  return 0;
 }
 
 const struct keyword *
@@ -216,14 +199,11 @@ find_keyword(const char *word)
     return in_word_set(word, strlen(word));
 }
 
-char rcsid_keywords[] = "$Id: keywords.c,v 1.3 1998-12-14 13:17:55 nop Exp $";
+char rcsid_keywords[] = "$Id: keywords.c,v 1.3.8.1 2002-11-03 03:37:58 xplat Exp $";
 
-/* 
+/*
  * $Log: not supported by cvs2svn $
- * Revision 1.2  1997/03/03 04:18:45  nop
- * GNU Indent normalization
- *
- * Revision 1.1.1.1  1997/03/03 03:45:00  nop
+ * Revision 1.1.1.1  1997/03/03 03:45:02  nop
  * LambdaMOO 1.8.0p5
  *
  * Revision 2.2  1996/02/08  06:33:21  pavel

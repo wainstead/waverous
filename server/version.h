@@ -50,6 +50,9 @@ typedef enum {
 				 * verb code instead of as a numeric offset
 				 * into compiled opcodes.
 				 */
+    DBV_Constants,		/* Started treating constants like STR as true
+    				 * constants rather than preset variables.
+    				 */
     Num_DB_Versions		/* Special: the current version is this - 1. */
 } DB_Version;
 
@@ -64,6 +67,9 @@ extern int check_version(DB_Version);
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3.6.2  2002/09/17 15:35:06  xplat
+ * GNU indent normalization.
+ *
  * Revision 1.3.6.1  2002/09/12 05:57:40  xplat
  * Changes for inline PC saving and patch tags in the on-disk DB.
  *
