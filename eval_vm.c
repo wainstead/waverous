@@ -46,7 +46,7 @@ free_vm(vm the_vm, int stack_too)
 
     if (stack_too)
 	for (i = the_vm->top_activ_stack; i >= 0; i--)
-	    free_activation(the_vm->activ_stack[i], 1);
+	    free_activation(&the_vm->activ_stack[i], 1);
     myfree(the_vm->activ_stack, M_VM);
     myfree(the_vm, M_VM);
 }
@@ -120,10 +120,13 @@ read_vm(int task_id)
     return the_vm;
 }
 
-char rcsid_eval_vm[] = "$Id: eval_vm.c,v 1.3 1998-12-14 13:17:46 nop Exp $";
+char rcsid_eval_vm[] = "$Id: eval_vm.c,v 1.4 2002-08-18 09:47:26 bjj Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  1998/12/14 13:17:46  nop
+ * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
+ *
  * Revision 1.2  1997/03/03 04:18:36  nop
  * GNU Indent normalization
  *

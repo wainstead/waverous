@@ -60,10 +60,10 @@ static const char cmap[] =
 int
 mystrcasecmp(const char *ss, const char *tt)
 {
-    const unsigned char *s = (const unsigned char *) ss;
-    const unsigned char *t = (const unsigned char *) tt;
+    register const unsigned char *s = (const unsigned char *) ss;
+    register const unsigned char *t = (const unsigned char *) tt;
 
-    if (ss == tt) {
+    if (s == t) {
 	return 0;
     }
     while (cmap[*s] == cmap[*t++]) {
@@ -439,7 +439,7 @@ binary_to_raw_bytes(const char *binary, int *buflen)
     return reset_stream(s);
 }
 
-char rcsid_utils[] = "$Id: utils.c,v 1.6 2002-08-18 08:51:50 bjj Exp $";
+char rcsid_utils[] = "$Id: utils.c,v 1.7 2002-08-18 09:47:26 bjj Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
