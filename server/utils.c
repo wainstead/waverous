@@ -144,8 +144,10 @@ complex_free_var(Var v)
 	break;
     case TYPE_LIST:
 	if (delref(v.v.list) == 0) {
-	    for (i = 1; i <= v.v.list[0].v.num; i++)
-		free_var(v.v.list[i]);
+	    Var *pv;
+
+	    for (i = v.v.list[0].v.num, pv = v.v.list + 1; i > 0; i--, pv++)
+		free_var(*pv);
 	    myfree(v.v.list, M_LIST);
 	}
 	break;
@@ -411,9 +413,15 @@ binary_to_raw_bytes(const char *binary, int *buflen)
     return reset_stream(s);
 }
 
-char rcsid_utils[] = "$Id: utils.c,v 1.2.2.1 1997-03-20 18:07:48 bjj Exp $";
+char rcsid_utils[] = "$Id: utils.c,v 1.2.2.2 1997-03-21 14:29:03 bjj Exp $";
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.2.2.1  1997/03/20 18:07:48  bjj
+ * Add a flag to the in-memory type identifier so that inlines can cheaply
+ * identify Vars that need actual work done to ref/free/dup them.  Add the
+ * appropriate inlines to utils.h and replace old functions in utils.c with
+ * complex_* functions which only handle the types with external storage.
+ *
  * Revision 1.2  1997/03/03 04:19:36  nop
  * GNU Indent normalization
  *
