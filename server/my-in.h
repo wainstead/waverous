@@ -38,10 +38,24 @@ extern unsigned32 ntohl();
 
 #endif
 
+#  if NDECL_IN_ADDR_T
+typedef unsigned32 in_addr_t;
+#  endif
+
+#  ifndef INADDR_NONE
+#    define INADDR_NONE ((in_addr_t)-1)
+#  endif
+
 #endif
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3.10.1  2003/06/01 12:39:27  wrog
+ * ensure definitions for in_addr_t, INADDR_NONE
+ *
+ * Revision 1.3  1998/12/14 13:18:09  nop
+ * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
+ *
  * Revision 1.2  1997/03/03 04:18:53  nop
  * GNU Indent normalization
  *
