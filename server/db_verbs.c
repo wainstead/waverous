@@ -26,6 +26,9 @@
 #include "config.h"
 #include "db.h"
 #include "db_private.h"
+#include "db_tune.h"
+#include "list.h"
+#include "log.h"
 #include "parse_cmd.h"
 #include "program.h"
 #include "storage.h"
@@ -380,6 +383,42 @@ make_vc_table(int size)
 }
 
 #define VC_CACHE_STATS_MAX 16
+
+Var
+db_verb_cache_stats(void)
+{
+    int i, depth, histogram[VC_CACHE_STATS_MAX + 1];
+    vc_entry *vc;
+    Var v, vv;
+
+    for (i = 0; i < VC_CACHE_STATS_MAX + 1; i++) {
+	histogram[i] = 0;
+    }
+
+    for (i = 0; i < vc_size; i++) {
+	depth = 0;
+	for (vc = vc_table[i]; vc; vc = vc->next)
+	    depth++;
+	if (depth > VC_CACHE_STATS_MAX)
+	    depth = VC_CACHE_STATS_MAX;
+	histogram[depth]++;
+    }
+
+    v = new_list(4);
+    v.v.list[1].type = TYPE_INT;
+    v.v.list[1].v.num = verbcache_hit;
+    v.v.list[2].type = TYPE_INT;
+    v.v.list[2].v.num = verbcache_miss;
+    v.v.list[3].type = TYPE_INT;
+    v.v.list[3].v.num = db_verb_generation;
+    vv = (v.v.list[4] = new_list(VC_CACHE_STATS_MAX + 1));
+    for (i = 0; i < VC_CACHE_STATS_MAX + 1; i++) {
+	vv.v.list[i + 1].type = TYPE_INT;
+	vv.v.list[i + 1].v.num = histogram[i];
+    }
+    return v;
+}
+
 void
 db_log_cache_stats(void)
 {
@@ -695,9 +734,14 @@ db_verb_allows(db_verb_handle h, Objid progr, db_verb_flag flag)
 }
 
 
-char rcsid_db_verbs[] = "$Id: db_verbs.c,v 1.2.2.2 1997-03-22 22:54:36 bjj Exp $";
+char rcsid_db_verbs[] = "$Id: db_verbs.c,v 1.2.2.3 1997-05-29 11:56:21 nop Exp $";
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.2.2.2  1997/03/22 22:54:36  bjj
+ * Tiny tweak to db_find_callable_verb to avoid recomputing the first parent
+ * with verbdefs.  Also hit it with indent, which made these diffs bigger than
+ * they should have been...
+ *
  * Revision 1.2.2.1  1997/03/20 07:26:03  nop
  * First pass at the new verb cache.  Some ugly code inside.
  *
