@@ -387,7 +387,7 @@ function_description(int i)
     vv = v.v.list[4] = new_list(nargs);
     for (j = 0; j < nargs; j++) {
 	vv.v.list[j + 1].type = TYPE_INT;
-	vv.v.list[j + 1].v.num = entry.prototype[j];
+	vv.v.list[j + 1].v.num = entry.prototype[j] & TYPE_DB_MASK;
     }
 
     return v;
@@ -453,9 +453,13 @@ register_functions(void)
     register_function("load_server_options", 0, 0, bf_load_server_options);
 }
 
-char rcsid_functions[] = "$Id: functions.c,v 1.3 1997-03-03 05:03:50 nop Exp $";
+char rcsid_functions[] = "$Id: functions.c,v 1.3.2.1 1997-05-11 04:31:54 bjj Exp $";
 
 /* $Log: not supported by cvs2svn $
+ * Revision 1.3  1997/03/03 05:03:50  nop
+ * steak2: move protectedness into builtin struct, load_server_options()
+ * now required for $server_options updates.
+ *
  * Revision 1.2  1997/03/03 04:18:42  nop
  * GNU Indent normalization
  *
