@@ -17,13 +17,18 @@
  * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* $Id: waif.h,v 1.1.2.1 2002-08-29 05:44:22 bjj Exp $ */
+/* $Id: waif.h,v 1.1.2.2 2005-10-03 05:50:29 bjj Exp $ */
 
 #ifndef WAIF_h
 #define WAIF_h
 
 #define WAIF_PROP_PREFIX	':'
 #define WAIF_VERB_PREFIX	':'
+
+#ifdef WAIF_DICT
+#define WAIF_INDEX_VERB ":_index"
+#define WAIF_INDEXSET_VERB ":_set_index"
+#endif /* WAIF_DICT */
 
 #include "db_private.h"
 

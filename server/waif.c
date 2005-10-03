@@ -17,7 +17,7 @@
  * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-static char rcsid[] = "$Id: waif.c,v 1.1.2.2 2002-08-29 06:03:40 bjj Exp $";
+char rcsid_waif[] = "$Id: waif.c,v 1.1.2.3 2005-10-03 05:50:29 bjj Exp $";
 
 #include "structures.h"
 #include "bf_register.h"
