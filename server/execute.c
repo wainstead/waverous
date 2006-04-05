@@ -2768,8 +2768,8 @@ register_execute(void)
     register_function("task_stack", 1, 2, bf_task_stack, TYPE_INT, TYPE_ANY);
 
 #ifdef WAIF_DICT
-    waif_index_verb = strdup(WAIF_INDEX_VERB);
-    waif_indexset_verb = strdup(WAIF_INDEXSET_VERB);
+    waif_index_verb = str_dup(WAIF_INDEX_VERB);
+    waif_indexset_verb = str_dup(WAIF_INDEXSET_VERB);
 #endif				/* WAIF_DICT */
 }
 
@@ -3024,10 +3024,13 @@ read_activ(activation * a, int which_vector)
 }
 
 
-char rcsid_execute[] = "$Id: execute.c,v 1.13.2.4 2005-10-03 05:50:29 bjj Exp $";
+char rcsid_execute[] = "$Id: execute.c,v 1.13.2.5 2006-04-05 00:49:29 bjj Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.13.2.4  2005/10/03 05:50:29  bjj
+ * Add Jay Carlson's WAIF DICT as build option.
+ *
  * Revision 1.13.2.3  2005/09/29 06:56:18  bjj
  * Merge HEAD onto WAIF, bringing it approximately to 1.8.2
  *
