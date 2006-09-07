@@ -1666,8 +1666,8 @@ activation_bytes(activation * ap)
     }
     /* XXX ignore bi_func_data, it's an opaque type. */
     total += value_bytes(ap->temp) - sizeof(Var);
-    total += strlen(ap->verb) + 1;
-    total += strlen(ap->verbname) + 1;
+    total += memo_strlen(ap->verb) + 1;
+    total += memo_strlen(ap->verbname) + 1;
     return total;
 }
 
@@ -2233,10 +2233,13 @@ register_tasks(void)
     register_function("flush_input", 1, 2, bf_flush_input, TYPE_OBJ, TYPE_ANY);
 }
 
-char rcsid_tasks[] = "$Id: tasks.c,v 1.13 2004-05-28 07:53:32 wrog Exp $";
+char rcsid_tasks[] = "$Id: tasks.c,v 1.14 2006-09-07 00:55:02 bjj Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.13  2004/05/28 07:53:32  wrog
+ * added "intrinsic-commands" connection option
+ *
  * Revision 1.12  2004/05/22 01:25:44  wrog
  * merging in WROGUE changes (W_SRCIP, W_STARTUP, W_OOB)
  *

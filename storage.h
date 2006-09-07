@@ -47,17 +47,31 @@ extern void myfree(void *where, Memory_Type type);
 extern void *mymalloc(unsigned size, Memory_Type type);
 extern void *myrealloc(void *where, unsigned size, Memory_Type type);
 
-static inline void    /* XXX was extern, fix for non-gcc compilers */
+static inline void		/* XXX was extern, fix for non-gcc compilers */
 free_str(const char *s)
 {
     if (delref(s) == 0)
 	myfree((void *) s, M_STRING);
 }
 
+#ifdef MEMO_STRLEN
+/*
+ * Using the same mechanism as ref_count.h uses to hide Value ref counts,
+ * keep a memozied strlen in the storage with the string.
+ */
+#define memo_strlen(X)		((void)0, (((int *)(X))[-2]))
+#else
+#define memo_strlen(X)		strlen(X)
+
+#endif /* MEMO_STRLEN */
+
 #endif				/* Storage_h */
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  1998/12/14 13:19:00  nop
+ * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
+ *
  * Revision 1.4  1998/02/19 07:36:17  nop
  * Initial string interning during db load.
  *
