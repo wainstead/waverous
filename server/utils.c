@@ -364,7 +364,7 @@ value_bytes(Var v)
 
     switch (v.type) {
     case TYPE_STR:
-	size += strlen(v.v.str) + 1;
+	size += memo_strlen(v.v.str) + 1;
 	break;
     case TYPE_FLOAT:
 	size += sizeof(double);
@@ -439,10 +439,14 @@ binary_to_raw_bytes(const char *binary, int *buflen)
     return reset_stream(s);
 }
 
-char rcsid_utils[] = "$Id: utils.c,v 1.7 2002-08-18 09:47:26 bjj Exp $";
+char rcsid_utils[] = "$Id: utils.c,v 1.8 2006-09-07 00:55:02 bjj Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2002/08/18 09:47:26  bjj
+ * Finally made free_activation() take a pointer after noticing how !$%^&
+ * much time it was taking in a particular profiling run.
+ *
  * Revision 1.5  1999/08/09 02:36:33  nop
  * Shortcut various equality tests if we have pointer equality.
  *

@@ -274,6 +274,13 @@
 #define STRING_INTERNING /* */
 
 /******************************************************************************
+ * Store the length of the string WITH the string rather than recomputing
+ * it each time it is needed.
+ ******************************************************************************
+ */
+/* #define MEMO_STRLEN */
+
+/******************************************************************************
  * This package comes with a copy of the implementation of malloc() from GNU
  * Emacs.  This is a very nice and reasonably portable implementation, but some
  * systems, notably the NeXT machine, won't allow programs to provide their own
@@ -384,6 +391,9 @@
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2004/05/22 01:25:44  wrog
+ * merging in WROGUE changes (W_SRCIP, W_STARTUP, W_OOB)
+ *
  * Revision 1.8.10.3  2004/05/21 00:02:59  wrog
  * allow for OUT_OF_BAND_QUOTE_PREFIX being undefined
  *
