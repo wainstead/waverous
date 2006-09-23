@@ -6,10 +6,10 @@
 @c Uncomment the following line for two-sided printing.
 @c @setchapternewpage odd
 @macro lmversion
-1.8.1
+1.8.2
 @end macro
 @macro lmdate
-May 2004
+August 2006
 @end macro
 @comment %**end of header (This is for running Texinfo on a region.)
 
@@ -113,6 +113,7 @@ author.
           Copyright @copyright{} 2004 by Roger F. Crew.
 @end format
 @end ifset
+@end ifnothtml
 
 @menu
 * Introduction::             What is LambdaMOO?
@@ -123,7 +124,9 @@ author.
 * Function Index::           Index to All Built-In Functions
 @end menu
 
-@end ifnothtml
+@ifhtml
+@contents
+@end ifhtml
 @c evidently, space is not allowed here
 @c
 @node Introduction, Database, Top, Top
@@ -171,8 +174,8 @@ Next, I describe the complete syntax and semantics of the MOO programming
 language.  Finally, I describe all of the database conventions assumed by the
 server.
 
-@quotation
-@strong{Note:} This manual describes only those aspects of LambdaMOO that are
+@quotation Note
+This manual describes only those aspects of LambdaMOO that are
 entirely independent of the contents of the database.  It does not describe,
 for example, the commands or programming interfaces present in the LambdaCore
 database.
@@ -188,8 +191,8 @@ manipulate.  In a few places, I refer to the @dfn{LambdaCore} database.  This
 is one particular LambdaMOO database, created every so often by extracting the
 ``core'' of the current database for the original LambdaMOO.
 
-@quotation
-@strong{Note}: The original LambdaMOO resides on the host
+@quotation Note
+The original LambdaMOO resides on the host
 @code{lambda.moo.mud.org} on port 8888.  Feel free to drop by!  A copy of the most
 recent release of the LambdaCore database can be obtained by anonymous FTP from
 host @code{ftp.lambda.moo.mud.org} in the directory @code{pub/MOO}.
@@ -614,8 +617,8 @@ set, then no error is raised, no message is printed, and the command is not
 aborted; instead the error value is returned as the result of the erroneous
 operation.
 
-@quotation
-@strong{Note:} the @samp{d} bit exists only for historical reasons; it used to
+@quotation Note
+The @samp{d} bit exists only for historical reasons; it used to
 be the only way for MOO code to catch and handle errors.  With the introduction
 of the @code{try}-@code{except} statement and the error-catching expression,
 the @samp{d} bit is no longer useful.  All new verbs should have the @samp{d}
@@ -767,9 +770,9 @@ first word names any of the five ``intrinsic'' commands: @samp{.program},
 @samp{PREFIX}, @samp{OUTPUTPREFIX}, @samp{SUFFIX}, @samp{OUTPUTSUFFIX}.
 The first one of these is only available to programmers, the other four are
 intended for use by client programs; all five are described in the final
-chapter of this document, ``Server Commands and Database Assumptions''.  If the
-first word isn't one of the above, then we get to the usual case: a normal MOO
-command.
+chapter of this document, @ref{Server,,Server Commands and Database Assumptions}.
+If the first word isn't one of the above, then we get to the usual case: a
+normal MOO command.
 
 The server next gives code in the database a chance to handle the command.  If
 the verb @code{$do_command()} exists, it is called with the words of the
@@ -1026,8 +1029,8 @@ set, then the error is effectively squelched immediately upon generation; the
 error value is simply returned as the value of the expression that generated
 it.
 
-@quotation
-@strong{Note:} this error-squelching behavior is very error prone, since it
+@quotation Note
+This error-squelching behavior is very error prone, since it
 affects @emph{all} errors, including ones the programmer may not have
 anticipated.  The @samp{d} bit exists only for historical reasons; it was once
 the only way for MOO programmers to catch and handle errors.  The
@@ -2096,8 +2099,8 @@ expression accomplishes this:
 ` @var{expr-1} ! @var{codes} => @var{expr-2} '
 @end example
 
-@noindent
-@strong{Note:} the open- and close-quotation marks in the previous line are
+@noindent Note:
+The open- and close-quotation marks in the previous line are
 really part of the syntax; you must actually type them as part of your MOO
 program for this kind of expression.
 
@@ -2239,8 +2242,8 @@ generated in a verb whose @samp{d} (debug) bit is not set, then the error is
 ignored and the statement that generated it is simply skipped; execution
 proceeds with the next statement.
 
-@quotation
-@strong{Note:} this error-ignoring behavior is very error prone, since it
+@quotation Note
+This error-ignoring behavior is very error prone, since it
 affects @emph{all} errors, including ones the programmer may not have
 anticipated.  The @samp{d} bit exists only for historical reasons; it was once
 the only way for MOO programmers to catch and handle errors.  The
@@ -3572,6 +3575,15 @@ crypt("foobar", "J4")   @result{}   "J4AcPxOJ4ncq2"
 @end example
 @end deftypefun
 
+@quotation Note
+As of version 1.8.2, the entire salt (of any length) is passed to the operating
+system's low-level crypt function.  It is unlikely, however, that all operating
+systems will return the same string when presented with a longer salt.
+Therefore, identical calls to @code{crypt()} may generate different results on
+different platforms, and your password verification systems will fail.  Use a
+salt longer than two characters at your own risk.
+@end quotation
+
 @deftypefun str string_hash (str @var{text})
 @deftypefunx str binary_hash (str @var{bin-string})
 Returns a 32-character hexadecimal string encoding the result of applying the
@@ -4106,7 +4118,7 @@ set_verb_args($container, "take", @{"any", "from", "this"@})
 @end example
 @end deftypefun
 
-@deftypefun none add_verb (obj @var{object}, list @var{info}, list @var{args})
+@deftypefun int add_verb (obj @var{object}, list @var{info}, list @var{args})
 Defines a new verb on the given @var{object}.  The new verb's owner, permission
 bits and name(s) are given by @var{info} in the same format as is returned by
 @code{verb_info()}, described above.  The new verb's direct-object,
@@ -4120,7 +4132,8 @@ well-formed permission bits and verb names, or @var{args} is not a legitimate
 syntax specification, then @code{E_INVARG} is raised.  If the programmer does
 not have write permission on @var{object} or if the owner specified by
 @var{info} is not the programmer and the programmer is not a wizard, then
-@code{E_PERM} is raised.
+@code{E_PERM} is raised.  Otherwise, this function returns a positive integer
+representing the new verb's index in this object's @code{verbs()} list.
 @end deftypefun
 
 @deftypefun none delete_verb (obj @var{object}, str @var{verb-desc})
@@ -4388,22 +4401,7 @@ Raises @code{E_INVARG} if @var{conn} does not specify a current connection and
 following values for @var{option} are currently supported:
 
 @table @code
-@item "hold-input"
-If @var{value} is true, then input received on @var{conn} will not be treated
-as a command; instead, it will remain in the queue until it is retrieved by a call to
-@code{read()} or this connection option is set false, 
-in which case command processing resumes.
-Processing of out-of-band input lines is unaffected by this option.
-
-@item "client-echo"
-Send the Telnet Protocol @samp{WONT ECHO} or @samp{WILL ECHO} command,
-depending on whether @var{value} is true or false, respectively.  For clients
-that support the Telnet Protocol, this should toggle whether or not the client
-echoes locally the characters typed by the user.  Note that the server itself
-never echoes input characters under any circumstances.  (This option is only
-available under the TCP/IP networking configurations.)
-
-@item "binary"
+@item binary
 If @var{value} is true, then both input from and output to @var{conn} can
 contain arbitrary bytes.  Input from a connection in binary mode is not broken
 into lines at all; it is delivered to either the read() function or the
@@ -4413,7 +4411,26 @@ a description of the binary string representation.)  For output to a connection
 in binary mode, the second argument to `notify()' must be a binary string; if
 it is malformed, E_INVARG is raised.
 
-@item "flush-command"
+@item hold-input
+If @var{value} is true, then input received on @var{conn} will not be treated
+as a command; instead, it will remain in the queue until it is retrieved by a
+call to @code{read()} or this connection option is set false, in which case
+command processing resumes.  Processing of binary and out-of-band input lines
+are unaffected by this option.
+
+@item disable-oob
+Out-of-band input processing is disabled or enabled if @var{value} is true or
+false, respectively.
+
+@item client-echo
+Send the Telnet Protocol @samp{WONT ECHO} or @samp{WILL ECHO} command,
+depending on whether @var{value} is true or false, respectively.  For clients
+that support the Telnet Protocol, this should toggle whether or not the client
+echoes locally the characters typed by the user.  Note that the server itself
+never echoes input characters under any circumstances.  (This option is only
+available under the TCP/IP networking configurations.)
+
+@item flush-command
 If @var{value} is a non-empty string, then it becomes the new @dfn{flush}
 command for this connection, by which the player can flush all queued input
 that has not yet been processed by the server.  If @var{value} is not a
@@ -4421,6 +4438,14 @@ non-empty string, then @var{conn} is set to have no flush command at all.  The
 default value of this option can be set via the property
 @code{$server_options.default_flush_command}; see the chapter on server
 assumptions about the database for details.
+
+@item intrinsic-commands
+If @var{value} is a list, then it may contain any or none of the ``intrinsic''
+commands as strings.  For more details, see @ref{Server,,Server Commands and Database Assumptions}.
+
+If @var{value} is an integer, all intrinsic commands are enabled (the default
+condition) or disabled, depending on whether @var{value} is true or false,
+respectively.
 @end table
 @end deftypefun
 
@@ -4438,7 +4463,7 @@ connection and @code{E_PERM} if the programmer is neither @var{conn} nor a
 wizard.
 @end deftypefun
 
-@deftypefun obj open_network_connection (@var{value}, @dots{})
+@deftypefun obj open_network_connection (@var{value}, @dots{} [, @var{listener}])
 Establishes a network connection to the place specified by the arguments and
 more-or-less pretends that a new, normal player connection has been established
 from there.  The new connection, as usual, will not be logged in initially and
@@ -4452,12 +4477,17 @@ the network connection cannot be made for some reason, then other errors will
 be returned, depending upon the particular network implementation in use.
 
 For the TCP/IP network implementations (the only ones as of this writing that
-support outbound connections), there must be two arguments, a string naming a
-host (possibly using the numeric Internet syntax) and an integer specifying a TCP
-port.  If a connection cannot be made because the host does not exist, the port
-does not exist, the host is not reachable or refused the connection,
-@code{E_INVARG} is raised.  If the connection cannot be made for other
-reasons, including resource limitations, then @code{E_QUOTA} is raised.
+support outbound connections), there must be at least two arguments, a string
+naming a host (possibly using the numeric Internet syntax) and an integer
+specifying a TCP port.  If a connection cannot be made because the host does
+not exist, the port does not exist, the host is not reachable or refused the
+connection, @code{E_INVARG} is raised.  If the connection cannot be made for
+ other reasons, including resource limitations, then @code{E_QUOTA} is raised.
+
+Beginning with version 1.8.2, an optional third argument may be supplied,
+@code{listener} must be an object, whose listening verbs will be called at
+appropriate points.  See the description in @code{listen()}, below, for more
+details.
 
 The outbound connection process involves certain steps that can take quite a
 long time, during which the server is not doing anything else, including
@@ -4469,24 +4499,24 @@ It is worth mentioning one tricky point concerning the use of this function.
 Since the server treats the new connection pretty much like any normal player
 connection, it will naturally try to parse any input from that connection as
 commands in the usual way.  To prevent this treatment, you should use
-@code{set_connection_option()} to set the @code{"hold-input"} option true on
+@code{set_connection_option()} to set the @code{hold-input} option true on
 the connection.
 @end deftypefun
 
 @deftypefun value listen (obj @var{object}, @var{point} [, @var{print-messages}])
 Create a new point at which the server will listen for network connections,
-just as it does normally.  @var{Object} is the object whose verbs
+just as it does normally.  @var{object} is the object whose verbs
 @code{do_login_command}, @code{do_command}, @code{do_out_of_band_command},
 @code{user_connected}, @code{user_created}, @code{user_reconnected},
 @code{user_disconnected}, and @code{user_client_disconnected} will be called at
 appropriate points, just as these verbs are called on @code{#0} for normal
 connections.  (See the chapter on server assumptions about the database for the
-complete story on when these functions are called.)  @var{Point} is a
+complete story on when these functions are called.)  @var{point} is a
 network-configuration-specific parameter describing the listening point.  If
 @var{print-messages} is provided and true, then the various
 database-configurable messages (also detailed in the chapter on server
 assumptions) will be printed on connections received at the new listening
-point.  @code{Listen()} returns @var{canon}, a `canonicalized' version of
+point.  @code{listen()} returns @var{canon}, a `canonicalized' version of
 @var{point}, with any configuration-specific defaulting or aliasing accounted
 for.
 
@@ -4811,7 +4841,8 @@ information about a particular queued task in the following format:
 
 @example
 @{@var{task-id}, @var{start-time}, @var{x}, @var{y},
- @var{programmer}, @var{verb-loc}, @var{verb-name}, @var{line}, @var{this}@}
+ @var{programmer}, @var{verb-loc}, @var{verb-name}, @var{line}, @var{this},
+ @var{task-size}@}
 @end example
 
 @noindent
@@ -4823,12 +4854,15 @@ will begin execution (and also the player who @dfn{owns} this task),
 @var{verb-loc} is the object on which the verb that forked this task was
 defined at the time, @var{verb-name} is that name of that verb, @var{line} is
 the number of the first line of the code in that verb that this task will
-execute, and @var{this} is the value of the variable @samp{this} in that verb.
+execute, @var{this} is the value of the variable @samp{this} in that verb, and
+@var{task-size} is the size of the task in bytes.
 For reading tasks, @var{start-time} is @code{-1}.
 
 The @var{x} and @var{y} fields are now obsolete and are retained only for
 backward-compatibility reasons.  They may be reused for new purposes in some
 future version of the server.
+
+The @var{task-size} variable was introduced in version 1.8.2.
 @end deftypefun
 
 @deftypefun none kill_task (int @var{task-id})
@@ -4998,7 +5032,7 @@ For @code{verb_cache_stats} the return value will be a list of the form
 @end example
 
 @noindent
-though this may change in future server releases.  The cache is invalided 
+though this may change in future server releases.  The cache is invalidated 
 by any builtin function call that may have an effect on verb lookups
 (e.g., @code{delete_verb()}).
 @end deftypefun
@@ -5082,20 +5116,26 @@ It is possible to compile the server to recognize an
 @dfn{out-of-band prefix}
 for input lines.  This is a string
 that the server will check for at the beginning of every unflushed line of
-input from a connection, regardless of
+input from a non-binary connection, regardless of
 whether or not a player is logged in and regardless of whether or not
-reading tasks are waiting for input on that connection.  
+reading tasks are waiting for input on that connection.
 
 If a given line of input begins with the defined out-of-band prefix 
 (@samp{#$#} by default), then it is not treated as a normal command or given as
 input to any reading task.  Instead, the line is parsed into a list of words in
-the usual way and those words are given as the arguments in a call to
-@code{$do_out_of_band_command()}.  
+the usual way and those words are given as the arguments in a forked call to
+@code{$do_out_of_band_command()}.
 
 If this verb does not exist or is not executable, 
 the line in question will be @emph{completely ignored}.
 
-For example, with the default out-of-band prefix, the line of input
+You may also define an @dfn{out-of-band quote prefix} (@samp{#$"} by default);
+any lines that begin with this prefix will be stripped of the prefix and
+handled normally, even if the resulting line begins with the out-of-band
+prefix.  This provides a means of quoting lines that would otherwise trigger
+@code{$do_out_of_band_command()}.
+
+For example, with the default prefixes, the line of input
 
 @example
 #$#mcp-client-set-type fancy
@@ -5107,6 +5147,17 @@ would result in the following call being made in a new server task:
 @example
 $do_out_of_band_command("#$#mcp-client-set-type", "fancy")
 @end example
+
+@noindent
+and the line of input
+
+@example
+#$"#$#mcp-client-set-type fancy
+@end example
+
+@noindent
+would result in the text @samp{#$#mcp-client-set-type fancy} being handled
+normally, as a command or input to a reading task.
 
 During the call to @code{$do_out_of_band_command()}, the variable @code{player}
 is set to the object number representing the player associated with the
@@ -5626,17 +5677,20 @@ For more on this, see @ref{Out-of-band Processing,OOB,Out-of-band Processing}.
 
 As we previously described in @ref{Parsing,,The Built-in Command Parser},
 on any logged-in connection that 
+
 @itemize
 @item
 is not the subject of a @code{read()} call,
 @item
 does not have a @code{.program} command in progress, and
 @item
-has not had its connection option @code{"hold-input"} set, 
+has not had its connection option @code{hold-input} set, 
 @end itemize
+
 @noindent
 any incoming line that 
 @itemize
+
 @item
 has not been flushed
 @item
@@ -5645,6 +5699,7 @@ is in-band (i.e., has not been consumed by out-of-band processing) and
 is not itself @code{.program} or one of the other four intrinsic commands
 @end itemize
 @noindent
+
 will result in a call to @code{$do_command()}
 provided that verb exists and is executable.
 If this verb suspends or returns a true value, then processing of that line ends at this point, 
@@ -5889,7 +5944,10 @@ can affect the database and how the code within it runs.
 @comment  node-name,  next,  previous,  up
 @subsection Server Compilation Options
 
-The following option values are specified (via @code{#define}) in the file @samp{options.h} in the server sources.  Except for those cases where property values on @code{$server_options} take precedence, these settings cannot be changed at runtime.  
+The following option values are specified (via @code{#define}) in the file
+@samp{options.h} in the server sources.  Except for those cases where property
+values on @code{$server_options} take precedence, these settings cannot be
+changed at runtime.
 
 This list is not intended to be exhaustive.
 
@@ -5988,6 +6046,17 @@ This specifies that, once the database is loaded,
 Emergency Wizard Mode will be entered 
 before starting any tasks 
 or doing the initial listen to accept connections.
+
+@item -a @var{source-address}
+(Optional)
+This specifies a network interface (for a server compiled to use TCP/IP
+networking) to listen on.
+If this option is not given, the server will listen on all interfaces.
+
+@item +O/-O
+(Optional)
+Enable or disable outbound networking, respectively.  These override the
+compile-time default set in @samp{options.h}.
 @end table
 
 @subsubheading Database Arguments
@@ -6122,9 +6191,12 @@ server's standard input and output streams.
 
 @bye
 
-@c $Id: ProgrammersManual.texinfo,v 1.3 2004-06-02 21:49:02 wrog Exp $
+@c $Id: ProgrammersManual.texinfo,v 1.4 2006-09-23 15:01:38 pschwan Exp $
 
 @c $Log: not supported by cvs2svn $
+@c Revision 1.3  2004/06/02 21:49:02  wrog
+@c changed a few #0.s -> $s
+@c
 @c Revision 1.2  2004/06/02 08:04:43  wrog
 @c first 1.8.1 version
 @c introduce date and version macros
