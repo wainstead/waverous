@@ -25,7 +25,7 @@ ProgrammersManual.tex-no-info: ProgrammersManual.texinfo
 	    -e '/^@menu/,/^@end menu/d' \
 	    -e '/^@setfilename/s/info/txt/' \
 	    -e 's/@ref{\([^,}]*,\)*\([^}]*\)}/the section "\2"/' \
-	    -e 's/@pxref{\([^,}]*,\)*\(\(@[a-z]*{[^}]*}\|[^@}]\)*\)}/see "\2"/' \
+	    -e 's/@pxref{\([^,}]*,\)*\([^}]*\)}/see the section "\2"/' \
 	    -e 's/@xref{\([^,}]*,\)*\([^}]*\)}/See the section "\2"/' \
 	    < ProgrammersManual.texinfo > ProgrammersManual.tex-no-info
 
@@ -51,7 +51,7 @@ html/ProgrammersManual_toc.html: ProgrammersManual.texinfo
 	cp -p common.css html
 	@echo ====================
 	@echo Checking for TexInfo commands left in the html...
-	@texi2html -check html/ProgrammersManual_*.html
+	-@texi2html -check html/ProgrammersManual_*.html || echo "Check failed; proceeding anyways."
 	@echo ====================
 
 
@@ -75,6 +75,12 @@ distclean: clean
 	rm -rf html
 
 # $Log: not supported by cvs2svn $
+# Revision 1.2  2004/06/02 08:20:26  wrog
+# changed .Z targets to .gz targets (no one uses compress anymore, right?)
+# txt target: fixed sed script to be able to deal with cross references
+# html target: updated to use subdir option and include link to common.css style-sheet
+# added pdf target; added distclean target
+#
 # Revision 1.1.1.2  2004/05/31 07:04:20  wrog
 # eostrom last version
 #
