@@ -2121,18 +2121,19 @@ run_interpreter(char raise, enum error e,
 
     if (ret == OUTCOME_ABORTED && handler_verb_name) {
 	db_verb_handle h;
+        enum outcome hret;
 	Var args, handled, traceback;
 	int i;
 
 	args = handler_verb_args;
 	h = db_find_callable_verb(SYSTEM_OBJECT, handler_verb_name);
 	if (do_db_tracebacks && h.ptr) {
-	    ret = do_server_verb_task(SYSTEM_OBJECT, handler_verb_name,
-				      var_ref(handler_verb_args), h,
-				      activ_stack[0].player, "", &handled,
-				      0/*no-traceback*/);
-	    if ((ret == OUTCOME_DONE && is_true(handled))
-		|| ret == OUTCOME_BLOCKED) {
+	    hret = do_server_verb_task(SYSTEM_OBJECT, handler_verb_name,
+				       var_ref(handler_verb_args), h,
+				       activ_stack[0].player, "", &handled,
+				       0/*no-traceback*/);
+	    if ((hret == OUTCOME_DONE && is_true(handled))
+		|| hret == OUTCOME_BLOCKED) {
 		/* Assume the in-DB code handled it */
 		free_var(args);
 		return OUTCOME_ABORTED;		/* original ret value */
@@ -2870,10 +2871,17 @@ read_activ(activation * a, int which_vector)
 }
 
 
-char rcsid_execute[] = "$Id: execute.c,v 1.17 2006-09-07 00:55:02 bjj Exp $";
+char rcsid_execute[] = "$Id: execute.c,v 1.18 2006-09-26 02:03:59 pschwan Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.17  2006/09/07 00:55:02  bjj
+ * Add new MEMO_STRLEN option which uses the refcounting mechanism to
+ * store strlen with strings.  This is basically free, since most string
+ * allocations are rounded up by malloc anyway.  This saves lots of cycles
+ * computing strlen.  (The change is originally from jitmoo, where I wanted
+ * inline range checks for string ops).
+ *
  * Revision 1.16  2004/05/22 01:25:43  wrog
  * merging in WROGUE changes (W_SRCIP, W_STARTUP, W_OOB)
  *
