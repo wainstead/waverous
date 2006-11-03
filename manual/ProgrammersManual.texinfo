@@ -6,7 +6,7 @@
 @c Uncomment the following line for two-sided printing.
 @c @setchapternewpage odd
 @macro lmversion
-1.8.2
+1.8.3
 @end macro
 @macro lmdate
 August 2006
@@ -3577,7 +3577,7 @@ crypt("foobar", "J4")   @result{}   "J4AcPxOJ4ncq2"
 @end deftypefun
 
 @quotation Note
-As of version 1.8.2, the entire salt (of any length) is passed to the operating
+As of version 1.8.3, the entire salt (of any length) is passed to the operating
 system's low-level crypt function.  It is unlikely, however, that all operating
 systems will return the same string when presented with a longer salt.
 Therefore, identical calls to @code{crypt()} may generate different results on
@@ -4551,7 +4551,7 @@ not exist, the port does not exist, the host is not reachable or refused the
 connection, @code{E_INVARG} is raised.  If the connection cannot be made for
 other reasons, including resource limitations, then @code{E_QUOTA} is raised.
 
-Beginning with version 1.8.2, an optional third argument may be supplied,
+Beginning with version 1.8.3, an optional third argument may be supplied,
 @code{listener} must be an object, whose listening verbs will be called at
 appropriate points.  See the description in @code{listen()}, below, for more
 details.
@@ -4929,7 +4929,7 @@ The @var{x} and @var{y} fields are now obsolete and are retained only for
 backward-compatibility reasons.  They may be reused for new purposes in some
 future version of the server.
 
-The @var{task-size} variable was introduced in version 1.8.2.
+The @var{task-size} variable was introduced in version 1.8.3.
 @end deftypefun
 
 @deftypefun none kill_task (int @var{task-id})
@@ -6312,9 +6312,16 @@ server's standard input and output streams.
 
 @bye
 
-@c $Id: ProgrammersManual.texinfo,v 1.5 2006-09-29 04:56:42 wrog Exp $
+@c $Id: ProgrammersManual.texinfo,v 1.6 2006-11-03 01:55:37 pschwan Exp $
 
 @c $Log: not supported by cvs2svn $
+@c Revision 1.5  2006/09/29 04:56:42  wrog
+@c more on connection options
+@c explain brokenness of binary mode
+@c expand oob quoting
+@c expand/fix -a and +O/-O description
+@c add OUT_OF_BAND_QUOTE_PREFIX to options.h list
+@c
 @c Revision 1.4  2006/09/23 15:01:38  pschwan
 @c Manual updates in preparation for a 1.8.2 release
 @c
