@@ -18,7 +18,8 @@
 #ifndef Storage_h
 #define Storage_h 1
 
-#include "config.h"
+#include "my-string.h"
+
 #include "structures.h"
 #include "ref_count.h"
 
@@ -69,6 +70,13 @@ free_str(const char *s)
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2006/09/07 00:55:02  bjj
+ * Add new MEMO_STRLEN option which uses the refcounting mechanism to
+ * store strlen with strings.  This is basically free, since most string
+ * allocations are rounded up by malloc anyway.  This saves lots of cycles
+ * computing strlen.  (The change is originally from jitmoo, where I wanted
+ * inline range checks for string ops).
+ *
  * Revision 1.5  1998/12/14 13:19:00  nop
  * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
  *
