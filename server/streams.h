@@ -28,6 +28,7 @@ typedef struct {
 
 extern Stream *new_stream(int size);
 extern void stream_add_char(Stream *, char);
+extern void stream_delete_char(Stream *);
 extern void stream_add_string(Stream *, const char *);
 extern void stream_printf(Stream *, const char *,...);
 extern void free_stream(Stream *);
@@ -39,6 +40,9 @@ extern int stream_length(Stream *);
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  1998/12/14 13:19:02  nop
+ * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
+ *
  * Revision 1.2  1997/03/03 04:19:28  nop
  * GNU Indent normalization
  *
