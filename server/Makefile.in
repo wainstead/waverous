@@ -139,7 +139,7 @@ tags:
 	etags -t $(SRCS)
 
 clean:
-	rm -f $(OBJS) $(OPT_NET_OBJS) core y.tab.c y.tab.h y.output makedep eddep
+	rm -f $(OBJS) $(OPT_NET_OBJS) core parser.c y.tab.c y.tab.h y.output makedep eddep
 
 distclean:	clean
 	rm -f config.h Makefile config.status
@@ -156,6 +156,9 @@ depend: ${ALL_CSRCS}
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.9  2004/05/22 01:25:43  wrog
+# merging in WROGUE changes (W_SRCIP, W_STARTUP, W_OOB)
+#
 # Revision 1.8.10.1  2003/06/01 12:33:07  wrog
 # added net_tcp.c; (put db_tune.h in HDRS); ran makedepend
 #
