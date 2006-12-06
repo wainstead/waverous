@@ -732,7 +732,7 @@ run(char raise, enum error resumption_error, Var * result)
 	     + ((unsigned) bv[-2] << 8)      	\
 	     + bv[-1]))))
 
-#define SKIP_BYTES(bv, nb)	(void)(bv += nb)
+#define SKIP_BYTES(bv, nb)	((void)(bv += nb))
 
 #define LOAD_STATE_VARIABLES() 					\
 do {  								\
@@ -810,8 +810,10 @@ do {    						    	\
 		Var cond;
 
 		cond = POP();
-		if (!is_true(cond))	/* jump if false */
-		    JUMP(READ_BYTES(bv, bc.numbytes_label));
+		if (!is_true(cond)) {	/* jump if false */
+		    unsigned lab = READ_BYTES(bv, bc.numbytes_label);
+		    JUMP(lab);
+		}
 		else {
 		    SKIP_BYTES(bv, bc.numbytes_label);
 		}
@@ -820,7 +822,10 @@ do {    						    	\
 	    break;
 
 	case OP_JUMP:
-	    JUMP(READ_BYTES(bv, bc.numbytes_label));
+	    {
+		unsigned lab = READ_BYTES(bv, bc.numbytes_label);
+		JUMP(lab);
+	    }
 	    break;
 
 	case OP_FOR_LIST:
@@ -1825,6 +1830,7 @@ do {    						    	\
 		    {
 			Var v, marker;
 			int i;
+			unsigned lab;
 
 			if (eop == EOP_END_CATCH)
 			    v = POP();
@@ -1840,7 +1846,8 @@ do {    						    	\
 			if (eop == EOP_END_CATCH)
 			    PUSH(v);
 
-			JUMP(READ_BYTES(bv, bc.numbytes_label));
+			lab = READ_BYTES(bv, bc.numbytes_label);
+			JUMP(lab);
 		    }
 		    break;
 
@@ -1892,7 +1899,7 @@ do {    						    	\
 		    goto do_test;
 
 		case EOP_EXIT_ID:
-		    READ_BYTES(bv, bc.numbytes_var_name);	/* ignore id */
+		    SKIP_BYTES(bv, bc.numbytes_var_name);	/* ignore id */
 		    /* fall thru */
 		case EOP_EXIT:
 		    {
@@ -2871,10 +2878,23 @@ read_activ(activation * a, int which_vector)
 }
 
 
-char rcsid_execute[] = "$Id: execute.c,v 1.18 2006-09-26 02:03:59 pschwan Exp $";
+char rcsid_execute[] = "$Id: execute.c,v 1.19 2006-12-06 23:54:53 wrog Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.18  2006/09/26 02:03:59  pschwan
+ * b=1552816
+ * r=ben
+ *
+ * execute.c:run_interpreter() sometimes clobbers the real return code with that
+ * of the traceback handler.  If |result| is non-NULL, this can lead to it being
+ * used later on without ever having been initialized, causing "Unknown Var type"
+ * errors.
+ *
+ * In practice -- because |result| is almost always NULL or (in one case)
+ * initialized before calling run_interpreter() -- this situation wasn't
+ * encountered execept in Emergency Mode.
+ *
  * Revision 1.17  2006/09/07 00:55:02  bjj
  * Add new MEMO_STRLEN option which uses the refcounting mechanism to
  * store strlen with strings.  This is basically free, since most string
