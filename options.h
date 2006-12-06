@@ -207,6 +207,15 @@
 #define DEFAULT_CONNECT_TIMEOUT	300
 
 /******************************************************************************
+ * On connections that have not been set to binary mode, the server normally
+ * discards incoming characters that are not printable ASCII, including
+ * backspace (8) and delete(127).  If INPUT_APPLY_BACKSPACE is defined,
+ * backspace and delete cause the preceding character (if any) to be removed
+ * from the input stream.  (Comment this out to restore pre-1.8.3 behavior)
+ */
+#define INPUT_APPLY_BACKSPACE
+
+/******************************************************************************
  * The server maintains a cache of the most recently used patterns from calls
  * to the match() and rmatch() built-in functions.  PATTERN_CACHE_SIZE controls
  * how many past patterns are remembered by the server.  Do not set it to a
@@ -391,6 +400,13 @@
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2006/09/07 00:55:02  bjj
+ * Add new MEMO_STRLEN option which uses the refcounting mechanism to
+ * store strlen with strings.  This is basically free, since most string
+ * allocations are rounded up by malloc anyway.  This saves lots of cycles
+ * computing strlen.  (The change is originally from jitmoo, where I wanted
+ * inline range checks for string ops).
+ *
  * Revision 1.9  2004/05/22 01:25:44  wrog
  * merging in WROGUE changes (W_SRCIP, W_STARTUP, W_OOB)
  *
