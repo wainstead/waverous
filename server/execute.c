@@ -61,7 +61,6 @@ static int ticks_remaining;
 int task_timed_out;
 static int interpreter_is_running = 0;
 static Timer_ID task_alarm_id;
-static task_kind current_task_kind;
 
 static const char *handler_verb_name;	/* For in-DB traceback handling */
 static Var handler_verb_args;
@@ -734,7 +733,7 @@ run(char raise, enum error resumption_error, Var * result)
 	     + ((unsigned) bv[-2] << 8)      	\
 	     + bv[-1]))))
 
-#define SKIP_BYTES(bv, nb)	(void)(bv += nb)
+#define SKIP_BYTES(bv, nb)	((void)(bv += nb))
 
 #define LOAD_STATE_VARIABLES() 					\
 do {  								\
@@ -812,8 +811,10 @@ do {    						    	\
 		Var cond;
 
 		cond = POP();
-		if (!is_true(cond))	/* jump if false */
-		    JUMP(READ_BYTES(bv, bc.numbytes_label));
+		if (!is_true(cond)) {	/* jump if false */
+		    unsigned lab = READ_BYTES(bv, bc.numbytes_label);
+		    JUMP(lab);
+		}
 		else {
 		    SKIP_BYTES(bv, bc.numbytes_label);
 		}
@@ -822,7 +823,10 @@ do {    						    	\
 	    break;
 
 	case OP_JUMP:
-	    JUMP(READ_BYTES(bv, bc.numbytes_label));
+	    {
+		unsigned lab = READ_BYTES(bv, bc.numbytes_label);
+		JUMP(lab);
+	    }
 	    break;
 
 	case OP_FOR_LIST:
@@ -962,12 +966,13 @@ do {    						    	\
 			   || (list.type == TYPE_LIST
 		       && index.v.num > list.v.list[0].v.num /* size */ )
 			   || (list.type == TYPE_STR
-			    && index.v.num > (int) strlen(list.v.str))) {
+			    && index.v.num > (int) memo_strlen(list.v.str))) {
 		    free_var(value);
 		    free_var(index);
 		    free_var(list);
 		    PUSH_ERROR(E_RANGE);
-		} else if (list.type == TYPE_STR && strlen(value.v.str) != 1) {
+		} else if (list.type == TYPE_STR
+			   && memo_strlen(value.v.str) != 1) {
 		    free_var(value);
 		    free_var(index);
 		    free_var(list);
@@ -1180,10 +1185,11 @@ do {    						    	\
 		    ans = do_add(lhs, rhs);
 		else if (lhs.type == TYPE_STR && rhs.type == TYPE_STR) {
 		    char *str;
+		    int llen = memo_strlen(lhs.v.str);
 
-		    str = mymalloc((strlen(rhs.v.str) + strlen(lhs.v.str) + 1)
-				   * sizeof(char), M_STRING);
-		    sprintf(str, "%s%s", lhs.v.str, rhs.v.str);
+		    str = mymalloc(llen + memo_strlen(rhs.v.str) + 1, M_STRING);
+		    strcpy(str, lhs.v.str);
+		    strcpy(str + llen, rhs.v.str);
 		    ans.type = TYPE_STR;
 		    ans.v.str = str;
 		} else {
@@ -1273,7 +1279,7 @@ do {    						    	\
 		    }
 		} else {	/* list.type == TYPE_STR */
 		    if (index.v.num <= 0
-			|| index.v.num > (int) strlen(list.v.str)) {
+			|| index.v.num > (int) memo_strlen(list.v.str)) {
 			free_var(index);
 			free_var(list);
 			PUSH_ERROR(E_RANGE);
@@ -1317,7 +1323,7 @@ do {    						    	\
 		    free_var(from);
 		    PUSH_ERROR(E_TYPE);
 		} else {
-		    int len = (base.type == TYPE_STR ? strlen(base.v.str)
+		    int len = (base.type == TYPE_STR ? memo_strlen(base.v.str)
 			       : base.v.list[0].v.num);
 		    if (from.v.num <= to.v.num
 			&& (from.v.num <= 0 || from.v.num > len
@@ -1683,7 +1689,7 @@ do {    						    	\
 			    free_var(value);
 			    PUSH_ERROR(E_TYPE);
 			} else if (rangeset_check(base.type == TYPE_STR
-						  ? strlen(base.v.str)
+						  ? memo_strlen(base.v.str)
 						  : base.v.list[0].v.num,
 						  from.v.num, to.v.num)) {
 			    free_var(base);
@@ -1706,7 +1712,7 @@ do {    						    	\
 			v.type = TYPE_INT;
 			item = RUN_ACTIV.base_rt_stack[i];
 			if (item.type == TYPE_STR) {
-			    v.v.num = strlen(item.v.str);
+			    v.v.num = memo_strlen(item.v.str);
 			    PUSH(v);
 			} else if (item.type == TYPE_LIST) {
 			    v.v.num = item.v.list[0].v.num;
@@ -1825,6 +1831,7 @@ do {    						    	\
 		    {
 			Var v, marker;
 			int i;
+			unsigned lab;
 
 			if (eop == EOP_END_CATCH)
 			    v = POP();
@@ -1840,7 +1847,8 @@ do {    						    	\
 			if (eop == EOP_END_CATCH)
 			    PUSH(v);
 
-			JUMP(READ_BYTES(bv, bc.numbytes_label));
+			lab = READ_BYTES(bv, bc.numbytes_label);
+			JUMP(lab);
 		    }
 		    break;
 
@@ -1892,7 +1900,7 @@ do {    						    	\
 		    goto do_test;
 
 		case EOP_EXIT_ID:
-		    READ_BYTES(bv, bc.numbytes_var_name);	/* ignore id */
+		    SKIP_BYTES(bv, bc.numbytes_var_name);	/* ignore id */
 		    /* fall thru */
 		case EOP_EXIT:
 		    {
@@ -2130,17 +2138,19 @@ run_interpreter(char raise, enum error e,
 
     if (ret == OUTCOME_ABORTED && handler_verb_name) {
 	db_verb_handle h;
+        enum outcome hret;
 	Var args, handled, traceback;
 	int i;
 
 	args = handler_verb_args;
 	h = db_find_callable_verb(SYSTEM_OBJECT, handler_verb_name);
 	if (do_db_tracebacks && h.ptr) {
-	    ret = do_server_verb_task(SYSTEM_OBJECT, handler_verb_name,
-				      var_ref(handler_verb_args), h,
-				 activ_stack[0].player, "", &handled, 0);
-	    if ((ret == OUTCOME_DONE && is_true(handled))
-		|| ret == OUTCOME_BLOCKED) {
+	    hret = do_server_verb_task(SYSTEM_OBJECT, handler_verb_name,
+				       var_ref(handler_verb_args), h,
+				       activ_stack[0].player, "", &handled,
+				       0/*no-traceback*/);
+	    if ((hret == OUTCOME_DONE && is_true(handled))
+		|| hret == OUTCOME_BLOCKED) {
 		/* Assume the in-DB code handled it */
 		free_var(args);
 		return OUTCOME_ABORTED;		/* original ret value */
@@ -2192,13 +2202,12 @@ current_max_stack_size(void)
 /* procedure to create a new task */
 
 static enum outcome
-do_task(Program * prog, int which_vector, Var * result, int do_db_tracebacks)
+do_task(Program * prog, int which_vector, Var * result, int is_fg, int do_db_tracebacks)
 {				/* which vector determines the vector for the root_activ.
 				   a forked task can also have which_vector == MAIN_VECTOR.
 				   this happens iff it is recovered from a read from disk,
 				   because in that case the forked statement is parsed as 
 				   the main vector */
-    int forked = (current_task_kind == TASK_FORKED);
 
     RUN_ACTIV.prog = program_ref(prog);
 
@@ -2212,17 +2221,16 @@ do_task(Program * prog, int which_vector, Var * result, int do_db_tracebacks)
     RUN_ACTIV.bi_func_pc = 0;
     RUN_ACTIV.temp.type = TYPE_NONE;
 
-    return run_interpreter(0, E_NONE, result, !forked, do_db_tracebacks);
+    return run_interpreter(0, E_NONE, result, is_fg, do_db_tracebacks);
 }
 
 /* procedure to resume an old task */
 
 enum outcome
-resume_from_previous_vm(vm the_vm, Var v, task_kind kind, Var * result)
+resume_from_previous_vm(vm the_vm, Var v)
 {
     int i;
 
-    current_task_kind = kind;
     check_activ_stack_size(the_vm->max_stack_size);
     top_activ_stack = the_vm->top_activ_stack;
     root_activ_vector = the_vm->root_activ_vector;
@@ -2232,12 +2240,12 @@ resume_from_previous_vm(vm the_vm, Var v, task_kind kind, Var * result)
     free_vm(the_vm, 0);
 
     if (v.type == TYPE_ERR)
-	return run_interpreter(1, v.v.err, result, 0, 1);
+	return run_interpreter(1, v.v.err, 0, 0/*bg*/, 1/*traceback*/);
     else {
 	/* PUSH_REF(v) */
 	*(RUN_ACTIV.top_rt_stack++) = var_ref(v);
 
-	return run_interpreter(0, E_NONE, result, 0, 1);
+	return run_interpreter(0, E_NONE, 0, 0/*bg*/, 1/*traceback*/);
     }
 }
 
@@ -2264,7 +2272,6 @@ do_server_program_task(Objid this, const char *verb, Var args, Objid vloc,
 {
     Var *env;
 
-    current_task_kind = TASK_INPUT;
     check_activ_stack_size(current_max_stack_size());
     top_activ_stack = 0;
 
@@ -2288,7 +2295,7 @@ do_server_program_task(Objid this, const char *verb, Var args, Objid vloc,
     set_rt_env_str(env, SLOT_VERB, str_ref(RUN_ACTIV.verb));
     set_rt_env_var(env, SLOT_ARGS, args);
 
-    return do_task(program, MAIN_VECTOR, result, do_db_tracebacks);
+    return do_task(program, MAIN_VECTOR, result, 1/*fg*/, do_db_tracebacks);
 }
 
 enum outcome
@@ -2297,7 +2304,6 @@ do_input_task(Objid user, Parsed_Command * pc, Objid this, db_verb_handle vh)
     Program *prog = db_verb_program(vh);
     Var *env;
 
-    current_task_kind = TASK_INPUT;
     check_activ_stack_size(current_max_stack_size());
     top_activ_stack = 0;
 
@@ -2321,21 +2327,19 @@ do_input_task(Objid user, Parsed_Command * pc, Objid this, db_verb_handle vh)
     set_rt_env_str(env, SLOT_VERB, str_ref(pc->verb));
     set_rt_env_var(env, SLOT_ARGS, var_ref(pc->args));
 
-    return do_task(prog, MAIN_VECTOR, 0, 1);
+    return do_task(prog, MAIN_VECTOR, 0, 1/*fg*/, 1/*traceback*/);
 }
 
 enum outcome
-do_forked_task(Program * prog, Var * rt_env, activation a, int f_id,
-	       Var * result)
+do_forked_task(Program * prog, Var * rt_env, activation a, int f_id)
 {
-    current_task_kind = TASK_FORKED;
     check_activ_stack_size(current_max_stack_size());
     top_activ_stack = 0;
 
     RUN_ACTIV = a;
     RUN_ACTIV.rt_env = rt_env;
 
-    return do_task(prog, f_id, result, 1);
+    return do_task(prog, f_id, 0, 0/*bg*/, 1/*traceback*/);
 }
 
 /* this is called from bf_eval to set up stack for an eval call */
@@ -3010,11 +3014,11 @@ read_activ(activation * a, int *which_vector, int is_root)
     }
     if (a->bi_func_pc != 0) {
 	func_name = dbio_read_string();
-	a->bi_func_id = number_func_by_name(func_name);
-	if (a->bi_func_id == FUNC_NOT_FOUND) {
+	if ((i = number_func_by_name(func_name)) == FUNC_NOT_FOUND) {
 	    errlog("READ_ACTIV: Unknown built-in function `%s'\n", func_name);
 	    return 0;
 	}
+	a->bi_func_id = i;
 	if (!read_bi_func_data(a->bi_func_id, &a->bi_func_data,
 			       &a->bi_func_pc)) {
 	    errlog("READ_ACTIV: Bad saved state for built-in function `%s'\n",
@@ -3102,10 +3106,47 @@ upgrade_activ(activation * a, int *which_vector, int is_root)
     return 1;
 }
 
-char rcsid_execute[] = "$Id: execute.c,v 1.13.6.7.2.2 2002-11-03 03:42:35 xplat Exp $";
+char rcsid_execute[] = "$Id: execute.c,v 1.13.6.7.2.3 2007-05-14 23:09:24 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.19  2006/12/06 23:54:53  wrog
+ * Fix compiler warnings about undefined behavior (bv assigned twice in JUMP(READ_BYTES(...))) and unused values
+ *
+ * Revision 1.18  2006/09/26 02:03:59  pschwan
+ * b=1552816
+ * r=ben
+ *
+ * execute.c:run_interpreter() sometimes clobbers the real return code with that
+ * of the traceback handler.  If |result| is non-NULL, this can lead to it being
+ * used later on without ever having been initialized, causing "Unknown Var type"
+ * errors.
+ *
+ * In practice -- because |result| is almost always NULL or (in one case)
+ * initialized before calling run_interpreter() -- this situation wasn't
+ * encountered execept in Emergency Mode.
+ *
+ * Revision 1.17  2006/09/07 00:55:02  bjj
+ * Add new MEMO_STRLEN option which uses the refcounting mechanism to
+ * store strlen with strings.  This is basically free, since most string
+ * allocations are rounded up by malloc anyway.  This saves lots of cycles
+ * computing strlen.  (The change is originally from jitmoo, where I wanted
+ * inline range checks for string ops).
+ *
+ * Revision 1.16  2004/05/22 01:25:43  wrog
+ * merging in WROGUE changes (W_SRCIP, W_STARTUP, W_OOB)
+ *
+ * Revision 1.15  2004/03/03 23:06:57  bjj
+ * Luke-Jr's patch for read_activ FUNC_NOT_FOUND
+ *
+ * Revision 1.14.2.1  2003/06/04 21:28:58  wrog
+ * removed useless arguments from resume_from_previous_vm(), do_forked_task(); 
+ * replaced current_task_kind with is_fg argument for do_task(); 
+ * made enum task_kind internal to tasks.c
+ *
+ * Revision 1.14  2002/09/15 23:21:01  xplat
+ * GNU indent normalization.
+ *
  * Revision 1.13.6.7.2.1  2002/11/03 03:37:58  xplat
  * Initial support for keeping type constants in a global constants table
  * rather than every stack frame.

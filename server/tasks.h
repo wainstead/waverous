@@ -35,7 +35,8 @@ extern Var tasks_connection_options(task_queue, Var);
 extern int tasks_set_connection_option(task_queue, const char *,
 				       Var);
 
-extern void new_input_task(task_queue, const char *);
+extern void new_input_task(task_queue, const char *, int);
+extern void task_suspend_input(task_queue);
 extern enum error enqueue_forked_task2(activation a, int f_index,
 			       unsigned after_seconds, int vid);
 extern enum error enqueue_suspended_task(vm the_vm, void *data);
@@ -110,6 +111,18 @@ extern db_verb_handle find_verb_for_programming(Objid player,
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2004/05/22 01:25:44  wrog
+ * merging in WROGUE changes (W_SRCIP, W_STARTUP, W_OOB)
+ *
+ * Revision 1.4  2003/06/12 18:16:57  bjj
+ * Suspend input on connection until :do_login_command() can run.
+ *
+ * Revision 1.3.10.1  2003/06/11 10:40:17  wrog
+ * added binary argument to new_input_task()
+ *
+ * Revision 1.3  1998/12/14 13:19:08  nop
+ * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
+ *
  * Revision 1.2.2.1  1998/12/06 07:13:23  bjj
  * Rationalize enqueue_forked_task interface and fix program_ref leak in
  * the case where fork fails with E_QUOTA.  Make .queued_task_limit=0 really

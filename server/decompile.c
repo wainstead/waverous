@@ -67,6 +67,7 @@ do {				\
     arm_sink = &(temp->next);	\
 } while (0);
 
+#define SKIP_BYTES(n)  ((void)(ptr += n))
 #define READ_BYTES(n)			\
   (ptr += n,				\
    (n == 1				\
@@ -83,7 +84,7 @@ do {				\
 #define READ_LITERAL()	program->literals[READ_BYTES(bc.numbytes_literal)]
 #define READ_FORK()	program->fork_vectors[READ_BYTES(bc.numbytes_fork)]
 #define READ_ID()	READ_BYTES(bc.numbytes_var_name)
-#define READ_STACK()	READ_BYTES(bc.numbytes_stack)
+#define READ_STACK()	SKIP_BYTES(bc.numbytes_stack)
 
 #define READ_JUMP(is_hot)	read_jump(bc.numbytes_label, &ptr, &is_hot)
 
@@ -1096,10 +1097,13 @@ find_line_number(Program * prog, int vector, int pc)
     return lineno;
 }
 
-char rcsid_decompile[] = "$Id: decompile.c,v 1.5.6.5.2.2 2002-11-03 03:42:35 xplat Exp $";
+char rcsid_decompile[] = "$Id: decompile.c,v 1.5.6.5.2.3 2007-05-14 23:09:24 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5.6.5.2.2  2002/11/03 03:42:35  xplat
+ * GNU indent normalization.
+ *
  * Revision 1.5.6.5.2.1  2002/11/03 03:37:58  xplat
  * Initial support for keeping type constants in a global constants table
  * rather than every stack frame.
@@ -1108,6 +1112,12 @@ char rcsid_decompile[] = "$Id: decompile.c,v 1.5.6.5.2.2 2002-11-03 03:42:35 xpl
  * Changes to support PCs located in vectors other than MAIN_VECTOR.
  *
  * Revision 1.5.6.4  2002/09/17 15:35:04  xplat
+ * GNU indent normalization.
+ *
+ * Revision 1.7  2006/12/06 23:51:31  wrog
+ * Fix compiler warnings about unused values
+ *
+ * Revision 1.6  2002/09/15 23:21:01  xplat
  * GNU indent normalization.
  *
  * Revision 1.5.6.3  2002/09/17 15:03:56  xplat

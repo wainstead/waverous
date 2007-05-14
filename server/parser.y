@@ -1362,10 +1362,14 @@ parse_list_as_program(Var code, Var *errors)
     return program;
 }
 
-char rcsid_parser[] = "$Id: parser.y,v 1.2.6.4.2.1 2002-11-03 03:37:58 xplat Exp $";
+char rcsid_parser[] = "$Id: parser.y,v 1.2.6.4.2.2 2007-05-14 23:09:24 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2.6.4.2.1  2002/11/03 03:37:58  xplat
+ * Initial support for keeping type constants in a global constants table
+ * rather than every stack frame.
+ *
  * Revision 1.2.6.4  2002/10/29 01:00:24  xplat
  * Changed PMODE_* to PARSE_* for clarity.
  *
@@ -1377,6 +1381,13 @@ char rcsid_parser[] = "$Id: parser.y,v 1.2.6.4.2.1 2002-11-03 03:37:58 xplat Exp
  *
  * Revision 1.2.6.1  2002/09/12 05:57:40  xplat
  * Changes for inline PC saving and patch tags in the on-disk DB.
+ *
+ * Revision 1.4  2004/05/22 01:25:44  wrog
+ * merging in WROGUE changes (W_SRCIP, W_STARTUP, W_OOB)
+ *
+ * Revision 1.3  2004/04/09 19:52:52  bjj
+ * == Revision 1.2.8.1  2003/06/07 20:16:24 wrog
+ * fixed 6 rules that were missing final semicolons to make newer bison happy.
  *
  * Revision 1.2  1998/12/14 13:18:45  nop
  * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims

@@ -53,6 +53,17 @@
 #define OUT_OF_BAND_PREFIX "#$#"
 
 /******************************************************************************
+ * If OUT_OF_BAND_QUOTE_PREFIX is defined as a non-empty string, then any
+ * lines of input from any player that begin with that prefix will be
+ * stripped of that prefix and processed normally (whether to be parsed a
+ * command or given to a pending read()ing task), even if the resulting line
+ * begins with OUT_OF_BAND_PREFIX.  This provides a means of quoting lines
+ * that would otherwise spawn #0:do_out_of_band_command tasks
+ */
+
+#define OUT_OF_BAND_QUOTE_PREFIX "#$\""
+
+/******************************************************************************
  * The following constants define the execution limits placed on all MOO tasks.
  *
  * DEFAULT_MAX_STACK_DEPTH is the default maximum depth allowed for the MOO
@@ -143,19 +154,31 @@
 /* #define MPLEX_STYLE MP_POLL */
 
 /******************************************************************************
- * Define OUTBOUND_NETWORK to enable the built-in MOO function
- * open_network_connection(), which allows (only) wizard-owned MOO code to make
- * outbound network connections from the server.
+ * The built-in MOO function open_network_connection(), when enabled,
+ * allows (only) wizard-owned MOO code to make outbound network connections
+ * from the server.  When disabled, it raises E_PERM whenever called.
+ *
+ * The +O and -O command line options can explicitly enable and disable this
+ * function.  If neither option is supplied, the definition given to
+ * OUTBOUND_NETWORK here determines the default behavior
+ * (use 0 to disable by default, 1 or blank to enable by default).
+ * 
+ * If OUTBOUND_NETWORK is not defined at all,
+ * open_network_connection() is permanently disabled and +O is ignored.
+ *
  * *** THINK VERY HARD BEFORE ENABLING THIS FUNCTION ***
- * In some contexts, this could represent a serious breach of security.  By
- * default, the open_network_connection() function is disabled, always raising
- * E_PERM when called.
+ * In some contexts, this could represent a serious breach of security.  
  *
  * Note: OUTBOUND_NETWORK may not be defined if NETWORK_PROTOCOL is either
  *	 NP_SINGLE or NP_LOCAL.
  */
 
-/* #define OUTBOUND_NETWORK */
+/* disable by default, +O enables: */
+/* #define OUTBOUND_NETWORK 0 */
+
+/* enable by default, -O disables: */
+/* #define OUTBOUND_NETWORK 1 */
+
 
 /******************************************************************************
  * The following constants define certain aspects of the server's network
@@ -182,6 +205,15 @@
 #define MAX_QUEUED_OUTPUT	65536
 #define MAX_QUEUED_INPUT	MAX_QUEUED_OUTPUT
 #define DEFAULT_CONNECT_TIMEOUT	300
+
+/******************************************************************************
+ * On connections that have not been set to binary mode, the server normally
+ * discards incoming characters that are not printable ASCII, including
+ * backspace (8) and delete(127).  If INPUT_APPLY_BACKSPACE is defined,
+ * backspace and delete cause the preceding character (if any) to be removed
+ * from the input stream.  (Comment this out to restore pre-1.8.3 behavior)
+ */
+#define INPUT_APPLY_BACKSPACE
 
 /******************************************************************************
  * The server maintains a cache of the most recently used patterns from calls
@@ -251,6 +283,13 @@
 #define STRING_INTERNING /* */
 
 /******************************************************************************
+ * Store the length of the string WITH the string rather than recomputing
+ * it each time it is needed.
+ ******************************************************************************
+ */
+/* #define MEMO_STRLEN */
+
+/******************************************************************************
  * This package comes with a copy of the implementation of malloc() from GNU
  * Emacs.  This is a very nice and reasonably portable implementation, but some
  * systems, notably the NeXT machine, won't allow programs to provide their own
@@ -276,6 +315,9 @@
 
 #ifndef OUT_OF_BAND_PREFIX
 #define OUT_OF_BAND_PREFIX ""
+#endif
+#ifndef OUT_OF_BAND_QUOTE_PREFIX
+#define OUT_OF_BAND_QUOTE_PREFIX ""
 #endif
 
 #if PATTERN_CACHE_SIZE < 1
@@ -331,6 +373,14 @@
 #  error You cannot define "OUTBOUND_NETWORK" with that "NETWORK_PROTOCOL"
 #endif
 
+/* make sure OUTBOUND_NETWORK has a value;
+   for backward compatibility, use 1 if none given */
+#if defined(OUTBOUND_NETWORK) && (( 0 * OUTBOUND_NETWORK - 1 ) == 0)
+#undef OUTBOUND_NETWORK
+#define OUTBOUND_NETWORK 1
+#endif
+
+
 #if NETWORK_PROTOCOL != NP_LOCAL && NETWORK_PROTOCOL != NP_SINGLE && NETWORK_PROTOCOL != NP_TCP
 #  error Illegal value for "NETWORK_PROTOCOL"
 #endif
@@ -350,6 +400,31 @@
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2006/12/06 23:57:51  wrog
+ * New INPUT_APPLY_BACKSPACE option to process backspace/delete characters on nonbinary connections (patch 1571939)
+ *
+ * Revision 1.10  2006/09/07 00:55:02  bjj
+ * Add new MEMO_STRLEN option which uses the refcounting mechanism to
+ * store strlen with strings.  This is basically free, since most string
+ * allocations are rounded up by malloc anyway.  This saves lots of cycles
+ * computing strlen.  (The change is originally from jitmoo, where I wanted
+ * inline range checks for string ops).
+ *
+ * Revision 1.9  2004/05/22 01:25:44  wrog
+ * merging in WROGUE changes (W_SRCIP, W_STARTUP, W_OOB)
+ *
+ * Revision 1.8.10.3  2004/05/21 00:02:59  wrog
+ * allow for OUT_OF_BAND_QUOTE_PREFIX being undefined
+ *
+ * Revision 1.8.10.2  2003/06/11 10:36:45  wrog
+ * added OUT_OF_BAND_QUOTE_PREFIX
+ *
+ * Revision 1.8.10.1  2003/06/01 12:42:30  wrog
+ * added cmdline options -a (source address) +O/-O (enable/disable outbound network)
+ *
+ * Revision 1.8  2001/01/29 09:08:40  bjj
+ * Made STRING_INTERNING optional via options.h.
+ *
  * Revision 1.7  2000/01/11 02:05:27  nop
  * More doc tweaking, really warn about BYTECODE_REDUCE_REF.
  *
