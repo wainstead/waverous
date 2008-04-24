@@ -165,10 +165,13 @@ extern Exception dbpriv_dbio_failed;
 extern void dbpriv_set_dbio_input(FILE *);
 extern void dbpriv_set_dbio_output(FILE *);
 
-#endif DB_PRIVATE_h
+#endif /* DB_PRIVATE_h */
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4.2.1  2002/08/29 05:44:23  bjj
+ * Add WAIF type as distributed in version 0.95 (one small merge).
+ *
  * Revision 1.4  1998/12/14 13:17:37  nop
  * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
  *
