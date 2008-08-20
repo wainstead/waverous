@@ -69,7 +69,7 @@ bf_prop_info(Var arglist, Byte next, void *vdata, Objid progr)
     db_prop_handle h;
     Var r;
     unsigned flags;
-    char *s;
+    char perms[4], *s;
 
     if (!valid(oid)) {
 	free_var(arglist);
@@ -87,7 +87,7 @@ bf_prop_info(Var arglist, Byte next, void *vdata, Objid progr)
     r.v.list[1].type = TYPE_OBJ;
     r.v.list[1].v.obj = db_property_owner(h);
     r.v.list[2].type = TYPE_STR;
-    r.v.list[2].v.str = s = str_dup("xxx");
+    s = perms;
     flags = db_property_flags(h);
     if (flags & PF_READ)
 	*s++ = 'r';
@@ -96,6 +96,7 @@ bf_prop_info(Var arglist, Byte next, void *vdata, Objid progr)
     if (flags & PF_CHOWN)
 	*s++ = 'c';
     *s = '\0';
+    r.v.list[2].v.str = str_dup(perms);
 
     return make_var_pack(r);
 }
@@ -329,10 +330,13 @@ register_property(void)
 			     TYPE_OBJ, TYPE_STR);
 }
 
-char rcsid_property[] = "$Id: property.c,v 1.3 1998-12-14 13:18:50 nop Exp $";
+char rcsid_property[] = "$Id: property.c,v 1.4 2008-08-20 04:25:23 bjj Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  1998/12/14 13:18:50  nop
+ * Merge UNSAFE_OPTS (ref fixups); fix Log tag placement to fit CVS whims
+ *
  * Revision 1.2  1997/03/03 04:19:18  nop
  * GNU Indent normalization
  *
