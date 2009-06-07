@@ -380,7 +380,7 @@ validate_hierarchies()
 static const char *
 fmt_verb_name(void *data)
 {
-    db_verb_handle *h = data;
+  db_verb_handle *h = (db_verb_handle *) data;
     static Stream *s = 0;
 
     if (!s)
