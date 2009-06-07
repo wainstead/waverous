@@ -331,7 +331,7 @@ find_tqueue(Objid player, int create_if_not_found)
     if (!create_if_not_found)
 	return 0;
 
-    tq = mymalloc(sizeof(tqueue), M_TASK);
+    tq = (tqueue *) mymalloc(sizeof(tqueue), M_TASK);
 
     deactivate_tqueue(tq);
 
@@ -1089,7 +1089,7 @@ enqueue_suspended_task(vm the_vm, void *data)
     task *t;
 
     if (check_user_task_limit(progr_of_cur_verb(the_vm))) {
-	t = mymalloc(sizeof(task), M_TASK);
+	t = (task *) mymalloc(sizeof(task), M_TASK);
 	t->kind = TASK_SUSPENDED;
 	t->t.suspended.the_vm = the_vm;
 	if (now + after_seconds < now)
@@ -1109,7 +1109,7 @@ enqueue_suspended_task(vm the_vm, void *data)
 void
 resume_task(vm the_vm, Var value)
 {
-    task *t = mymalloc(sizeof(task), M_TASK);
+    task *t = (task *) mymalloc(sizeof(task), M_TASK);
     Objid progr = progr_of_cur_verb(the_vm);
     tqueue *tq = find_tqueue(progr, 1);
 
@@ -1356,7 +1356,7 @@ run_server_program_task(Objid this, const char *verb, Var args, Objid vloc,
 void
 register_task_queue(task_enumerator enumerator)
 {
-    ext_queue *eq = mymalloc(sizeof(ext_queue), M_TASK);
+    ext_queue *eq = (ext_queue *) mymalloc(sizeof(ext_queue), M_TASK);
 
     eq->enumerator = enumerator;
     eq->next = external_queues;

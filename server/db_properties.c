@@ -80,7 +80,7 @@ insert_prop(Objid oid, int pos, Pval pval)
     int i, nprops;
 
     nprops = dbpriv_count_properties(oid);
-    new_propval = mymalloc(nprops * sizeof(Pval), M_PVAL);
+    new_propval = (Pval *) mymalloc(nprops * sizeof(Pval), M_PVAL);
 
     o = dbpriv_find_object(oid);
 
@@ -137,7 +137,7 @@ db_add_propdef(Objid oid, const char *pname, Var value, Objid owner,
 	int new_size = (o->propdefs.max_length == 0
 			? 8 : 2 * o->propdefs.max_length);
 
-	o->propdefs.l = mymalloc(new_size * sizeof(Propdef), M_PROPDEF);
+	o->propdefs.l = (Propdef *) mymalloc(new_size * sizeof(Propdef), M_PROPDEF);
 	for (i = 0; i < o->propdefs.max_length; i++)
 	    o->propdefs.l[i] = old_props[i];
 	o->propdefs.max_length = new_size;
@@ -200,7 +200,7 @@ remove_prop(Objid oid, int pos)
     free_var(o->propval[pos].var);	/* free deleted property */
 
     if (nprops) {
-	new_propval = mymalloc(nprops * sizeof(Pval), M_PVAL);
+	new_propval = (Pval *) mymalloc(nprops * sizeof(Pval), M_PVAL);
 	for (i = 0; i < pos; i++)
 	    new_propval[i] = o->propval[i];
 	for (i = pos; i < nprops; i++)
@@ -249,7 +249,7 @@ db_delete_propdef(Objid oid, const char *pname)
 		int new_size = max / 2;
 		Propdef *new_props;
 
-		new_props = mymalloc(new_size * sizeof(Propdef), M_PROPDEF);
+		new_props = (Propdef *) mymalloc(new_size * sizeof(Propdef), M_PROPDEF);
 
 		for (j = 0; j < i; j++)
 		    new_props[j] = props->l[j];
@@ -603,7 +603,7 @@ fix_props(Objid oid, int parent_local, int old, int new, int common)
 	free_var(me->propval[i].var);
 
     if (local + new + common != 0) {
-	new_propval = mymalloc((local + new + common) * sizeof(Pval), M_PVAL);
+	new_propval = (Pval *) mymalloc((local + new + common) * sizeof(Pval), M_PVAL);
 	for (i = 0; i < local; i++)
 	    new_propval[i] = me->propval[i];
 	for (i = 0; i < new; i++) {

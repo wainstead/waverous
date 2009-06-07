@@ -105,7 +105,7 @@ free_shandle(shandle * h)
 static slistener *
 new_slistener(Objid oid, Var desc, int print_messages, enum error *ee)
 {
-    slistener *l = mymalloc(sizeof(slistener), M_NETWORK);
+    slistener *l = (slistener *) mymalloc(sizeof(slistener), M_NETWORK);
     server_listener sl;
     enum error e;
     const char *name;

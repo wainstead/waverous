@@ -68,7 +68,7 @@ new_entry()
 	ans = free_list;
 	free_list = free_list->next;
     } else
-	ans = mymalloc(sizeof(reftab_entry), M_REF_ENTRY);
+	ans = (reftab_entry *) mymalloc(sizeof(reftab_entry), M_REF_ENTRY);
     return ans;
 }
 

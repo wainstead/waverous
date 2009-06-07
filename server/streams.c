@@ -28,7 +28,7 @@
 Stream *
 new_stream(int size)
 {
-    Stream *s = mymalloc(sizeof(Stream), M_STREAM);
+    Stream *s = (Stream *) mymalloc(sizeof(Stream), M_STREAM);
 
     s->buffer = mymalloc(size, M_STREAM);
     s->buflen = size;

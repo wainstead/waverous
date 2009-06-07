@@ -94,7 +94,7 @@ alloc_rt_stack(activation * a, int size)
 	res = rt_stack_quick;
 	rt_stack_quick = rt_stack_quick[0].v.list;
     } else {
-	res = mymalloc(MAX(size, RT_STACK_QUICKSIZE) * sizeof(Var), M_RT_STACK);
+	res = (Var *) mymalloc(MAX(size, RT_STACK_QUICKSIZE) * sizeof(Var), M_RT_STACK);
     }
     a->base_rt_stack = a->top_rt_stack = res;
     a->rt_stack_size = size;
@@ -2169,7 +2169,7 @@ check_activ_stack_size(int max)
 	if (activ_stack)
 	    myfree(activ_stack, M_VM);
 
-	activ_stack = mymalloc(sizeof(activation) * max, M_VM);
+	activ_stack = (activation *) mymalloc(sizeof(activation) * max, M_VM);
 	max_stack_size = max;
     }
 }

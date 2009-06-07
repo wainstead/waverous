@@ -140,7 +140,7 @@ read_object(void)
     o->verbdefs = 0;
     prevv = &(o->verbdefs);
     for (i = dbio_read_num(); i > 0; i--) {
-	v = mymalloc(sizeof(Verbdef), M_VERBDEF);
+	v = (Verbdef *) mymalloc(sizeof(Verbdef), M_VERBDEF);
 	read_verbdef(v);
 	*prevv = v;
 	prevv = &(v->next);
@@ -150,7 +150,7 @@ read_object(void)
     o->propdefs.max_length = 0;
     o->propdefs.l = 0;
     if ((i = dbio_read_num()) != 0) {
-	o->propdefs.l = mymalloc(i * sizeof(Propdef), M_PROPDEF);
+	o->propdefs.l = (Propdef *) mymalloc(i * sizeof(Propdef), M_PROPDEF);
 	o->propdefs.cur_length = i;
 	o->propdefs.max_length = i;
 	for (i = 0; i < o->propdefs.cur_length; i++)
@@ -158,7 +158,7 @@ read_object(void)
     }
     nprops = dbio_read_num();
     if (nprops)
-	o->propval = mymalloc(nprops * sizeof(Pval), M_PVAL);
+	o->propval = (Pval *) mymalloc(nprops * sizeof(Pval), M_PVAL);
     else
 	o->propval = 0;
 
