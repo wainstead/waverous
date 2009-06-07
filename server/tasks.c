@@ -686,7 +686,7 @@ do_command_task(tqueue * tq, char *command)
 	    Objid location = (valid(tq->player)
 			      ? db_object_location(tq->player)
 			      : NOTHING);
-	    Objid this;
+	    Objid self;
 	    db_verb_handle vh;
 	    Var result, args;
 
@@ -701,14 +701,14 @@ do_command_task(tqueue * tq, char *command)
 		!= OUTCOME_DONE
 		|| is_true(result)) {
 		/* Do nothing more; we assume :do_command handled it. */
-	    } else if (find_verb_on(this = tq->player, pc, &vh)
-		       || find_verb_on(this = location, pc, &vh)
-		       || find_verb_on(this = pc->dobj, pc, &vh)
-		       || find_verb_on(this = pc->iobj, pc, &vh)
-		       || (valid(this = location)
+	    } else if (find_verb_on(self = tq->player, pc, &vh)
+		       || find_verb_on(self = location, pc, &vh)
+		       || find_verb_on(self = pc->dobj, pc, &vh)
+		       || find_verb_on(self = pc->iobj, pc, &vh)
+		       || (valid(self = location)
 			 && (vh = db_find_callable_verb(location, "huh"),
 			     vh.ptr))) {
-		do_input_task(tq->player, pc, this, vh);
+		do_input_task(tq->player, pc, self, vh);
 	    } else {
 		notify(tq->player, "I couldn't understand that.");
 		tq->last_input_task_id = 0;
@@ -1342,13 +1342,13 @@ run_server_task_setting_id(Objid player, Objid what, const char *verb,
 }
 
 enum outcome
-run_server_program_task(Objid this, const char *verb, Var args, Objid vloc,
+run_server_program_task(Objid self, const char *verb, Var args, Objid vloc,
 		    const char *verbname, Program * program, Objid progr,
 			int debug, Objid player, const char *argstr,
 			Var * result)
 {
     current_task_id = new_task_id();
-    return do_server_program_task(this, verb, args, vloc, verbname, program,
+    return do_server_program_task(self, verb, args, vloc, verbname, program,
 				  progr, debug, player, argstr, result,
 				  1/*traceback*/);
 }
@@ -1706,7 +1706,7 @@ list_for_forked_task(forked_task ft)
     list.v.list[8].type = TYPE_INT;
     list.v.list[8].v.num = find_line_number(ft.program, ft.f_index, 0);
     list.v.list[9].type = TYPE_OBJ;
-    list.v.list[9].v.obj = ft.a.this;
+    list.v.list[9].v.obj = ft.a.self;
     list.v.list[10].type = TYPE_INT;
     list.v.list[10].v.num = forked_task_bytes(ft);
 
@@ -1748,7 +1748,7 @@ list_for_vm(vm the_vm)
     list.v.list[8].type = TYPE_INT;
     list.v.list[8].v.num = suspended_lineno_of_vm(the_vm);
     list.v.list[9].type = TYPE_OBJ;
-    list.v.list[9].v.obj = top_activ(the_vm).this;
+    list.v.list[9].v.obj = top_activ(the_vm).self;
     list.v.list[10].type = TYPE_INT;
     list.v.list[10].v.num = suspended_task_bytes(the_vm);
 

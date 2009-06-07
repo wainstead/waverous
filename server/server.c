@@ -1183,7 +1183,7 @@ read_active_connections(void)
 int
 main(int argc, char **argv)
 {
-    char *this_program = str_dup(argv[0]);
+    char *self_program = str_dup(argv[0]);
     const char *log_file = 0;
     int emergency = 0;
     Var desc;

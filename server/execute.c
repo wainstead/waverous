@@ -126,8 +126,8 @@ print_error_backtrace(const char *msg, void (*output) (const char *))
 	    stream_printf(str, "... called from ");
 	stream_printf(str, "#%d:%s", activ_stack[t].vloc,
 		      activ_stack[t].verbname);
-	if (activ_stack[t].vloc != activ_stack[t].this)
-	    stream_printf(str, " (this == #%d)", activ_stack[t].this);
+	if (activ_stack[t].vloc != activ_stack[t].self)
+	    stream_printf(str, " (self == #%d)", activ_stack[t].self);
 
 	stream_printf(str, ", line %d",
 		      find_line_number(activ_stack[t].prog,
@@ -401,7 +401,7 @@ make_stack_list(activation * stack, int start, int end, int include_end,
 	if (include_end || i != end) {
 	    v = r.v.list[j++] = new_list(line_numbers_too ? 6 : 5);
 	    v.v.list[1].type = TYPE_OBJ;
-	    v.v.list[1].v.obj = stack[i].this;
+	    v.v.list[1].v.obj = stack[i].self;
 	    v.v.list[2].type = TYPE_STR;
 	    v.v.list[2].v.str = str_ref(stack[i].verb);
 	    v.v.list[3].type = TYPE_OBJ;
@@ -534,26 +534,26 @@ free_activation(activation * ap, char data_too)
 /** Set up another activation for calling a verb
   does not change the vm in case of any error **/
 
-enum error call_verb2(Objid this, const char *vname, Var args, int do_pass);
+enum error call_verb2(Objid self, const char *vname, Var args, int do_pass);
 
 /*
  * Historical interface for things which want to call with vname not
  * already in a moo-str.
  */
 enum error
-call_verb(Objid this, const char *vname_in, Var args, int do_pass)
+call_verb(Objid self, const char *vname_in, Var args, int do_pass)
 {
     const char *vname = str_dup(vname_in);
     enum error result;
 
-    result = call_verb2(this, vname, args, do_pass);
+    result = call_verb2(self, vname, args, do_pass);
     /* call_verb2 got any refs it wanted */
     free_str(vname);
     return result;
 }
 
 enum error
-call_verb2(Objid this, const char *vname, Var args, int do_pass)
+call_verb2(Objid self, const char *vname, Var args, int do_pass)
 {
     /* if call succeeds, args will be consumed.  If call fails, args
        will NOT be consumed  -- it must therefore be freed by caller */
@@ -577,7 +577,7 @@ call_verb2(Objid this, const char *vname, Var args, int do_pass)
 	else
 	    where = db_object_parent(RUN_ACTIV.vloc);
     else
-	where = this;
+	where = self;
 
     if (!valid(where))
 	return E_INVIND;
@@ -589,7 +589,7 @@ call_verb2(Objid this, const char *vname, Var args, int do_pass)
 
     program = db_verb_program(h);
     RUN_ACTIV.prog = program_ref(program);
-    RUN_ACTIV.this = this;
+    RUN_ACTIV.self = self;
     RUN_ACTIV.progr = db_verb_owner(h);
     RUN_ACTIV.vloc = db_verb_definer(h);
     RUN_ACTIV.verb = str_ref(vname);
@@ -606,8 +606,8 @@ call_verb2(Objid this, const char *vname, Var args, int do_pass)
 
     fill_in_rt_consts(env, program->version);
 
-    set_rt_env_obj(env, SLOT_THIS, this);
-    set_rt_env_obj(env, SLOT_CALLER, CALLER_ACTIV.this);
+    set_rt_env_obj(env, SLOT_THIS, self);
+    set_rt_env_obj(env, SLOT_CALLER, CALLER_ACTIV.self);
 
 #define ENV_COPY(slot) \
     set_rt_env_var(env, slot, var_ref(CALLER_ACTIV.rt_env[slot]))
@@ -2159,7 +2159,7 @@ run_interpreter(char raise, enum error e,
 Objid
 caller()
 {
-    return RUN_ACTIV.this;
+    return RUN_ACTIV.self;
 }
 
 static void
@@ -2243,11 +2243,11 @@ resume_from_previous_vm(vm the_vm, Var v)
 /*** external functions ***/
 
 enum outcome
-do_server_verb_task(Objid this, const char *verb, Var args, db_verb_handle h,
+do_server_verb_task(Objid self, const char *verb, Var args, db_verb_handle h,
 		    Objid player, const char *argstr, Var * result,
 		    int do_db_tracebacks)
 {
-    return do_server_program_task(this, verb, args, db_verb_definer(h),
+    return do_server_program_task(self, verb, args, db_verb_definer(h),
 				  db_verb_names(h), db_verb_program(h),
 				  db_verb_owner(h),
 				  db_verb_flags(h) & VF_DEBUG,
@@ -2255,7 +2255,7 @@ do_server_verb_task(Objid this, const char *verb, Var args, db_verb_handle h,
 }
 
 enum outcome
-do_server_program_task(Objid this, const char *verb, Var args, Objid vloc,
+do_server_program_task(Objid self, const char *verb, Var args, Objid vloc,
 		    const char *verbname, Program * program, Objid progr,
 		       int debug, Objid player, const char *argstr,
 		       Var * result, int do_db_tracebacks)
@@ -2266,7 +2266,7 @@ do_server_program_task(Objid this, const char *verb, Var args, Objid vloc,
     top_activ_stack = 0;
 
     RUN_ACTIV.rt_env = env = new_rt_env(program->num_var_names);
-    RUN_ACTIV.this = this;
+    RUN_ACTIV.self = self;
     RUN_ACTIV.player = player;
     RUN_ACTIV.progr = progr;
     RUN_ACTIV.vloc = vloc;
@@ -2276,7 +2276,7 @@ do_server_program_task(Objid this, const char *verb, Var args, Objid vloc,
     fill_in_rt_consts(env, program->version);
     set_rt_env_obj(env, SLOT_PLAYER, player);
     set_rt_env_obj(env, SLOT_CALLER, -1);
-    set_rt_env_obj(env, SLOT_THIS, this);
+    set_rt_env_obj(env, SLOT_THIS, self);
     set_rt_env_obj(env, SLOT_DOBJ, NOTHING);
     set_rt_env_obj(env, SLOT_IOBJ, NOTHING);
     set_rt_env_str(env, SLOT_DOBJSTR, str_dup(""));
@@ -2290,7 +2290,7 @@ do_server_program_task(Objid this, const char *verb, Var args, Objid vloc,
 }
 
 enum outcome
-do_input_task(Objid user, Parsed_Command * pc, Objid this, db_verb_handle vh)
+do_input_task(Objid user, Parsed_Command * pc, Objid self, db_verb_handle vh)
 {
     Program *prog = db_verb_program(vh);
     Var *env;
@@ -2299,7 +2299,7 @@ do_input_task(Objid user, Parsed_Command * pc, Objid this, db_verb_handle vh)
     top_activ_stack = 0;
 
     RUN_ACTIV.rt_env = env = new_rt_env(prog->num_var_names);
-    RUN_ACTIV.this = this;
+    RUN_ACTIV.self = self;
     RUN_ACTIV.player = user;
     RUN_ACTIV.progr = db_verb_owner(vh);
     RUN_ACTIV.vloc = db_verb_definer(vh);
@@ -2309,7 +2309,7 @@ do_input_task(Objid user, Parsed_Command * pc, Objid this, db_verb_handle vh)
     fill_in_rt_consts(env, prog->version);
     set_rt_env_obj(env, SLOT_PLAYER, user);
     set_rt_env_obj(env, SLOT_CALLER, user);
-    set_rt_env_obj(env, SLOT_THIS, this);
+    set_rt_env_obj(env, SLOT_THIS, self);
     set_rt_env_obj(env, SLOT_DOBJ, pc->dobj);
     set_rt_env_obj(env, SLOT_IOBJ, pc->iobj);
     set_rt_env_str(env, SLOT_DOBJSTR, str_ref(pc->dobjstr));
@@ -2348,7 +2348,7 @@ setup_activ_for_eval(Program * prog)
     RUN_ACTIV.rt_env = env = new_rt_env(prog->num_var_names);
     fill_in_rt_consts(env, prog->version);
     set_rt_env_obj(env, SLOT_PLAYER, CALLER_ACTIV.player);
-    set_rt_env_obj(env, SLOT_CALLER, CALLER_ACTIV.this);
+    set_rt_env_obj(env, SLOT_CALLER, CALLER_ACTIV.self);
     set_rt_env_obj(env, SLOT_THIS, NOTHING);
     set_rt_env_obj(env, SLOT_DOBJ, NOTHING);
     set_rt_env_obj(env, SLOT_IOBJ, NOTHING);
@@ -2359,7 +2359,7 @@ setup_activ_for_eval(Program * prog)
     set_rt_env_str(env, SLOT_VERB, str_dup(""));
     set_rt_env_var(env, SLOT_ARGS, new_list(0));
 
-    RUN_ACTIV.this = NOTHING;
+    RUN_ACTIV.self = NOTHING;
     RUN_ACTIV.player = CALLER_ACTIV.player;
     RUN_ACTIV.progr = CALLER_ACTIV.progr;
     RUN_ACTIV.vloc = NOTHING;
@@ -2544,7 +2544,7 @@ bf_ticks_left(Var arglist, Byte next, void *vdata, Objid progr)
 static package
 bf_pass(Var arglist, Byte next, void *vdata, Objid progr)
 {
-    enum error e = call_verb2(RUN_ACTIV.this, RUN_ACTIV.verb, arglist, 1);
+    enum error e = call_verb2(RUN_ACTIV.self, RUN_ACTIV.verb, arglist, 1);
 
     if (e == E_NONE)
 	return tail_call_pack();
@@ -2648,7 +2648,7 @@ write_activ_as_pi(activation a)
     dbio_write_var(dummy);
 
     dbio_printf("%d %d %d %d %d %d %d %d %d\n",
-	    a.this, -7, -8, a.player, -9, a.progr, a.vloc, -10, a.debug);
+	    a.self, -7, -8, a.player, -9, a.progr, a.vloc, -10, a.debug);
     dbio_write_string("No");
     dbio_write_string("More");
     dbio_write_string("Parse");
@@ -2672,7 +2672,7 @@ read_activ_as_pi(activation * a)
      * of `scanf'...
      */
     if (dbio_scanf("%d %d %d %d %d %d %d %d %d%c",
-		 &a->this, &dummy, &dummy, &a->player, &dummy, &a->progr,
+		 &a->self, &dummy, &dummy, &a->player, &dummy, &a->progr,
 		   &a->vloc, &dummy, &a->debug, &c) != 10
 	|| c != '\n') {
 	errlog("READ_A: Bad numbers.\n");

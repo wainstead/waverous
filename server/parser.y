@@ -280,7 +280,7 @@ elseifs:
 
 			while (tmp->next)
 			    tmp = tmp->next;
-			tmp->next = this_arm;
+			tmp->next = self_arm;
 			$$ = $1;
 		    } else
 			$$ = this_arm;
@@ -625,7 +625,7 @@ ne_arglist:
 
 			while (tmp->next)
 			    tmp = tmp->next;
-			tmp->next = this_arg;
+			tmp->next = self_arg;
 			$$ = $1;
 		    } else
 			$$ = this_arg;
@@ -639,7 +639,7 @@ ne_arglist:
 
 			while (tmp->next)
 			    tmp = tmp->next;
-			tmp->next = this_arg;
+			tmp->next = self_arg;
 			$$ = $1;
 		    } else
 			$$ = this_arg;
