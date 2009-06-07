@@ -161,10 +161,10 @@ rehash(reftab_entry ** old, reftab_entry ** new)
 	for (link = old[loop]; link; link = next) {
 	    int index = key(link->p);
 	    next = link->next;
-	    ll_insert_entry(&new[index], link);
+	    ll_insert_entry(&_new[index], link);
 	}
     myfree(old, M_REF_TABLE);
-    return new;
+    return _new;
 }
 
 void

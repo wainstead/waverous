@@ -171,14 +171,14 @@ db_rename_propdef(Objid oid, const char *old, const char *new)
 	p = props->l[i];
 	if (p.hash == hash && !mystrcasecmp(p.name, old)) {
 	    if (mystrcasecmp(old, new) != 0) {	/* Not changing just the case */
-		h = db_find_property(oid, new, 0);
+		h = db_find_property(oid, _new, 0);
 		if (h.ptr
-		|| property_defined_at_or_below(new, str_hash(new), oid))
+		|| property_defined_at_or_below(_new, str_hash(_new), oid))
 		    return 0;
 	    }
 	    free_str(props->l[i].name);
-	    props->l[i].name = str_ref(new);
-	    props->l[i].hash = str_hash(new);
+	    props->l[i].name = str_ref(_new);
+	    props->l[i].hash = str_hash(_new);
 
 	    return 1;
 	}
@@ -588,7 +588,7 @@ db_property_allows(db_prop_handle h, Objid progr, db_prop_flag flag)
 }
 
 static void
-fix_props(Objid oid, int parent_local, int old, int new, int common)
+fix_props(Objid oid, int parent_local, int old, int _new, int common)
 {
     Object *me = dbpriv_find_object(oid);
     Object *parent = dbpriv_find_object(me->parent);
@@ -602,11 +602,11 @@ fix_props(Objid oid, int parent_local, int old, int new, int common)
     for (i = local; i < local + old; i++)
 	free_var(me->propval[i].var);
 
-    if (local + new + common != 0) {
+    if (local + _new + common != 0) {
 	new_propval = (Pval *) mymalloc((local + new + common) * sizeof(Pval), M_PVAL);
 	for (i = 0; i < local; i++)
 	    new_propval[i] = me->propval[i];
-	for (i = 0; i < new; i++) {
+	for (i = 0; i < _new; i++) {
 	    Pval pv;
 
 	    pv = parent->propval[parent_local + i];
@@ -625,7 +625,7 @@ fix_props(Objid oid, int parent_local, int old, int new, int common)
     me->propval = new_propval;
 
     for (c = me->child; c != NOTHING; c = dbpriv_find_object(c)->sibling)
-	fix_props(c, local, old, new, common);
+	fix_props(c, local, old, _new, common);
 }
 
 int

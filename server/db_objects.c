@@ -77,9 +77,9 @@ ensure_new_object(void)
 
 	new = mymalloc(max_objects * 2 * sizeof(Object *), M_OBJECT_TABLE);
 	for (i = 0; i < max_objects; i++)
-	    new[i] = objects[i];
+	    _new[i] = objects[i];
 	myfree(objects, M_OBJECT_TABLE);
-	objects = new;
+	objects = _new;
 	max_objects *= 2;
     }
 }
@@ -181,17 +181,17 @@ db_destroy_object(Objid oid)
 Objid
 db_renumber_object(Objid old)
 {
-    Objid new;
+    Objid _new;
     Object *o;
 
     db_priv_affected_callable_verb_lookup();
 
-    for (new = 0; new < old; new++) {
-	if (objects[new] == 0) {
+    for (_new = 0; _new < old; _new++) {
+	if (objects[_new] == 0) {
 	    /* Change the identity of the object. */
-	    o = objects[new] = objects[old];
+	    o = objects[_new] = objects[old];
 	    objects[old] = 0;
-	    objects[new]->id = new;
+	    objects[_new]->id = _new;
 
 	    /* Fix up the parent/children hierarchy */
 	    {
@@ -208,7 +208,7 @@ db_renumber_object(Objid old)
 		for (oid = o->child;
 		     oid != NOTHING;
 		     oid = objects[oid]->sibling)
-		    objects[oid]->parent = new;
+		    objects[oid]->parent = _new;
 	    }
 
 	    /* Fix up the location/contents hierarchy */
@@ -226,16 +226,16 @@ db_renumber_object(Objid old)
 		for (oid = o->contents;
 		     oid != NOTHING;
 		     oid = objects[oid]->next)
-		    objects[oid]->location = new;
+		    objects[oid]->location = _new;
 	    }
 
 	    /* Fix up the list of users, if necessary */
-	    if (is_user(new)) {
+	    if (is_user(_new)) {
 		int i;
 
 		for (i = 1; i <= all_users.v.list[0].v.num; i++)
 		    if (all_users.v.list[i].v.obj == old) {
-			all_users.v.list[i].v.obj = new;
+			all_users.v.list[i].v.obj = _new;
 			break;
 		    }
 	    }
@@ -252,28 +252,28 @@ db_renumber_object(Objid old)
 		    if (!o)
 			continue;
 
-		    if (o->owner == new)
+		    if (o->owner == _new)
 			o->owner = NOTHING;
 		    else if (o->owner == old)
-			o->owner = new;
+			o->owner = _new;
 
 		    for (v = o->verbdefs; v; v = v->next)
-			if (v->owner == new)
+			if (v->owner == _new)
 			    v->owner = NOTHING;
 			else if (v->owner == old)
-			    v->owner = new;
+			    v->owner = _new;
 
 		    count = dbpriv_count_properties(oid);
 		    p = o->propval;
 		    for (i = 0; i < count; i++)
-			if (p[i].owner == new)
+			if (p[i].owner == _new)
 			    p[i].owner = NOTHING;
 			else if (p[i].owner == old)
-			    p[i].owner = new;
+			    p[i].owner = _new;
 		}
 	    }
 
-	    return new;
+	    return _new;
 	}
     }
 
