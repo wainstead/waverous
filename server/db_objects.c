@@ -69,13 +69,13 @@ ensure_new_object(void)
 {
     if (max_objects == 0) {
 	max_objects = 100;
-	objects = mymalloc(max_objects * sizeof(Object *), M_OBJECT_TABLE);
+	objects = (Object **) mymalloc(max_objects * sizeof(Object *), M_OBJECT_TABLE);
     }
     if (num_objects >= max_objects) {
 	int i;
-	Object **new;
+	Object **_new;
 
-	new = mymalloc(max_objects * 2 * sizeof(Object *), M_OBJECT_TABLE);
+	_new = (Object **) mymalloc(max_objects * 2 * sizeof(Object *), M_OBJECT_TABLE);
 	for (i = 0; i < max_objects; i++)
 	    _new[i] = objects[i];
 	myfree(objects, M_OBJECT_TABLE);
@@ -203,7 +203,7 @@ db_renumber_object(Objid old)
 			oidp = &objects[*oidp]->sibling;
 		    if (*oidp == NOTHING)
 			panic("Object not in parent's children list");
-		    *oidp = new;
+		    *oidp = _new;
 		}
 		for (oid = o->child;
 		     oid != NOTHING;
@@ -221,7 +221,7 @@ db_renumber_object(Objid old)
 			oidp = &objects[*oidp]->next;
 		    if (*oidp == NOTHING)
 			panic("Object not in location's contents list");
-		    *oidp = new;
+		    *oidp = _new;
 		}
 		for (oid = o->contents;
 		     oid != NOTHING;
