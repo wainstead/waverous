@@ -79,7 +79,7 @@ struct bft_entry {
     bf_type func;
     bf_read_type read;
     bf_write_type write;
-    int protected;
+    int _protected;
 };
 
 static struct bft_entry bf_table[MAX_FUNC];
@@ -110,15 +110,17 @@ register_common(const char *name, int minargs, int maxargs, bf_type func,
     bf_table[top_bf_table].func = func;
     bf_table[top_bf_table].read = read;
     bf_table[top_bf_table].write = write;
-    bf_table[top_bf_table].protected = 0;
-
+    bf_table[top_bf_table]._protected = 0;
+    
     if (num_arg_types > 0)
 	bf_table[top_bf_table].prototype =
-	    mymalloc(num_arg_types * sizeof(var_type), M_PROTOTYPE);
+          (var_type *) mymalloc(num_arg_types * sizeof(var_type), M_PROTOTYPE);
     else
 	bf_table[top_bf_table].prototype = 0;
+
     for (va_index = 0; va_index < num_arg_types; va_index++)
 	bf_table[top_bf_table].prototype[va_index] = va_arg(args, var_type);
+
 
     return top_bf_table++;
 }
@@ -200,7 +202,7 @@ call_bi_func(unsigned n, Var arglist, Byte func_pc,
 	 * Check permissions, if protected
 	 */
 	/* if (caller() != SYSTEM_OBJECT && server_flag_option(f->protect_str)) { */
-	if (caller() != SYSTEM_OBJECT && f->protected) {
+	if (caller() != SYSTEM_OBJECT && f->_protected) {
 	    /* Try calling #0:bf_FUNCNAME(@ARGS) instead */
 	    enum error e = call_verb2(SYSTEM_OBJECT, f->verb_str, arglist, 0);
 
@@ -306,7 +308,7 @@ make_kill_pack()
 {
     package p;
 
-    p.kind = BI_KILL;
+    p.kind = p.BI_KILL;
 
     return p;
 }
@@ -322,7 +324,7 @@ make_raise_pack(enum error err, const char *msg, Var value)
 {
     package p;
 
-    p.kind = BI_RAISE;
+    p.kind = p.BI_RAISE;
     p.u.raise.code.type = TYPE_ERR;
     p.u.raise.code.v.err = err;
     p.u.raise.msg = str_dup(msg);
@@ -336,7 +338,7 @@ make_var_pack(Var v)
 {
     package p;
 
-    p.kind = BI_RETURN;
+    p.kind = p.BI_RETURN;
     p.u.ret = v;
 
     return p;
@@ -353,7 +355,7 @@ make_call_pack(Byte pc, void *data)
 {
     package p;
 
-    p.kind = BI_CALL;
+    p.kind = p.BI_CALL;
     p.u.call.pc = pc;
     p.u.call.data = data;
 
@@ -371,7 +373,7 @@ make_suspend_pack(enum error(*proc) (vm, void *), void *data)
 {
     package p;
 
-    p.kind = BI_SUSPEND;
+    p.kind = p.BI_SUSPEND;
     p.u.susp.proc = proc;
     p.u.susp.data = data;
 
@@ -387,7 +389,7 @@ function_description(int i)
 
     entry = bf_table[i];
     v = new_list(4);
-    v.v.list[1].type = TYPE_STR;
+    v.v.list[1].type = (var_type)TYPE_STR;
     v.v.list[1].v.str = str_ref(entry.name);
     v.v.list[2].type = TYPE_INT;
     v.v.list[2].v.num = entry.minargs;
@@ -433,7 +435,7 @@ load_server_protect_flags(void)
     int i;
 
     for (i = 0; i < top_bf_table; i++) {
-	bf_table[i].protected = server_flag_option(bf_table[i].protect_str);
+	bf_table[i]._protected = server_flag_option(bf_table[i].protect_str);
     }
     oklog("Loaded protect cache for %d builtins\n", i);
 }
