@@ -156,7 +156,7 @@ new_float(double d)
 {
     Var v;
 
-    v.type = TYPE_FLOAT;
+    v.type = (var_type)TYPE_FLOAT;
     v.v.fnum = (double *) mymalloc(sizeof(double), M_FLOAT);
     *v.v.fnum = d;
 
@@ -183,6 +183,22 @@ to_float(Var v, double *dp)
 #endif
 
 #if defined(HAVE_MATHERR) && defined(DOMAIN) && defined(SING) && defined(OVERFLOW) && defined(UNDERFLOW)
+
+/* note: for some odd reason compiling with g++ chokes on the
+   matherr() function, as "struct exception" was not defined
+   anywhere. It seems it's part of a precursor to POSIX (the mentioned
+   SVID3 below). To that end, I found the definition of "struct
+   exception" and paste it in here just to get things to compile. */
+
+// borrowed from:
+// http://docs.sun.com/app/docs/doc/805-3175/6j31emoh8?l=Ja&a=view
+struct exception {
+	int type;
+	char *name;
+	double arg1, arg2, retval;
+};
+
+
 /* Required in order to properly handle FP exceptions on SVID3 systems */
 int
 matherr(struct exception *x)
@@ -617,7 +633,7 @@ bf_ctime(Var arglist, Byte next, void *vdata, Objid progr)
 
     if (buffer[8] == '0')
 	buffer[8] = ' ';
-    r.type = TYPE_STR;
+    r.type = (var_type)TYPE_STR;
     r.v.str = str_dup(buffer);
 
     free_var(arglist);
@@ -664,7 +680,7 @@ bf_floatstr(Var arglist, Byte next, void *vdata, Objid progr)
     sprintf(fmt, "%%.%d%c", prec, use_sci ? 'e' : 'f');
     sprintf(output, fmt, d);
 
-    r.type = TYPE_STR;
+    r.type = (var_type)TYPE_STR;
     r.v.str = str_dup(output);
 
     return make_var_pack(r);
