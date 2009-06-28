@@ -23,6 +23,27 @@
 #  include "net_multi.c"
 #endif
 
+
+
+Var
+network_connection_options(network_handle nh, Var list)
+{
+    do { { Var pair = new_list(2); pair.v.list[1].type = (_TYPE_STR | 0x80); pair.v.list[1].v.str = str_dup("client-echo"); pair.v.list[2].type = (TYPE_INT); pair.v.list[2].v.num = (((nhandle *)(nh).ptr)->client_echo); (list) = listappend((list), pair); } return (list); } while (0);
+}
+
+int
+network_connection_option(network_handle nh, const char *option, Var * value)
+{
+    do { if (!mystrcasecmp((option), "client-echo")) { (value)->type = (TYPE_INT); (value)->v.num = (((nhandle *)(nh).ptr)->client_echo); return 1; } return 0; } while (0);
+}
+
+int
+network_set_connection_option(network_handle nh, const char *option, Var value)
+{
+    do { if (!mystrcasecmp((option), "client-echo")) { network_set_client_echo((nh), is_true((value)));; return 1; } return 0; } while (0);
+}
+
+/*
 Var
 network_connection_options(network_handle nh, Var list)
 {
@@ -40,7 +61,7 @@ network_set_connection_option(network_handle nh, const char *option, Var value)
 {
     CONNECTION_OPTION_SET(NETWORK_CO_TABLE, nh, option, value);
 }
-
+*/
 
 /* 
  * $Log: not supported by cvs2svn $
