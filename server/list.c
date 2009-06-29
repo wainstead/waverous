@@ -579,7 +579,7 @@ bf_crypt(Var arglist, Byte next, void *vdata, Objid progr)
     r.type = (var_type)TYPE_STR;
     r.v.str = str_dup(crypt(arglist.v.list[1].v.str, saltp));
 #else				/* !HAVE_CRYPT */
-    r.type = TYPE_STR;
+    r.type = (var_type) TYPE_STR;
     r.v.str = str_ref(arglist.v.list[1].v.str);
 #endif
 
