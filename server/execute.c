@@ -279,10 +279,10 @@ unwind_stack(Finally_Reason why, Var value, enum outcome *outcome)
 		p = call_bi_func(bi_func_id, value, bi_func_pc, a->progr,
 				 bi_func_data);
 		switch (p.kind) {
-		case BI_RETURN:
+		case package::BI_RETURN:
 		    *(a->top_rt_stack++) = p.u.ret;
 		    return 0;
-		case BI_RAISE:
+		case package::BI_RAISE:
 		    if (a->debug)
 			return raise_error(p, outcome);
 		    else {
@@ -291,7 +291,7 @@ unwind_stack(Finally_Reason why, Var value, enum outcome *outcome)
 			free_var(p.u.raise.value);
 			return 0;
 		    }
-		case BI_SUSPEND:
+		case package::BI_SUSPEND:
 		    {
 			enum error e = suspend_task(p);
 
@@ -305,13 +305,13 @@ unwind_stack(Finally_Reason why, Var value, enum outcome *outcome)
 			    return unwind_stack(FIN_RAISE, value, outcome);
 			}
 		    }
-		case BI_CALL:
+		case package::BI_CALL:
 		    a = &(activ_stack[top_activ_stack]);	/* TOS has changed */
 		    a->bi_func_id = bi_func_id;
 		    a->bi_func_pc = p.u.call.pc;
 		    a->bi_func_data = p.u.call.data;
 		    return 0;
-		case BI_KILL:
+		case package::BI_KILL:
 		    return unwind_stack(FIN_ABORT, zero, outcome);
 		}
 	    } else {
@@ -328,18 +328,18 @@ unwind_stack(Finally_Reason why, Var value, enum outcome *outcome)
 		    p = call_bi_func(bi_func_id, zero, bi_func_pc, a->progr,
 				     bi_func_data);
 		    switch (p.kind) {
-		    case BI_RETURN:
+		    case package::BI_RETURN:
 			free_var(p.u.ret);
 			break;
-		    case BI_RAISE:
+		    case package::BI_RAISE:
 			free_var(p.u.raise.code);
 			free_str(p.u.raise.msg);
 			free_var(p.u.raise.value);
 			break;
-		    case BI_SUSPEND:
-		    case BI_KILL:
+		    case package::BI_SUSPEND:
+		    case package::BI_KILL:
 			break;
-		    case BI_CALL:
+		    case package::BI_CALL:
 			free_activation(&activ_stack[top_activ_stack--], 0);
 			bi_func_pc = p.u.call.pc;
 			bi_func_data = p.u.call.data;
@@ -1621,10 +1621,10 @@ do {    						    	\
 		    LOAD_STATE_VARIABLES();
 
 		    switch (p.kind) {
-		    case BI_RETURN:
+		    case package::BI_RETURN:
 			PUSH(p.u.ret);
 			break;
-		    case BI_RAISE:
+		    case package::BI_RAISE:
 			if (RUN_ACTIV.debug) {
 			    if (raise_error(p, 0))
 				return OUTCOME_ABORTED;
@@ -1636,13 +1636,13 @@ do {    						    	\
 			    free_var(p.u.raise.value);
 			}
 			break;
-		    case BI_CALL:
+		    case package::BI_CALL:
 			/* another activ has been pushed onto activ_stack */
 			RUN_ACTIV.bi_func_id = func_id;
 			RUN_ACTIV.bi_func_data = p.u.call.data;
 			RUN_ACTIV.bi_func_pc = p.u.call.pc;
 			break;
-		    case BI_SUSPEND:
+		    case package::BI_SUSPEND:
 			{
 			    enum error e = suspend_task(p);
 
@@ -1652,7 +1652,7 @@ do {    						    	\
 				PUSH_ERROR(e);
 			}
 			break;
-		    case BI_KILL:
+		    case package::BI_KILL:
 			STORE_STATE_VARIABLES();
 			unwind_stack(FIN_ABORT, zero, 0);
 			return OUTCOME_ABORTED;
