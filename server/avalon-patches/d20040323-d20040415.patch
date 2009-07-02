@@ -1,0 +1,13 @@
+diff -Nur d20040323/projects/moo/src/extensions.c d20040415/projects/moo/src/extensions.c
+--- d20040323/projects/moo/src/extensions.c	2004-03-22 11:30:08.000000000 -0500
++++ d20040415/projects/moo/src/extensions.c	2004-04-15 14:28:14.000000000 -0400
+@@ -279,8 +279,8 @@
+         }
+ 
+         while (result < 1 || result > num) {
+-            result = 1;
+             int x = 0;
++            result = 1;
+             for (x=0; x<bits; x++) {
+                 int rbit, powwow;
+                 powwow = (int) pow(2, x);

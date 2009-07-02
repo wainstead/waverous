@@ -1,0 +1,666 @@
+diff -Nur tORIGINAL/projects/moo/src/configure d20040322/projects/moo/src/configure
+--- tORIGINAL/projects/moo/src/configure	2004-03-22 11:14:53.000000000 -0500
++++ d20040322/projects/moo/src/configure	2004-03-22 11:29:04.000000000 -0500
+@@ -1403,6 +1403,93 @@
+ 
+ done
+ 
++for func in ident_id
++do
++    trfrom='[a-z]' trto='[A-Z]'
++  var=HAVE_`echo $func | tr "$trfrom" "$trto"`
++    echo checking for $func
++cat > conftest.c <<EOF
++#include "confdefs.h"
++#include <assert.h>
++int main() { exit(0); }
++int t() { 
++/* The GNU C library defines this for functions which it implements
++    to always fail with ENOSYS.  Some functions are actually named
++    something starting with __ and the normal name is an alias.  */
++#if defined (__stub_$func) || defined (__stub___$func)
++choke me
++#else
++/* Override any gcc2 internal prototype to avoid an error.  */
++extern char $func(); $func();
++#endif
++ }
++EOF
++if eval $compile; then
++  rm -rf conftest*
++  {
++test -n "$verbose" && \
++echo "	defining $var"
++echo "#define" $var 1 >> confdefs.h
++DEFS="$DEFS -D$var=1"
++SEDDEFS="${SEDDEFS}\${SEDdA}$var\${SEDdB}$var\${SEDdC}1\${SEDdD}
++\${SEDuA}$var\${SEDuB}$var\${SEDuC}1\${SEDuD}
++\${SEDeA}$var\${SEDeB}$var\${SEDeC}1\${SEDeD}
++"
++}
++
++
++else
++  rm -rf conftest*
++  SAVELIBS="$LIBS"
++    for lib in -lident
++    do
++      LIBS="$LIBS $lib"
++      echo checking for $func
++cat > conftest.c <<EOF
++#include "confdefs.h"
++#include <assert.h>
++int main() { exit(0); }
++int t() { 
++/* The GNU C library defines this for functions which it implements
++    to always fail with ENOSYS.  Some functions are actually named
++    something starting with __ and the normal name is an alias.  */
++#if defined (__stub_$func) || defined (__stub___$func)
++choke me
++#else
++/* Override any gcc2 internal prototype to avoid an error.  */
++extern char $func(); $func();
++#endif
++ }
++EOF
++if eval $compile; then
++  rm -rf conftest*
++  
++{
++test -n "$verbose" && \
++echo "	defining $var"
++echo "#define" $var 1 >> confdefs.h
++DEFS="$DEFS -D$var=1"
++SEDDEFS="${SEDDEFS}\${SEDdA}$var\${SEDdB}$var\${SEDdC}1\${SEDdD}
++\${SEDuA}$var\${SEDuB}$var\${SEDuC}1\${SEDuD}
++\${SEDeA}$var\${SEDeB}$var\${SEDeC}1\${SEDeD}
++"
++}
++
++			 break
++
++else
++  rm -rf conftest*
++  LIBS="$SAVELIBS"
++fi
++rm -f conftest*
++
++    done
++    
++fi
++rm -f conftest*
++
++done
++
+ for hdr in unistd.h sys/cdefs.h stdlib.h tiuser.h machine/endian.h
+ do
+ trhdr=HAVE_`echo $hdr | tr '[a-z]./' '[A-Z]__'`
+diff -Nur tORIGINAL/projects/moo/src/configure.in d20040322/projects/moo/src/configure.in
+--- tORIGINAL/projects/moo/src/configure.in	2004-03-22 11:14:53.000000000 -0500
++++ d20040322/projects/moo/src/configure.in	2004-03-22 11:29:13.000000000 -0500
+@@ -315,6 +315,7 @@
+ MOO_HAVE_FUNC_LIBS(accept, "-lsocket -lnsl" -lsocket -linet)
+ MOO_HAVE_FUNC_LIBS(t_open, -lnsl -lnsl_s)
+ MOO_HAVE_FUNC_LIBS(crypt, -lcrypt -lcrypt_d)
++MOO_HAVE_FUNC_LIBS(ident_id, -lident)
+ AC_HAVE_HEADERS(unistd.h sys/cdefs.h stdlib.h tiuser.h machine/endian.h)
+ AC_HAVE_FUNCS(remove rename poll select strerror strftime strtoul matherr)
+ AC_HAVE_FUNCS(random lrand48 wait3 wait2 sigsetmask sigprocmask sigrelse)
+diff -Nur tORIGINAL/projects/moo/src/extensions.c d20040322/projects/moo/src/extensions.c
+--- tORIGINAL/projects/moo/src/extensions.c	2004-03-22 11:14:54.000000000 -0500
++++ d20040322/projects/moo/src/extensions.c	2004-03-22 11:30:08.000000000 -0500
+@@ -36,8 +36,6 @@
+ #include "functions.h"
+ #include "db_tune.h"
+ 
+-#if EXAMPLE
+-
+ #include "my-unistd.h"
+ 
+ #include "exceptions.h"
+@@ -46,6 +44,17 @@
+ #include "storage.h"
+ #include "tasks.h"
+ 
++/* FUP extension */
++#include "structures.h"
++#include "utils.h"
++/* FUP extension */
++
++/* vrandom extension */
++#include "list.h"
++/* vrandom extension */
++
++#if EXAMPLE
++
+ typedef struct stdin_waiter {
+     struct stdin_waiter *next;
+     vm the_vm;
+@@ -172,10 +181,126 @@
+ }
+ #endif
+ 
++static package
++bf_isa(Var arglist, Byte next, void *vdata, Objid progr)
++{
++  Objid what = arglist.v.list[1].v.obj;
++  Objid targ = arglist.v.list[2].v.obj;
++  Var   r;
++
++  free_var(arglist);
++
++  r.type = TYPE_INT;
++
++  while (valid(what))
++  {
++    if (what == targ)
++    {
++      r.v.num = 1;
++      return make_var_pack(r);
++    }
++
++    what = db_object_parent(what);
++  }
++
++  r.v.num = 0;
++  return make_var_pack(r);
++}
++
++// Begin VERYRANDOM code from tiresias
++
++static unsigned long regA, regB, regC;
++
++//int VERYRANDOM(unsigned long &regA, unsigned long &regB, unsigned long &regC) {
++int VERYRANDOM() {
++  regA=((((regA>>31)^(regA>>6)^(regA>>4)^(regA>>2)^(regA<<1)^regA) & 0x00000001)<<31) | (regA>>1);
++  regB=((((regB>>30)^(regB>>2)) & 0x00000001)<<30) | (regB>>1);
++  regC=((((regC>>28)^(regC>>1)) & 0x00000001)<<28) | (regC>>1);
++
++  return ((regA ^ regB ^ regC) & 0x00000001);
++//  return ((regA & regB) | (!regA & regC)) & 0x00000001;
++}
++
++static package
++bf_vrandomseed(Var arglist, Byte next, void *vdata, Objid progr)
++{
++    int nargs = arglist.v.list[0].v.num;
++    Var r;
++
++    free_var(arglist);
++
++    if (nargs != 0) {
++        unsigned long newRegA = (unsigned long) *arglist.v.list[1].v.list[1].v.fnum;
++        unsigned long newRegB = (unsigned long) *arglist.v.list[1].v.list[2].v.fnum;
++        unsigned long newRegC = (unsigned long) *arglist.v.list[1].v.list[3].v.fnum;
++
++        regA = newRegA;
++        regB = newRegB;
++        regC = newRegC;
++    }
++
++    r = new_list(3);
++    r.v.list[1].type = TYPE_FLOAT;
++    r.v.list[1].v.fnum = mymalloc(sizeof(double), M_FLOAT);
++    *r.v.list[1].v.fnum = (float) regA;
++
++    r.v.list[2].type = TYPE_FLOAT;
++    r.v.list[2].v.fnum = mymalloc(sizeof(double), M_FLOAT);
++    *r.v.list[2].v.fnum = (float) regB;
++
++    r.v.list[3].type = TYPE_FLOAT;
++    r.v.list[3].v.fnum = mymalloc(sizeof(double), M_FLOAT);
++    *r.v.list[3].v.fnum = (float) regC;
++
++    return make_var_pack(r);
++}
++
++static package
++bf_vrandom(Var arglist, Byte next, void *vdata, Objid progr)
++{
++    int nargs = arglist.v.list[0].v.num;
++    int num = (nargs >= 1 ? arglist.v.list[1].v.num : 1);
++
++    free_var(arglist);
++
++    if (num <= 0)
++        return make_error_pack(E_INVARG);
++    else {
++        Var r;
++        int bits = 0;
++        int result = -1;
++
++        r.type = TYPE_INT;
++        if (nargs == 0)
++            bits = 31;
++        else {
++            double x = pow(num, .5);
++            bits=((double)abs(x)==x?x:abs(x+1));
++        }
++
++        while (result < 1 || result > num) {
++            result = 1;
++            int x = 0;
++            for (x=0; x<bits; x++) {
++                int rbit, powwow;
++                powwow = (int) pow(2, x);
++//              rbit = VERYRANDOM(regA, regB, regC);
++                rbit = VERYRANDOM();
++                result = result + (rbit*powwow);
++            }
++        }
++
++        r.v.num = result;
++        return make_var_pack(r);
++    }
++}
++
++// end VERYRANDOM code
+ 
+ void
+ register_extensions()
+ {
++  oklog("          LOADING: extensions ...\n");
+ #if EXAMPLE
+     register_task_queue(stdin_enumerator);
+     register_function("read_stdin", 0, 0, bf_read_stdin);
+@@ -184,5 +309,10 @@
+     register_function("log_cache_stats", 0, 0, bf_log_cache_stats);
+     register_function("verb_cache_stats", 0, 0, bf_verb_cache_stats);
+ #endif
++    register_function("isa", 2, 2, bf_isa, TYPE_OBJ, TYPE_OBJ);
++    register_function("vrandomseed", 0, 3, bf_vrandomseed, TYPE_LIST);
++    register_function("vrandom", 0, 1, bf_vrandom, TYPE_INT);
++  register_files();
++  oklog("          LOADING: extensions ... finished\n");
+ }
+ 
+diff -Nur tORIGINAL/projects/moo/src/ext-FUP_options.h d20040322/projects/moo/src/ext-FUP_options.h
+--- tORIGINAL/projects/moo/src/ext-FUP_options.h	2004-03-22 11:25:05.000000000 -0500
++++ d20040322/projects/moo/src/ext-FUP_options.h	2004-03-22 11:29:37.000000000 -0500
+@@ -26,10 +26,14 @@
+ You can also make this base directory either read-only or read-and-write.
+ It is read-only by default. To make it writable from the MOO, comment the line:
+ */
+-     #define EXTERN_FILES_DIR_READ_ONLY
++//     #define EXTERN_FILES_DIR_READ_ONLY
+ 
+ 
+ /**********************************************************
+ The default mode for new directories can be configured too:
+ */
+      #define CREATE_NEW_DIR_MODE		0755
++
++#define INCLUDE_FILECHMOD
++#define INCLUDE_FILERUN
++
+diff -Nur tORIGINAL/projects/moo/src/Makefile.in d20040322/projects/moo/src/Makefile.in
+--- tORIGINAL/projects/moo/src/Makefile.in	2004-03-22 11:14:53.000000000 -0500
++++ d20040322/projects/moo/src/Makefile.in	2004-03-22 11:28:31.000000000 -0500
+@@ -31,7 +31,7 @@
+ 
+ CSRCS = ast.c code_gen.c db_file.c db_io.c db_objects.c db_properties.c \
+ 	db_verbs.c decompile.c disassemble.c eval_env.c eval_vm.c \
+-	exceptions.c execute.c extensions.c functions.c keywords.c list.c \
++	exceptions.c execute.c extensions.c ext-FUP.c functions.c keywords.c list.c \
+ 	log.c malloc.c match.c md5.c name_lookup.c network.c net_mplex.c \
+ 	net_proto.c numbers.c objects.c parse_cmd.c pattern.c program.c \
+ 	property.c quota.c ref_count.c regexpr.c server.c storage.c streams.c str_intern.c \
+diff -Nur tORIGINAL/projects/moo/src/net_bsd_tcp.c d20040322/projects/moo/src/net_bsd_tcp.c
+--- tORIGINAL/projects/moo/src/net_bsd_tcp.c	2004-03-22 11:14:54.000000000 -0500
++++ d20040322/projects/moo/src/net_bsd_tcp.c	2004-03-22 11:31:06.000000000 -0500
+@@ -41,6 +41,8 @@
+ #include "timers.h"
+ #include "utils.h"
+ 
++#include <netdb.h>
++
+ const char *
+ proto_name(void)
+ {
+@@ -87,8 +89,8 @@
+     if (!st)
+ 	st = new_stream(20);
+ 
+-    if (desc.type != TYPE_INT)
+-	return E_TYPE;
++    if (desc.type != TYPE_INT && desc.type != TYPE_LIST)
++        return E_TYPE;
+ 
+     port = desc.v.num;
+     s = socket(AF_INET, SOCK_STREAM, 0);
+@@ -102,8 +104,26 @@
+ 	close(s);
+ 	return E_QUOTA;
+     }
++    memset((char *) &address, 0, sizeof(address));
+     address.sin_family = AF_INET;
+-    address.sin_addr.s_addr = htonl(INADDR_ANY);
++    if (desc.type == TYPE_INT) {
++      port = desc.v.num;
++      address.sin_addr.s_addr = htonl(INADDR_ANY);
++    } else {
++      unsigned long inaddr;
++      inaddr = inet_addr(desc.v.list[1].v.str);
++      if (inaddr != INADDR_NONE) {
++        memcpy(&address.sin_addr, &inaddr, sizeof(inaddr));
++      } else {
++        struct hostent *hp;
++        hp=gethostbyname(desc.v.list[1].v.str);
++        if (hp == NULL)
++          return E_INVARG;
++
++        memcpy(&address.sin_addr,hp->h_addr,hp->h_length);
++      }
++      port = desc.v.list[2].v.num;
++    }
+     address.sin_port = htons(port);
+     if (bind(s, (struct sockaddr *) &address, sizeof(address)) < 0) {
+ 	enum error e = E_QUOTA;
+@@ -127,7 +147,11 @@
+     } else
+ 	*canon = var_ref(desc);
+ 
+-    stream_printf(st, "port %d", canon->v.num);
++    if (desc.type == TYPE_INT) {
++      stream_printf(st, "port %d", canon->v.num);
++    } else {
++      stream_printf(st, "%s port %d", canon->v.list[1].v.str, canon->v.list[2].v.num);
++    }
+     *name = reset_stream(st);
+ 
+     *fd = s;
+@@ -209,7 +233,7 @@
+     static int port;
+     static Timer_ID id;
+     int s, result, length;
+-    int timeout = server_int_option("name_lookup_timeout", 5);
++    int timeout = server_int_option("outbound_name_lookup_timeout", 5);
+     static struct sockaddr_in addr;
+     static Stream *st1 = 0, *st2 = 0;
+ 
+diff -Nur tORIGINAL/projects/moo/src/net_multi.c d20040322/projects/moo/src/net_multi.c
+--- tORIGINAL/projects/moo/src/net_multi.c	2004-03-22 11:14:54.000000000 -0500
++++ d20040322/projects/moo/src/net_multi.c	2004-03-22 11:31:52.000000000 -0500
+@@ -41,6 +41,10 @@
+ #include "timers.h"
+ #include "utils.h"
+ 
++#ifdef NETWORK_IDENT
++#include <ident.h>
++#endif
++
+ static struct proto proto;
+ static int eol_length;		/* == strlen(proto.eol_out_string) */
+ 
+@@ -82,6 +86,8 @@
+ #if NETWORK_PROTOCOL == NP_TCP
+     int client_echo;
+ #endif
++    char *user_name;
++    int user_client;
+ } nhandle;
+ 
+ static nhandle *all_nhandles = 0;
+@@ -322,6 +328,18 @@
+ #if NETWORK_PROTOCOL == NP_TCP
+     h->client_echo = 1;
+ #endif
++    h->user_name = NULL;
++
++#ifdef NETWORK_IDENT
++    if (server_int_option("ident_lookup", 1)) {
++      h->user_name = ident_id(rfd, server_int_option("ident_lookup_timeout", 5));
++    }
++#endif
++
++    h->user_client = 0;
++    if (!h->user_name || h->user_name[0] == '[') {
++      h->user_name = str_dup("unknown");
++    }
+ 
+     stream_printf(s, "%s %s %s",
+ 		  local_name, outbound ? "to" : "from", remote_name);
+@@ -610,6 +628,14 @@
+     return h->name;
+ }
+ 
++const char *
++network_connection_user(network_handle nh)
++{
++    nhandle *h = (nhandle *) nh.ptr;
++
++    return h->user_name;
++}
++
+ void
+ network_set_connection_binary(network_handle nh, int do_binary)
+ {
+@@ -633,6 +659,13 @@
+     list = listappend(list, pair);
+ #endif
+ 
++    pair = new_list(2);
++    pair.v.list[1].type = TYPE_STR;
++    pair.v.list[1].v.str = str_dup("user-client");
++    pair.v.list[2].type = TYPE_INT;
++    pair.v.list[2].v.num = h->user_client;
++    list = listappend(list, pair);
++ 
+     return list;
+ }
+ 
+@@ -649,6 +682,12 @@
+     }
+ #endif
+ 
++    if (!mystrcasecmp(option, "user-client")) {
++        value->type = TYPE_INT;
++        value->v.num = h->user_client;
++        return 1;
++    }
++
+     return 0;
+ }
+ 
+@@ -680,6 +719,11 @@
+     }
+ #endif
+ 
++    if (!mystrcasecmp(option, "user-client")) {
++        h->user_client = value.v.num;
++        return 1;
++    }
++
+     return 0;
+ }
+ 
+diff -Nur tORIGINAL/projects/moo/src/network.h d20040322/projects/moo/src/network.h
+--- tORIGINAL/projects/moo/src/network.h	2004-03-22 11:14:54.000000000 -0500
++++ d20040322/projects/moo/src/network.h	2004-03-22 11:32:06.000000000 -0500
+@@ -188,6 +188,8 @@
+ 				 * the given setting if valid.
+ 				 */
+ 
++extern const char *network_connection_user(network_handle nh);
++
+ #ifdef OUTBOUND_NETWORK
+ #include "structures.h"
+ 
+diff -Nur tORIGINAL/projects/moo/src/options.h d20040322/projects/moo/src/options.h
+--- tORIGINAL/projects/moo/src/options.h	2004-03-22 11:14:54.000000000 -0500
++++ d20040322/projects/moo/src/options.h	2004-03-22 15:39:55.000000000 -0500
+@@ -155,7 +155,7 @@
+  *	 NP_SINGLE or NP_LOCAL.
+  */
+ 
+-/* #define OUTBOUND_NETWORK */
++#define OUTBOUND_NETWORK
+ 
+ /******************************************************************************
+  * The following constants define certain aspects of the server's network
+@@ -256,6 +256,8 @@
+ 
+ /* #define USE_GNU_MALLOC */
+ 
++#define NETWORK_IDENT
++
+ /*****************************************************************************
+  ********** You shouldn't need to change anything below this point. **********
+  *****************************************************************************/
+diff -Nur tORIGINAL/projects/moo/src/server.c d20040322/projects/moo/src/server.c
+--- tORIGINAL/projects/moo/src/server.c	2004-03-22 11:14:54.000000000 -0500
++++ d20040322/projects/moo/src/server.c	2004-03-22 13:26:05.000000000 -0500
+@@ -1489,6 +1489,67 @@
+ }
+ 
+ static package
++bf_connection_user(Var arglist, Byte next, void *vdata, Objid progr)
++{
++    Objid       who = arglist.v.list[1].v.obj;
++    shandle    *h = find_shandle(who);
++    const char *user_name;
++    Var         r;
++
++/*    free_var(arglist);
++    r.type = TYPE_STR;
++    r.v.str = str_dup("unknown");
++    return make_var_pack(r);*/
++
++    if (h)
++        user_name = network_connection_user(h->nhandle);
++    else
++        user_name = 0;
++
++    free_var(arglist);
++    if (!is_wizard(progr)  &&  progr != who)
++        return make_error_pack(E_PERM);
++    else if (!user_name)
++        return make_error_pack(E_INVARG);
++    else {
++        r.type = TYPE_STR;
++        r.v.str = str_dup(user_name);
++        return make_var_pack(r);
++    }
++}
++
++Objid
++connection_listener(Objid player)
++{
++    shandle    *h = find_shandle(player);
++
++    if (h)
++        return h->listener;
++    else
++        return -1;
++}
++
++static package
++bf_connection_listener(Var arglist, Byte next, void *vdata, Objid progr)
++{
++    Objid       who = arglist.v.list[1].v.obj;
++    shandle    *h = find_shandle(who);
++    Var         r;
++
++    free_var(arglist);
++    if (!is_wizard(progr)  &&  progr != who)
++        return make_error_pack(E_PERM);
++
++    if (h) {
++        r.type = TYPE_OBJ;
++        r.v.obj = h->listener;
++        return make_var_pack(r);
++    } else {
++        return make_error_pack(E_INVARG);
++    }
++}
++
++static package
+ bf_notify(Var arglist, Byte next, void *vdata, Objid progr)
+ {				/* (player, string [, no_flush]) */
+     Objid conn = arglist.v.list[1].v.obj;
+@@ -1613,19 +1674,36 @@
+ bf_listen(Var arglist, Byte next, void *vdata, Objid progr)
+ {				/* (oid, desc) */
+     Objid oid = arglist.v.list[1].v.obj;
+-    Var desc = arglist.v.list[2];
++    Var desc;
+     int nargs = arglist.v.list[0].v.num;
+     int print_messages = nargs >= 3 && is_true(arglist.v.list[3]);
+-    enum error e;
++    enum error e = E_NONE;
+     slistener *l = 0;
+ 
+-    if (!is_wizard(progr))
+-	e = E_PERM;
+-    else if (!valid(oid) || find_slistener(desc))
+-	e = E_INVARG;
+-    else if (!(l = new_slistener(oid, desc, print_messages, &e)));	/* Do nothing; e is already set */
+-    else if (!start_listener(l))
+-	e = E_QUOTA;
++    if (arglist.v.list[2].type == TYPE_LIST) {
++        if (arglist.v.list[2].v.list[0].v.num == 2 && arglist.v.list[2].v.list[1].type == TYPE_STR && arglist.v.list[2].v.list[2].type == TYPE_INT) {
++            desc = new_list(2);
++            desc.v.list[1].type = TYPE_STR;
++            desc.v.list[1].v.str = str_dup(arglist.v.list[2].v.list[1].v.str);
++            desc.v.list[2] = arglist.v.list[2].v.list[2];
++        } else {
++            e = E_INVARG;
++        }
++    } else if (arglist.v.list[2].type == TYPE_INT) {
++        desc = arglist.v.list[2];
++    } else {
++      e = E_INVARG;
++    }
++
++    if (e == E_NONE) {
++        if (!is_wizard(progr))
++	    e = E_PERM;
++        else if (!valid(oid) || find_slistener(desc))
++	    e = E_INVARG;
++        else if (!(l = new_slistener(oid, desc, print_messages, &e)));	/* Do nothing; e is already set */
++        else if (!start_listener(l))
++	    e = E_QUOTA;
++    }
+ 
+     free_var(arglist);
+     if (e == E_NONE)
+@@ -1702,6 +1780,30 @@
+     return make_var_pack(r);
+ }
+ 
++static package
++bf_chr(Var arglist, Byte next, void *vdata, Objid progr)
++{ /* (number) */
++    Var r;
++    char c[2];
++
++    if (!is_wizard(progr)) {
++      free_var(arglist);
++      return make_error_pack(E_PERM);
++    }
++
++    c[0] = arglist.v.list[1].v.num;
++    c[1] = 0;
++
++    if (arglist.v.list[1].v.num == 10)
++      return make_error_pack(E_INVARG);
++
++    free_var(arglist);
++
++    r.type = TYPE_STR;
++    r.v.str = str_dup(c);
++    return make_var_pack(r);
++}
++
+ void
+ register_server(void)
+ {
+@@ -1733,5 +1835,8 @@
+     register_function("listeners", 0, 0, bf_listeners);
+     register_function("buffered_output_length", 0, 1,
+ 		      bf_buffered_output_length, TYPE_OBJ);
++    register_function("connection_listener", 1, 1, bf_connection_listener, TYPE_OBJ);
++    register_function("connection_user", 1, 1, bf_connection_user, TYPE_OBJ);
++    register_function("chr", 1, 1, bf_chr, TYPE_INT);
+ }
+ 

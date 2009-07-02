@@ -1,0 +1,23 @@
+d20051107		- added support for ususpend
+d20051106		- updated xml document parsing to handle name spaces
+			  better
+			- added ability to pass in a connection host to allow
+			  hostname to be available when using SSL tunnel
+			- call :do_prompt on user after every command to
+			  improve updatability of prompts
+d20050327		- added background name resolution
+d20050324		- added xml document parsing
+d20041022		- fixed random function to be type safe
+d20040416		- added utime() from andy
+d20040415		- modified vrandom to be ansi C compat
+d20040323		- Added in support for user_unidled and idle_time
+d20040322		- added FUP
+			- added ident support
+			- added vrandom functions
+			- added isa() function
+			- added listening on a specific address
+			- added user-client connection-option for tracking
+			  session level settings like ansi, status line, etc
+			- added chr() function
+tORIGINAL 		- original LambdaMOO 1.8.1
+
