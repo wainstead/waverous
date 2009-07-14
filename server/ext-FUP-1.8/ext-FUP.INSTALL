@@ -1,0 +1,23 @@
+CUSTOMIZATION:
+
+There are various parametters you can configure before compiling FUP,
+you just need to edit ext-FUP_options.h and follow the instructions
+given there.
+
+
+INSTALLATION:
+
+1) Copy the files ext-FUP.c and ext-FUP_options.h to the source directory.
+
+2) Add the contents of the extensions.c.sample provided with the FUP 
+   distribution to the extensions.c file of the source directory.
+
+3) Cutomize FUP by editing ext-FUP_options.h
+
+4) Configure and make.
+
+5) Create a subdirectory of the directory where the executable will
+   reside, named 'files'. If you are using filerun(), create another one called
+   'bin' (see CUSTOMIZATION above).
+
+

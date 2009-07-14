@@ -1,0 +1,73 @@
+diff -Nur tORIGINAL/projects/moo/src/net_bsd_tcp.c d20040322/projects/moo/src/net_bsd_tcp.c
+--- tORIGINAL/projects/moo/src/net_bsd_tcp.c	2004-03-22 11:14:54.000000000 -0500
++++ d20040322/projects/moo/src/net_bsd_tcp.c	2004-03-22 11:31:06.000000000 -0500
+@@ -41,6 +41,8 @@
+ #include "timers.h"
+ #include "utils.h"
+ 
++#include <netdb.h>
++
+ const char *
+ proto_name(void)
+ {
+@@ -87,8 +89,8 @@
+     if (!st)
+ 	st = new_stream(20);
+ 
+-    if (desc.type != TYPE_INT)
+-	return E_TYPE;
++    if (desc.type != TYPE_INT && desc.type != TYPE_LIST)
++        return E_TYPE;
+ 
+     port = desc.v.num;
+     s = socket(AF_INET, SOCK_STREAM, 0);
+@@ -102,8 +104,26 @@
+ 	close(s);
+ 	return E_QUOTA;
+     }
++    memset((char *) &address, 0, sizeof(address));
+     address.sin_family = AF_INET;
+-    address.sin_addr.s_addr = htonl(INADDR_ANY);
++    if (desc.type == TYPE_INT) {
++      port = desc.v.num;
++      address.sin_addr.s_addr = htonl(INADDR_ANY);
++    } else {
++      unsigned long inaddr;
++      inaddr = inet_addr(desc.v.list[1].v.str);
++      if (inaddr != INADDR_NONE) {
++        memcpy(&address.sin_addr, &inaddr, sizeof(inaddr));
++      } else {
++        struct hostent *hp;
++        hp=gethostbyname(desc.v.list[1].v.str);
++        if (hp == NULL)
++          return E_INVARG;
++
++        memcpy(&address.sin_addr,hp->h_addr,hp->h_length);
++      }
++      port = desc.v.list[2].v.num;
++    }
+     address.sin_port = htons(port);
+     if (bind(s, (struct sockaddr *) &address, sizeof(address)) < 0) {
+ 	enum error e = E_QUOTA;
+@@ -127,7 +147,11 @@
+     } else
+ 	*canon = var_ref(desc);
+ 
+-    stream_printf(st, "port %d", canon->v.num);
++    if (desc.type == TYPE_INT) {
++      stream_printf(st, "port %d", canon->v.num);
++    } else {
++      stream_printf(st, "%s port %d", canon->v.list[1].v.str, canon->v.list[2].v.num);
++    }
+     *name = reset_stream(st);
+ 
+     *fd = s;
+@@ -209,7 +233,7 @@
+     static int port;
+     static Timer_ID id;
+     int s, result, length;
+-    int timeout = server_int_option("name_lookup_timeout", 5);
++    int timeout = server_int_option("outbound_name_lookup_timeout", 5);
+     static struct sockaddr_in addr;
+     static Stream *st1 = 0, *st2 = 0;
+ 

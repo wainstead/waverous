@@ -1,0 +1,11 @@
+diff -Nur tORIGINAL/projects/moo/src/configure.in d20040322/projects/moo/src/configure.in
+--- tORIGINAL/projects/moo/src/configure.in	2004-03-22 11:14:53.000000000 -0500
++++ d20040322/projects/moo/src/configure.in	2004-03-22 11:29:13.000000000 -0500
+@@ -315,6 +315,7 @@
+ MOO_HAVE_FUNC_LIBS(accept, "-lsocket -lnsl" -lsocket -linet)
+ MOO_HAVE_FUNC_LIBS(t_open, -lnsl -lnsl_s)
+ MOO_HAVE_FUNC_LIBS(crypt, -lcrypt -lcrypt_d)
++MOO_HAVE_FUNC_LIBS(ident_id, -lident)
+ AC_HAVE_HEADERS(unistd.h sys/cdefs.h stdlib.h tiuser.h machine/endian.h)
+ AC_HAVE_FUNCS(remove rename poll select strerror strftime strtoul matherr)
+ AC_HAVE_FUNCS(random lrand48 wait3 wait2 sigsetmask sigprocmask sigrelse)

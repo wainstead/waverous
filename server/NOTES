@@ -1,0 +1,17 @@
+The first five patches apply OK to MOO_1_8_1.
+
+The expat support, though, was compiled by using the .o files created
+by a local copy of the expat library:
+
+i686-apple-darwin8-gcc-4.0.1: /usr/local/src/standard/expat/xmltok/*.o: No such file or directory
+i686-apple-darwin8-gcc-4.0.1: /usr/local/src/standard/expat/xmlparse/*.o: No such file or directory
+
+And xmlparse.h was renamed to expat.h. So these changes have to be
+taken into account: this would, probably, all be tweaks to the compile
+process and would require few code changes, I hope.
+
+I divvied up the first patch, tORIGINAL, into ten separate patch files
+and they all applied OK. No big shocker, but I should be able to
+segregate the patches better.
+
+

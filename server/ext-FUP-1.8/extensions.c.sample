@@ -1,0 +1,34 @@
+/*
+
+Here is a minimal extensions.c file that will load FUP
+
+*/
+
+#include "bf_register.h"
+#include "functions.h"
+#include "log.h"
+#include "storage.h"
+#include "structures.h"
+#include "utils.h"
+
+
+#include "ext-FUP.c"
+/* FUP extension */
+
+/* add other extensions here */
+
+void
+register_extensions()
+{
+  oklog("          LOADING: extensions ...\n");
+
+  register_files();
+  /* load FUP */
+
+  /* register other extensions here */
+
+  oklog("          LOADING: extensions ... finished\n");
+
+}
+
+/* all done */

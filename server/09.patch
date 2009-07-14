@@ -1,0 +1,21 @@
+diff -Nur tORIGINAL/projects/moo/src/options.h d20040322/projects/moo/src/options.h
+--- tORIGINAL/projects/moo/src/options.h	2004-03-22 11:14:54.000000000 -0500
++++ d20040322/projects/moo/src/options.h	2004-03-22 15:39:55.000000000 -0500
+@@ -155,7 +155,7 @@
+  *	 NP_SINGLE or NP_LOCAL.
+  */
+ 
+-/* #define OUTBOUND_NETWORK */
++#define OUTBOUND_NETWORK
+ 
+ /******************************************************************************
+  * The following constants define certain aspects of the server's network
+@@ -256,6 +256,8 @@
+ 
+ /* #define USE_GNU_MALLOC */
+ 
++#define NETWORK_IDENT
++
+ /*****************************************************************************
+  ********** You shouldn't need to change anything below this point. **********
+  *****************************************************************************/
