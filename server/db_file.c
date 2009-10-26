@@ -520,7 +520,7 @@ write_db_file(const char *reason)
     ES_ctx.link = ES_exceptionStack;		
     ES_exceptionStack = &ES_ctx;		
 	    						
-    if (setjmp((int *) ES_ctx.jmp) != 0)	
+    if (setjmp(ES_ctx.jmp) != 0)	
       ES_es = ES_Exception;			
 		    					
     while (1) {					
