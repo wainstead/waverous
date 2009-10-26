@@ -43,6 +43,8 @@
 
 #include "net_tcp.c"
 
+#include <netdb.h>
+
 const char *
 proto_name(void)
 {
@@ -78,8 +80,8 @@ proto_make_listener(Var desc, int *fd, Var * canon, const char **name)
     if (!st)
 	st = new_stream(20);
 
-    if (desc.type != TYPE_INT)
-	return E_TYPE;
+    if (desc.type != TYPE_INT && desc.type != TYPE_LIST)
+        return E_TYPE;
 
     port = desc.v.num;
     s = socket(AF_INET, SOCK_STREAM, 0);
@@ -93,8 +95,26 @@ proto_make_listener(Var desc, int *fd, Var * canon, const char **name)
 	close(s);
 	return E_QUOTA;
     }
+    memset((char *) &address, 0, sizeof(address));
     address.sin_family = AF_INET;
-    address.sin_addr.s_addr = bind_local_ip;
+    if (desc.type == TYPE_INT) {
+      port = desc.v.num;
+      address.sin_addr.s_addr = bind_local_ip;
+    } else {
+      unsigned long inaddr;
+      inaddr = inet_addr(desc.v.list[1].v.str);
+      if (inaddr != INADDR_NONE) {
+        memcpy(&address.sin_addr, &inaddr, sizeof(inaddr));
+      } else {
+        struct hostent *hp;
+        hp=gethostbyname(desc.v.list[1].v.str);
+        if (hp == NULL)
+          return E_INVARG;
+
+        memcpy(&address.sin_addr,hp->h_addr,hp->h_length);
+      }
+      port = desc.v.list[2].v.num;
+    }
     address.sin_port = htons(port);
     if (bind(s, (struct sockaddr *) &address, sizeof(address)) < 0) {
 	enum error e = E_QUOTA;
@@ -118,7 +138,11 @@ proto_make_listener(Var desc, int *fd, Var * canon, const char **name)
     } else
 	*canon = var_ref(desc);
 
-    stream_printf(st, "port %d", canon->v.num);
+    if (desc.type == TYPE_INT) {
+      stream_printf(st, "port %d", canon->v.num);
+    } else {
+      stream_printf(st, "%s port %d", canon->v.list[1].v.str, canon->v.list[2].v.num);
+    }
     *name = reset_stream(st);
 
     *fd = s;
@@ -201,7 +225,7 @@ proto_open_connection(Var arglist, int *read_fd, int *write_fd,
     static Timer_ID id;
     size_t length;
     int s, result;
-    int timeout = server_int_option("name_lookup_timeout", 5);
+    int timeout = server_int_option("outbound_name_lookup_timeout", 5);
     static struct sockaddr_in addr;
     static Stream *st1 = 0, *st2 = 0;
 
@@ -252,18 +276,55 @@ proto_open_connection(Var arglist, int *read_fd, int *write_fd,
 	    return e;
 	}
     }	 
-    TRY {
-	id = set_timer(server_int_option("outbound_connect_timeout", 5),
-		       timeout_proc, 0);
-	result = connect(s, (struct sockaddr *) &addr, sizeof(addr));
-	cancel_timer(id);
+
+    {
+        ES_CtxBlock         ES_ctx;
+        volatile ES_Value   ES_es = ES_Initialize;
+
+        ES_ctx.nx = 0;
+        ES_ctx._finally = 0;
+        ES_ctx.link = ES_exceptionStack;
+        ES_exceptionStack = &ES_ctx;
+
+        if (setjmp(ES_ctx.jmp) != 0)
+            ES_es = ES_Exception;
+
+        while (1) {
+            if (ES_es == ES_EvalBody) {
+                            /* TRY body goes here */
+                            {
+                                id = set_timer(server_int_option("outbound_connect_timeout", 5),
+                                               timeout_proc, 0);
+                                result = connect(s, (struct sockaddr *) &addr, sizeof(addr));
+                                cancel_timer(id);
+                            }
+                /* TRY body or handler goes here */
+                if (ES_es == ES_EvalBody)
+                    ES_exceptionStack = ES_ctx.link;
+                break;
+            }
+            if (ES_es == ES_Initialize) {
+                if (ES_ctx.nx >= ES_MaxExceptionsPerScope)
+                    panic("Too many EXCEPT clauses!");
+                ES_ctx.array[ES_ctx.nx++] = &timeout_exception;
+            } else if (ES_ctx.id == &timeout_exception  ||  &timeout_exception == &ANY) {
+                int exception_value = ES_ctx.value;
+
+                ES_exceptionStack = ES_ctx.link;
+                exception_value = exception_value;
+                    /* avoid warnings */
+                            /* handler goes here */
+
+                            {
+                                result = -1;
+                                errno = ETIMEDOUT;
+                                reenable_timers();
+                            }
+                break;
+            }
+            ES_es = ES_EvalBody;
+        }
     }
-    EXCEPT(timeout_exception) {
-	result = -1;
-	errno = ETIMEDOUT;
-	reenable_timers();
-    }
-    ENDTRY;
 
     if (result < 0) {
 	close(s);

@@ -34,6 +34,13 @@ network_connection_options(network_handle nh, Var list)
       pair.v.list[2].type = (TYPE_INT);
       pair.v.list[2].v.num = (((nhandle *)(nh).ptr)->client_echo);
       (list) = listappend((list), pair);
+
+      pair = new_list(2);
+      pair.v.list[1].type = TYPE_STR;
+      pair.v.list[1].v.str = str_dup("user-client");
+      pair.v.list[2].type = TYPE_INT; 
+      pair.v.list[2].v.num = (((nhandle *)(nh).ptr)->user_client);
+      list = listappend(list, pair);
     } return (list);
   } while (0);
 }
@@ -44,7 +51,13 @@ network_connection_option(network_handle nh, const char *option, Var * value)
   do { if (!mystrcasecmp((option), "client-echo")) { (value)->type = (TYPE_INT);
       (value)->v.num = (((nhandle *)(nh).ptr)->client_echo);
       return 1;
-    } return 0;
+    } 
+    if (!mystrcasecmp(option, "user-client")) {
+        (value)->type = TYPE_INT;
+        (value)->v.num = (((nhandle *)(nh).ptr)->user_client);
+        return 1;
+    }
+    return 0;
   } while (0);
 }
 
@@ -53,7 +66,12 @@ network_set_connection_option(network_handle nh, const char *option, Var value)
 {
   do { if (!mystrcasecmp((option), "client-echo")) { network_set_client_echo((nh), is_true((value)));;
       return 1;
-    } return 0;
+    }
+    if (!mystrcasecmp(option, "user-client")) {
+        (((nhandle *)(nh).ptr)->user_client) = value.v.num;
+       return 1;
+     }
+    return 0;
   } while (0);
 }
 

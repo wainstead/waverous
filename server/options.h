@@ -177,7 +177,7 @@
 /* #define OUTBOUND_NETWORK 0 */
 
 /* enable by default, -O disables: */
-/* #define OUTBOUND_NETWORK 1 */
+#define OUTBOUND_NETWORK 1
 
 
 /******************************************************************************
@@ -308,6 +308,8 @@
  */
 
 /* #define USE_GNU_MALLOC */
+
+#define NETWORK_IDENT
 
 /*****************************************************************************
  ********** You shouldn't need to change anything below this point. **********

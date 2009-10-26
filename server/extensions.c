@@ -36,8 +36,6 @@
 #include "functions.h"
 #include "db_tune.h"
 
-#if EXAMPLE
-
 #include "my-unistd.h"
 
 #include "exceptions.h"
@@ -45,6 +43,22 @@
 #include "net_multi.h"
 #include "storage.h"
 #include "tasks.h"
+
+/* FUP extension */
+#include "structures.h"
+#include "utils.h"
+/* FUP extension */
+
+/* vrandom extension */
+#include "list.h"
+/* vrandom extension */
+
+#include <math.h>
+#include <stdlib.h>
+
+extern void register_files(void);
+
+#if EXAMPLE
 
 typedef struct stdin_waiter {
     struct stdin_waiter *next;
@@ -172,10 +186,126 @@ bf_log_cache_stats(Var arglist, Byte next, void *vdata, Objid progr)
 }
 #endif
 
+static package
+bf_isa(Var arglist, Byte next, void *vdata, Objid progr)
+{
+  Objid what = arglist.v.list[1].v.obj;
+  Objid targ = arglist.v.list[2].v.obj;
+  Var   r;
+
+  free_var(arglist);
+
+  r.type = TYPE_INT;
+
+  while (valid(what))
+  {
+    if (what == targ)
+    {
+      r.v.num = 1;
+      return make_var_pack(r);
+    }
+
+    what = db_object_parent(what);
+  }
+
+  r.v.num = 0;
+  return make_var_pack(r);
+}
+
+// Begin VERYRANDOM code from tiresias
+
+static unsigned long regA, regB, regC;
+
+//int VERYRANDOM(unsigned long &regA, unsigned long &regB, unsigned long &regC) {
+int VERYRANDOM() {
+  regA=((((regA>>31)^(regA>>6)^(regA>>4)^(regA>>2)^(regA<<1)^regA) & 0x00000001)<<31) | (regA>>1);
+  regB=((((regB>>30)^(regB>>2)) & 0x00000001)<<30) | (regB>>1);
+  regC=((((regC>>28)^(regC>>1)) & 0x00000001)<<28) | (regC>>1);
+
+  return ((regA ^ regB ^ regC) & 0x00000001);
+//  return ((regA & regB) | (!regA & regC)) & 0x00000001;
+}
+
+static package
+bf_vrandomseed(Var arglist, Byte next, void *vdata, Objid progr)
+{
+    int nargs = arglist.v.list[0].v.num;
+    Var r;
+
+    free_var(arglist);
+
+    if (nargs != 0) {
+        unsigned long newRegA = (unsigned long) *arglist.v.list[1].v.list[1].v.fnum;
+        unsigned long newRegB = (unsigned long) *arglist.v.list[1].v.list[2].v.fnum;
+        unsigned long newRegC = (unsigned long) *arglist.v.list[1].v.list[3].v.fnum;
+
+        regA = newRegA;
+        regB = newRegB;
+        regC = newRegC;
+    }
+
+    r = new_list(3);
+    r.v.list[1].type = TYPE_FLOAT;
+    r.v.list[1].v.fnum = (double *) mymalloc(sizeof(double), M_FLOAT);
+    *r.v.list[1].v.fnum = (float) regA;
+
+    r.v.list[2].type = TYPE_FLOAT;
+    r.v.list[2].v.fnum = (double *) mymalloc(sizeof(double), M_FLOAT);
+    *r.v.list[2].v.fnum = (float) regB;
+
+    r.v.list[3].type = TYPE_FLOAT;
+    r.v.list[3].v.fnum = (double *) mymalloc(sizeof(double), M_FLOAT);
+    *r.v.list[3].v.fnum = (float) regC;
+
+    return make_var_pack(r);
+}
+
+static package
+bf_vrandom(Var arglist, Byte next, void *vdata, Objid progr)
+{
+    int nargs = arglist.v.list[0].v.num;
+    int num = (nargs >= 1 ? arglist.v.list[1].v.num : 1);
+
+    free_var(arglist);
+
+    if (num <= 0)
+        return make_error_pack(E_INVARG);
+    else {
+        Var r;
+        int bits = 0;
+        int result = -1;
+
+        r.type = TYPE_INT;
+        if (nargs == 0)
+            bits = 31;
+        else {
+            double x = pow(num, .5);
+            bits=(int)((double)abs((int)x)==x?x:abs((int)x+1));
+        }
+
+        while (result < 1 || result > num) {
+            result = 1;
+            int x = 0;
+            for (x=0; x<bits; x++) {
+                int rbit, powwow;
+                powwow = (int) pow(2, x);
+//              rbit = VERYRANDOM(regA, regB, regC);
+                rbit = VERYRANDOM();
+                result = result + (rbit*powwow);
+            }
+        }
+
+        r.v.num = result;
+        return make_var_pack(r);
+    }
+}
+
+// end VERYRANDOM code
 
 void
 register_extensions()
 {
+  oklog("          LOADING: extensions ...\n");
 #if EXAMPLE
     register_task_queue(stdin_enumerator);
     register_function("read_stdin", 0, 0, bf_read_stdin);
@@ -184,6 +314,11 @@ register_extensions()
     register_function("log_cache_stats", 0, 0, bf_log_cache_stats);
     register_function("verb_cache_stats", 0, 0, bf_verb_cache_stats);
 #endif
+    register_function("isa", 2, 2, bf_isa, TYPE_OBJ, TYPE_OBJ);
+    register_function("vrandomseed", 0, 3, bf_vrandomseed, TYPE_LIST);
+    register_function("vrandom", 0, 1, bf_vrandom, TYPE_INT);
+  register_files();
+  oklog("          LOADING: extensions ... finished\n");
 }
 
 char rcsid_extensions[] = "$Id: extensions.c,v 1.4 1998-12-14 13:17:52 nop Exp $";

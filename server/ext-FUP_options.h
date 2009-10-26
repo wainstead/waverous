@@ -26,10 +26,14 @@ The default name for the directory that holds the executables is defined in:
 You can also make this base directory either read-only or read-and-write.
 It is read-only by default. To make it writable from the MOO, comment the line:
 */
-     #define EXTERN_FILES_DIR_READ_ONLY
+//     #define EXTERN_FILES_DIR_READ_ONLY
 
 
 /**********************************************************
 The default mode for new directories can be configured too:
 */
      #define CREATE_NEW_DIR_MODE		0755
+
+#define INCLUDE_FILECHMOD
+#define INCLUDE_FILERUN
+

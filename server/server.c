@@ -1591,6 +1591,67 @@ bf_connection_name(Var arglist, Byte next, void *vdata, Objid progr)
 }
 
 static package
+bf_connection_user(Var arglist, Byte next, void *vdata, Objid progr)
+{
+    Objid       who = arglist.v.list[1].v.obj;
+    shandle    *h = find_shandle(who);
+    const char *user_name;
+    Var         r;
+
+/*    free_var(arglist);
+    r.type = TYPE_STR;
+    r.v.str = str_dup("unknown");
+    return make_var_pack(r);*/
+
+    if (h)
+        user_name = network_connection_user(h->nhandle);
+    else
+        user_name = 0;
+
+    free_var(arglist);
+    if (!is_wizard(progr)  &&  progr != who)
+        return make_error_pack(E_PERM);
+    else if (!user_name)
+        return make_error_pack(E_INVARG);
+    else {
+        r.type = TYPE_STR;
+        r.v.str = str_dup(user_name);
+        return make_var_pack(r);
+    }
+}
+
+Objid
+connection_listener(Objid player)
+{
+    shandle    *h = find_shandle(player);
+
+    if (h)
+        return h->listener;
+    else
+        return -1;
+}
+
+static package
+bf_connection_listener(Var arglist, Byte next, void *vdata, Objid progr)
+{
+    Objid       who = arglist.v.list[1].v.obj;
+    shandle    *h = find_shandle(who);
+    Var         r;
+
+    free_var(arglist);
+    if (!is_wizard(progr)  &&  progr != who)
+        return make_error_pack(E_PERM);
+
+    if (h) {
+        r.type = TYPE_OBJ;
+        r.v.obj = h->listener;
+        return make_var_pack(r);
+    } else {
+        return make_error_pack(E_INVARG);
+    }
+}
+
+static package
 bf_notify(Var arglist, Byte next, void *vdata, Objid progr)
 {				/* (player, string [, no_flush]) */
     Objid conn = arglist.v.list[1].v.obj;
@@ -1715,19 +1776,36 @@ static package
 bf_listen(Var arglist, Byte next, void *vdata, Objid progr)
 {				/* (oid, desc) */
     Objid oid = arglist.v.list[1].v.obj;
-    Var desc = arglist.v.list[2];
+    Var desc;
     int nargs = arglist.v.list[0].v.num;
     int print_messages = nargs >= 3 && is_true(arglist.v.list[3]);
-    enum error e;
+    enum error e = E_NONE;
     slistener *l = 0;
 
-    if (!is_wizard(progr))
-	e = E_PERM;
-    else if (!valid(oid) || find_slistener(desc))
-	e = E_INVARG;
-    else if (!(l = new_slistener(oid, desc, print_messages, &e)));	/* Do nothing; e is already set */
-    else if (!start_listener(l))
-	e = E_QUOTA;
+    if (arglist.v.list[2].type == TYPE_LIST) {
+        if (arglist.v.list[2].v.list[0].v.num == 2 && arglist.v.list[2].v.list[1].type == TYPE_STR && arglist.v.list[2].v.list[2].type == TYPE_INT) {
+            desc = new_list(2);
+            desc.v.list[1].type = TYPE_STR;
+            desc.v.list[1].v.str = str_dup(arglist.v.list[2].v.list[1].v.str);
+            desc.v.list[2] = arglist.v.list[2].v.list[2];
+        } else {
+            e = E_INVARG;
+        }
+    } else if (arglist.v.list[2].type == TYPE_INT) {
+        desc = arglist.v.list[2];
+    } else {
+      e = E_INVARG;
+    }
+
+    if (e == E_NONE) {
+        if (!is_wizard(progr))
+	    e = E_PERM;
+        else if (!valid(oid) || find_slistener(desc))
+	    e = E_INVARG;
+        else if (!(l = new_slistener(oid, desc, print_messages, &e)));	/* Do nothing; e is already set */
+        else if (!start_listener(l))
+	    e = E_QUOTA;
+    }
 
     free_var(arglist);
     if (e == E_NONE)
@@ -1804,6 +1882,30 @@ bf_buffered_output_length(Var arglist, Byte next, void *vdata, Objid progr)
     return make_var_pack(r);
 }
 
+static package
+bf_chr(Var arglist, Byte next, void *vdata, Objid progr)
+{ /* (number) */
+    Var r;
+    char c[2];
+
+    if (!is_wizard(progr)) {
+      free_var(arglist);
+      return make_error_pack(E_PERM);
+    }
+
+    c[0] = arglist.v.list[1].v.num;
+    c[1] = 0;
+
+    if (arglist.v.list[1].v.num == 10)
+      return make_error_pack(E_INVARG);
+
+    free_var(arglist);
+
+    r.type = TYPE_STR;
+    r.v.str = str_dup(c);
+    return make_var_pack(r);
+}
+
 void
 register_server(void)
 {
@@ -1835,6 +1937,9 @@ register_server(void)
     register_function("listeners", 0, 0, bf_listeners);
     register_function("buffered_output_length", 0, 1,
 		      bf_buffered_output_length, TYPE_OBJ);
+    register_function("connection_listener", 1, 1, bf_connection_listener, TYPE_OBJ);
+    register_function("connection_user", 1, 1, bf_connection_user, TYPE_OBJ);
+    register_function("chr", 1, 1, bf_chr, TYPE_INT);
 }
 
 char rcsid_server[] = "$Id: server.c,v 1.12 2007-06-02 21:34:36 wrog Exp $";

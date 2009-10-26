@@ -188,6 +188,8 @@ extern int network_set_connection_option(network_handle nh,
 				 * the given setting if valid.
 				 */
 
+extern const char *network_connection_user(network_handle nh);
+
 #ifdef OUTBOUND_NETWORK
 #include "structures.h"
 

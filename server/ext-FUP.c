@@ -75,17 +75,16 @@ matches(char *subject, const char *pattern)
 }
 
 void
-remove_LAST_character(theStr)
-char    *theStr;
+remove_LAST_character(char *theStr)
 {
  theStr[strlen(theStr)-1] = '\0';
 }
 
 void
-remove_special_characters(theStr)
-char	*theStr;
+remove_special_characters(char *theStr)
 {
-    register char *cp,*cp2;
+    const char *cp;
+    register char *cp2;
     char buf[BUF_LEN];
     int currlen = 0;
 
@@ -120,11 +119,8 @@ char	*theStr;
     strcpy( theStr, buf);
 }
 
-int
-build_dir_name(thePathStr, theDirName, spec)
-char *thePathStr;
-char *theDirName;
-char spec;
+enum error
+build_dir_name(const char *thePathStr, char *theDirName, char spec)
 {
     char external_files  [BUF_LEN];
     char localthePathStr [BUF_LEN];
@@ -164,12 +160,8 @@ char spec;
      return E_NONE;
 }
 
-int
-build_file_name(thePathStr, theNameStr, theFileName, spec)
-char *thePathStr;
-char *theNameStr;
-char *theFileName;
-char spec;
+enum error
+build_file_name(const char *thePathStr, const char *theNameStr, char *theFileName, char spec)
 {
     char external_files  [BUF_LEN];
     char localthePathStr [BUF_LEN];
@@ -253,7 +245,7 @@ bf_filelength(Var arglist, Byte next, void *vdata, Objid progr)
         int num_lines = -1;
         char buffer[BUF_LEN];
         Var ret;
-        int result;
+        enum error result;
         result = build_file_name(arglist.v.list[1].v.str,
                             arglist.v.list[2].v.str,
                             infileName,
@@ -277,7 +269,7 @@ bf_filesize(Var arglist, Byte next, void *vdata, Objid progr)
         char infileName[BUF_LEN];
         struct stat st;
         Var ret;
-        int result;
+        enum error result;
         result = build_file_name(arglist.v.list[1].v.str,
                             arglist.v.list[2].v.str,
                             infileName,
@@ -310,7 +302,7 @@ bf_filewrite(Var arglist, Byte next, void *vdata, Objid progr)
         int end_line   = MAX_INT;
         char buffer[BUF_LEN];
         Var ret, theline;
-        int result;
+        enum error result;
         result = build_file_name(arglist.v.list[1].v.str,
                             arglist.v.list[2].v.str,
                             infileName,
@@ -406,7 +398,7 @@ bf_fileread(Var arglist, Byte next, void *vdata, Objid progr)
         int index;
         int start_line = 1;
         int end_line   = MAX_INT;
-         int result;
+        enum error result;
         result = build_file_name(arglist.v.list[1].v.str,
                             arglist.v.list[2].v.str,
                             infileName,
@@ -460,7 +452,7 @@ bf_fileappend(Var arglist, Byte next, void *vdata, Objid progr)
         char outfileName[BUF_LEN];
         int i, thelength;
         Var ret, theline;
-        int result;
+        enum error result;
         result = build_file_name(arglist.v.list[1].v.str,
                             arglist.v.list[2].v.str,
                             outfileName,
@@ -516,7 +508,7 @@ bf_filedelete(Var arglist, Byte next, void *vdata, Objid progr)
 { /* (directory, filename) */
         char infileName[BUF_LEN];
         Var ret;
-         int result;
+         enum error result;
         result = build_file_name(arglist.v.list[1].v.str,
                             arglist.v.list[2].v.str,
                             infileName,
@@ -550,7 +542,7 @@ bf_filelist(Var arglist, Byte next, void *vdata, Objid progr)
         char dirName [BUF_LEN];
         Var ret, listOfDirs, listOfFiles, theline;
         int srchlen = 0;
-        int result;
+        enum error result;
         result = build_dir_name(arglist.v.list[1].v.str,
                             rootDir,
                             'd');
@@ -611,7 +603,7 @@ bf_filegrep(Var arglist, Byte next, void *vdata, Objid progr)
         int strings = TRUE;
         int numbers = FALSE;
         int showfound = TRUE;
-        int result;
+        enum error result;
         result = build_file_name(arglist.v.list[1].v.str,
                             arglist.v.list[2].v.str,
                             infileName,
@@ -680,7 +672,7 @@ bf_fileextract(Var arglist, Byte next, void *vdata, Objid progr)
         int numOfLine = 0;
         int status = 1;
         int requiredPattern = (arglist.v.list[0].v.num > 4);
-        int result;
+        enum error result;
         
         result = build_file_name(arglist.v.list[1].v.str,
                             arglist.v.list[2].v.str,
@@ -772,7 +764,7 @@ bf_filerename(Var arglist, Byte next, void *vdata, Objid progr)
         char oldFilename[BUF_LEN];
         char newFilename[BUF_LEN];
         Var ret;
-        int result;
+        enum error result;
         result = build_file_name(arglist.v.list[1].v.str,
                             arglist.v.list[2].v.str,
                             oldFilename,
@@ -812,7 +804,8 @@ bf_filechmod(Var arglist, Byte next, void *vdata, Objid progr)
         mode_t  mode;
         char filemode[BUF_LEN];
         int r1, r2; 
-        int result;
+        enum error result;
+        char localthePathStr [BUF_LEN];
         result = build_file_name(arglist.v.list[1].v.str,
                             arglist.v.list[2].v.str,
                             filename,
@@ -822,14 +815,16 @@ bf_filechmod(Var arglist, Byte next, void *vdata, Objid progr)
                 return make_error_pack(result);
         }
 
-        remove_special_characters(arglist.v.list[3].v.str);
-        if (strlen(arglist.v.list[3].v.str) == 0) {
+
+        strcpy(localthePathStr, arglist.v.list[3].v.str);
+        remove_special_characters(localthePathStr);
+        if (strlen(localthePathStr) == 0) {
                    free_var(arglist);
                    return make_error_pack(E_INVARG); }
 
         strcpy(external_files,EXTERN_FILES_DIR);
         sprintf(theRequestedAction,"chmod %s %s%s/%s\n",
-                                   arglist.v.list[3].v.str,
+                                   localthePathStr,
                                    external_files,
                                    arglist.v.list[1].v.str,
                                    arglist.v.list[2].v.str);
@@ -871,7 +866,7 @@ bf_fileinfo(Var arglist, Byte next, void *vdata, Objid progr)
         mode_t  mode;
         int r0, r1, r2; 
         char filemode[BUF_LEN];
-        int result;
+        enum error result;
         result = build_file_name(arglist.v.list[1].v.str,
                             arglist.v.list[2].v.str,
                             filename,
@@ -983,8 +978,10 @@ bf_filerun(Var arglist, Byte next, void *vdata, Objid progr)
         for (i = 1; i <= numOfArgs; i++) {
 	        switch (arglist.v.list[i].type) {
 	          case TYPE_STR:
-                theline.v.str = str_dup(arglist.v.list[i].v.str);
-                remove_special_characters( theline.v.str); 
+                char localthePathStr [BUF_LEN];
+                strcpy(localthePathStr, arglist.v.list[i].v.str);
+                remove_special_characters( localthePathStr); 
+                theline.v.str = str_dup(localthePathStr);
 
                 if (( strstr(theline.v.str,"/.")) ||
                    (!strncmp(theline.v.str,".",1)) ||
@@ -1066,7 +1063,7 @@ bf_filemkdir(Var arglist, Byte next, void *vdata, Objid progr)
       char newdirName[BUF_LEN];
       mode_t create_mode = CREATE_NEW_DIR_MODE;
       Var ret;
-        int result;
+        enum error result;
         result = build_file_name(arglist.v.list[1].v.str,
                             arglist.v.list[2].v.str,
                             newdirName,
@@ -1091,7 +1088,7 @@ bf_filermdir(Var arglist, Byte next, void *vdata, Objid prog)
 {  /* filermdir(base-directory-name, directory-name) */
         char rmDirName[BUF_LEN];
         Var  ret;
-        int result;
+        enum error result;
         result = build_file_name(arglist.v.list[1].v.str,
                             arglist.v.list[2].v.str,
                             rmDirName,

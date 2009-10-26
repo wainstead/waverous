@@ -41,6 +41,10 @@
 #include "timers.h"
 #include "utils.h"
 
+#ifdef NETWORK_IDENT
+#include <ident.h>
+#endif
+
 static struct proto proto;
 static int eol_length;		/* == strlen(proto.eol_out_string) */
 
@@ -82,6 +86,8 @@ typedef struct nhandle {
 #if NETWORK_PROTOCOL == NP_TCP
     int client_echo;
 #endif
+    char *user_name;
+    int user_client;
 } nhandle;
 
 static nhandle *all_nhandles = 0;
@@ -326,6 +332,18 @@ new_nhandle(int rfd, int wfd, const char *local_name, const char *remote_name,
 #if NETWORK_PROTOCOL == NP_TCP
     h->client_echo = 1;
 #endif
+    h->user_name = NULL;
+
+#ifdef NETWORK_IDENT
+    if (server_int_option("ident_lookup", 1)) {
+      h->user_name = ident_id(rfd, server_int_option("ident_lookup_timeout", 5));
+    }
+#endif
+
+    h->user_client = 0;
+    if (!h->user_name || h->user_name[0] == '[') {
+      h->user_name = str_dup("unknown");
+    }
 
     stream_printf(s, "%s %s %s",
 		  local_name, outbound ? "to" : "from", remote_name);
@@ -612,6 +630,14 @@ network_connection_name(network_handle nh)
     nhandle *h = (nhandle *) nh.ptr;
 
     return h->name;
+}
+
+const char *
+network_connection_user(network_handle nh)
+{
+    nhandle *h = (nhandle *) nh.ptr;
+
+    return h->user_name;
 }
 
 void
