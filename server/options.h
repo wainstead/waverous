@@ -309,7 +309,7 @@
 
 /* #define USE_GNU_MALLOC */
 
-#define NETWORK_IDENT
+/* #define NETWORK_IDENT */
 
 /*****************************************************************************
  ********** You shouldn't need to change anything below this point. **********
