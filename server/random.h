@@ -17,9 +17,11 @@
 
 #include "config.h"
 
+#include <stdlib.h>
+
 #if HAVE_LRAND48
-extern long lrand48(void);
-extern void srand48(long);
+//extern long lrand48(void);
+//extern void srand48(long);
 #    define RANDOM	lrand48
 #    define SRANDOM	srand48
 #else
