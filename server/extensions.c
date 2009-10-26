@@ -284,8 +284,8 @@ bf_vrandom(Var arglist, Byte next, void *vdata, Objid progr)
         }
 
         while (result < 1 || result > num) {
-            result = 1;
             int x = 0;
+            result = 1;
             for (x=0; x<bits; x++) {
                 int rbit, powwow;
                 powwow = (int) pow(2, x);
