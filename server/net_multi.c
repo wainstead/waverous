@@ -591,7 +591,7 @@ network_resume_input(network_handle nh)
 }
 
 int
-network_process_io(int timeout)
+network_process_io(struct timeval *timeout)
 {
     nhandle *h, *hnext;
     nlistener *l;

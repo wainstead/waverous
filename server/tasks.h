@@ -18,6 +18,8 @@
 #ifndef Tasks_H
 #define Tasks_H 1
 
+#include <sys/time.h>
+
 #include "config.h"
 #include "execute.h"
 #include "structures.h"
@@ -81,7 +83,7 @@ extern void register_task_queue(task_enumerator);
 
 extern Var read_input_now(Objid connection);
 
-extern int next_task_start(void);
+extern int next_task_start(struct timeval *tv);
 extern void run_ready_tasks(void);
 extern enum outcome run_server_task(Objid player, Objid what,
 				    const char *verb, Var args,

@@ -24,6 +24,8 @@
 #ifndef Network_H
 #define Network_H 1
 
+#include <sys/time.h>
+
 #include "config.h"
 #include "options.h"
 #include "structures.h"
@@ -147,7 +149,7 @@ extern void network_set_connection_binary(network_handle, int);
 				 * `binary input mode'.
 				 */
 
-extern int network_process_io(int timeout);
+extern int network_process_io(struct timeval *timeout);
 				/* This is called at intervals to allow the
 				 * network to flush pending output, receive
 				 * pending input, and handle requests for new

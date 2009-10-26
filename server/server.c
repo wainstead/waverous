@@ -438,12 +438,18 @@ main_loop(void)
 
     /* Now, we enter the main server loop */
     while (shutdown_message == 0) {
-	/* Check how long we have until the next task will be ready to run.
-	 * We only care about three cases (== 0, == 1, and > 1), so we can
-	 * map a `never' result from the task subsystem into 2.
-	 */
-	int task_seconds = next_task_start();
-	int seconds_left = task_seconds < 0 ? 2 : task_seconds;
+        struct timeval task_seconds;
+        int            any_tasks;
+
+        any_tasks = next_task_start(&task_seconds);
+
+        /* Set maximum timeout of 1 second if no tasks or if the next task is farther than 1 second away */
+        if ((!any_tasks) || (task_seconds.tv_sec > 0))
+        {
+          task_seconds.tv_sec  = 1;
+          task_seconds.tv_usec = 0;
+        }
+
 	shandle *h, *nexth;
 
 	if (checkpoint_requested != CHKPT_OFF) {
@@ -468,7 +474,7 @@ main_loop(void)
 	}
 #endif
 
-	if (!network_process_io(seconds_left ? 1 : 0) && seconds_left > 1)
+	if (!network_process_io(&task_seconds) && any_tasks)
 	    db_flush(FLUSH_ONE_SECOND);
 	else
 	    db_flush(FLUSH_IF_FULL);

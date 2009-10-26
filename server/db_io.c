@@ -77,6 +77,7 @@ dbio_scanf(const char *format,...)
     count = 0;
     for (ptr = format; *ptr; ptr++) {
 	int c, n, *ip;
+	double *dp;
 	unsigned *up;
 	char *cp;
 
@@ -106,6 +107,14 @@ dbio_scanf(const char *format,...)
 		up = va_arg(args, unsigned *);
 		n = fscanf(input, "%u", up);
 		goto finish;
+	    case 'l':
+		if ((*(ptr+1)) && (*(ptr+1) == 'f')) {
+			ptr++;
+			dp = va_arg(args, double *);
+			n = fscanf(input, "%lf", dp);
+			goto finish;
+		}
+		panic("DBIO_SCANF: Unsupported directive!");
 	    case 'c':
 		cp = va_arg(args, char *);
 		n = fscanf(input, "%c", cp);

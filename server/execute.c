@@ -2469,13 +2469,18 @@ bf_raise(Var arglist, Byte next, void *vdata, Objid progr)
 static package
 bf_suspend(Var arglist, Byte next, void *vdata, Objid progr)
 {
-    static int seconds;
+    static double seconds;
     int nargs = arglist.v.list[0].v.num;
 
     if (nargs >= 1)
-	seconds = arglist.v.list[1].v.num;
+    {
+        if (arglist.v.list[1].type == TYPE_INT)
+	    seconds = (double) arglist.v.list[1].v.num;
+	else
+	    seconds = *arglist.v.list[1].v.fnum;
+    }
     else
-	seconds = -1;
+	seconds = -1.0;
     free_var(arglist);
 
     if (nargs >= 1 && seconds < 0)
@@ -2624,7 +2629,7 @@ register_execute(void)
 				      bf_call_function_write,
 				      TYPE_STR);
     register_function("raise", 1, 3, bf_raise, TYPE_ANY, TYPE_STR, TYPE_ANY);
-    register_function("suspend", 0, 1, bf_suspend, TYPE_INT);
+    register_function("suspend", 0, 1, bf_suspend, TYPE_NUMERIC);
     register_function("read", 0, 2, bf_read, TYPE_OBJ, TYPE_ANY);
 
     register_function("seconds_left", 0, 0, bf_seconds_left);

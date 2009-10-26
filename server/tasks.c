@@ -15,6 +15,9 @@
     Pavel@Xerox.Com
  *****************************************************************************/
 
+#include <sys/time.h>
+#include <math.h>
+
 #include "my-string.h"
 #include "my-time.h"
 
@@ -30,6 +33,7 @@
 #include "list.h"
 #include "log.h"
 #include "match.h"
+#include "numbers.h"
 #include "options.h"
 #include "parse_cmd.h"
 #include "parser.h"
@@ -60,12 +64,12 @@ typedef struct forked_task {
     activation a;
     Var *rt_env;
     int f_index;
-    time_t start_time;
+    struct timeval start_time;
 } forked_task;
 
 typedef struct suspended_task {
     vm the_vm;
-    time_t start_time;
+    struct timeval start_time;
     Var value;
 } suspended_task;
 
@@ -179,6 +183,121 @@ static ext_queue *external_queues = 0;
      ? ttt->t.forked.start_time \
      : ttt->t.suspended.start_time)
 
+static void
+double_to_timeval(double d, struct timeval *tv)
+{
+  double secs, usecs, frac;
+
+  frac = modf(d, &secs);
+  usecs = ((double) 1000000) * frac;
+
+  tv->tv_sec  = (long) secs;
+  tv->tv_usec = (long) usecs;
+
+  return;
+}
+
+static double
+timeval_to_double(struct timeval *tv)
+{
+  double r;
+
+  r  = tv->tv_sec;
+  r += tv->tv_usec / ((double) 1000000);
+
+  return r;
+}
+
+static int
+timeval_lt(struct timeval *tv1, struct timeval *tv2)
+/* Returns true if tv1 is less than tv2. If either arg is NULL, time 0 is assumed. */
+{
+  long secs1, usecs1;
+  long secs2, usecs2;
+
+  if (tv1 == NULL)
+  {
+    secs1  = 0;
+    usecs1 = 0;
+  }
+  else
+  {
+    secs1  = tv1->tv_sec;
+    usecs1 = tv1->tv_usec;
+  }
+
+  if (tv2 == NULL)
+  {
+    secs2  = 0;
+    usecs2 = 0;
+  }
+  else
+  {
+    secs2  = tv2->tv_sec;
+    usecs2 = tv2->tv_usec;
+  }
+
+  if (secs1 < secs2)
+    return 1;
+
+  if ((secs1 == secs2) && (usecs1 < usecs2))
+    return 1;
+
+  return 0;
+}
+
+static void
+timeval_add(struct timeval *result, struct timeval *tv1, struct timeval *tv2)
+/* Adds *tv1 and *tv2 and writes the result to *result. */
+/* Neither *tv1 nor *tv2 should have negative fields. */
+/* It's safe to have (result == tv1) || (result == tv2) */
+{
+  struct timeval sum;
+
+  sum.tv_sec  = tv1->tv_sec;
+  sum.tv_sec += tv2->tv_sec;
+
+  sum.tv_usec  = tv1->tv_usec;
+  sum.tv_usec += tv2->tv_usec;
+
+  if (sum.tv_usec >= 1000000)
+  {
+    /* Microsecond carry */
+    sum.tv_sec += sum.tv_usec / 1000000;
+    sum.tv_usec %= 1000000;
+  }
+
+  if ((sum.tv_sec < tv1->tv_sec) || (sum.tv_sec < tv2->tv_sec))
+  {
+    /* Seconds overflow */
+    sum.tv_sec = INT_MAX;
+  }
+
+  *result = sum;
+}
+
+static void
+timeval_sub(struct timeval *result, struct timeval *tv1, struct timeval *tv2)
+/* Subtracts *tv2 from *tv1 and stores the result in *result. */
+/* It's safe to have (result == tv1) || (result == tv2) */
+{
+  struct timeval diff;
+
+  diff.tv_sec  = tv1->tv_sec;
+  diff.tv_usec = tv1->tv_usec;
+
+  diff.tv_sec  -= tv2->tv_sec;
+  diff.tv_usec -= tv2->tv_usec;
+
+  if (diff.tv_usec < 0)
+  {
+    /* Microsecond borrow */
+    diff.tv_sec -= ((-diff.tv_usec) / 1000000) + 1;
+    diff.tv_usec = 1000000 - ((-diff.tv_usec) % 1000000);
+  }
+
+  *result = diff;
+}
 
 /* 
  *  ICMD_FOR_EACH(DEFINE,verb)
@@ -1077,21 +1196,21 @@ static void
 enqueue_waiting(task * t)
 {				/* either FORKED or SUSPENDED */
 
-    time_t start_time = GET_START_TIME(t);
+    struct timeval start_time = GET_START_TIME(t);
     Objid progr = (t->kind == TASK_FORKED
 		   ? t->t.forked.a.progr
 		   : progr_of_cur_verb(t->t.suspended.the_vm));
     tqueue *tq = find_tqueue(progr, 1);
 
     tq->num_bg_tasks++;
-    if (!waiting_tasks || start_time < GET_START_TIME(waiting_tasks)) {
+    if (!waiting_tasks || timeval_lt(&start_time, &GET_START_TIME(waiting_tasks))) {
 	t->next = waiting_tasks;
 	waiting_tasks = t;
     } else {
 	task *tt;
 
 	for (tt = waiting_tasks; tt->next; tt = tt->next)
-	    if (start_time < GET_START_TIME(tt->next))
+	    if (timeval_lt(&start_time, &GET_START_TIME(tt->next)))
 		break;
 	t->next = tt->next;
 	tt->next = t;
@@ -1100,7 +1219,7 @@ enqueue_waiting(task * t)
 
 static void
 enqueue_ft(Program * program, activation a, Var * rt_env,
-	   int f_index, time_t start_time, int id)
+	   int f_index, struct timeval start_time, int id)
 {
     task *t = (task *) mymalloc(sizeof(task), M_TASK);
 
@@ -1153,9 +1272,12 @@ enqueue_forked_task2(activation a, int f_index, unsigned after_seconds, int vid)
 {
     int id;
     Var *rt_env;
+    struct timeval start_time;
 
     if (!check_user_task_limit(a.progr))
 	return E_QUOTA;
+
+    double_to_timeval((double) time(0) + after_seconds, &start_time);
 
     id = new_task_id();
     a.verb = str_ref(a.verb);
@@ -1167,7 +1289,7 @@ enqueue_forked_task2(activation a, int f_index, unsigned after_seconds, int vid)
 	a.rt_env[vid].v.num = id;
     }
     rt_env = copy_rt_env(a.rt_env, a.prog->num_var_names);
-    enqueue_ft(a.prog, a, rt_env, f_index, time(0) + after_seconds, id);
+    enqueue_ft(a.prog, a, rt_env, f_index, start_time, id);
 
     return E_NONE;
 }
@@ -1175,21 +1297,19 @@ enqueue_forked_task2(activation a, int f_index, unsigned after_seconds, int vid)
 enum error
 enqueue_suspended_task(vm the_vm, void *data)
 {
-    int after_seconds = *((int *) data);
-    int now = time(0);
-    int when;
+    double after_seconds = *((double *) data);
+    struct timeval now;
+    struct timeval wait;
     task *t;
+
+    gettimeofday(&now, NULL);
+    double_to_timeval(after_seconds, &wait);
 
     if (check_user_task_limit(progr_of_cur_verb(the_vm))) {
 	t = (task *) mymalloc(sizeof(task), M_TASK);
 	t->kind = TASK_SUSPENDED;
 	t->t.suspended.the_vm = the_vm;
-	if (now + after_seconds < now)
-	    /* overflow or suspend `forever' code */
-	    when = INT32_MAX;
-	else
-	    when = now + after_seconds;
-	t->t.suspended.start_time = when;
+        timeval_add(&t->t.suspended.start_time, &now, &wait);
 	t->t.suspended.value = zero;
 
 	enqueue_waiting(t);
@@ -1207,7 +1327,7 @@ resume_task(vm the_vm, Var value)
 
     t->kind = TASK_SUSPENDED;
     t->t.suspended.the_vm = the_vm;
-    t->t.suspended.start_time = 0;	/* ready now */
+    double_to_timeval(0.0, &t->t.suspended.start_time);  /* ready now */
     t->t.suspended.value = value;
 
     enqueue_bg_task(tq, t);
@@ -1262,31 +1382,48 @@ last_input_task_id(Objid player)
 }
 
 int
-next_task_start(void)
+next_task_start(struct timeval *tv)
 {
     tqueue *tq;
 
     for (tq = active_tqueues; tq; tq = tq->next)
 	if (tq->first_input != 0 || tq->first_bg != 0)
-	    return 0;
+        {
+            tv->tv_sec  = 0;
+            tv->tv_usec = 0;
+	    return 1;
+        }
 
     if (waiting_tasks != 0) {
-	int wait = (waiting_tasks->kind == TASK_FORKED
-		    ? waiting_tasks->t.forked.start_time
-		    : waiting_tasks->t.suspended.start_time) - time(0);
-	return (wait >= 0) ? wait : 0;
+        struct timeval wait;
+        struct timeval now;
+        struct timeval zero;
+
+        zero.tv_sec = 0;
+        zero.tv_usec = 0;
+
+        gettimeofday(&now, NULL);
+
+	timeval_sub(&wait, &(waiting_tasks->kind == TASK_FORKED
+		           ? waiting_tasks->t.forked.start_time
+	                   : waiting_tasks->t.suspended.start_time), &now);
+	*tv = timeval_lt(&wait, &zero) ? zero : wait;
+        return 1;
     }
-    return -1;
+
+    return 0;
 }
 
 void
 run_ready_tasks(void)
 {
     task *t, *next_t;
-    time_t now = time(0);
+    struct timeval now;
     tqueue *tq, *next_tq;
 
-    for (t = waiting_tasks; t && GET_START_TIME(t) <= now; t = next_t) {
+    gettimeofday(&now, NULL);
+
+    for (t = waiting_tasks; t && timeval_lt(&GET_START_TIME(t), &now); t = next_t) {
 	Objid progr = (t->kind == TASK_FORKED
 		       ? t->t.forked.a.progr
 		       : progr_of_cur_verb(t->t.suspended.the_vm));
@@ -1460,7 +1597,7 @@ write_forked_task(forked_task ft)
 {
     int lineno = find_line_number(ft.program, ft.f_index, 0);
 
-    dbio_printf("0 %d %d %d\n", lineno, ft.start_time, ft.id);
+    dbio_printf("0 %d %lf %d\n", lineno, timeval_to_double(&ft.start_time), ft.id);
     write_activ_as_pi(ft.a);
     write_rt_env(ft.program->var_names, ft.rt_env, ft.program->num_var_names);
     dbio_write_forked_program(ft.program, ft.f_index);
@@ -1469,7 +1606,7 @@ write_forked_task(forked_task ft)
 static void
 write_suspended_task(suspended_task st)
 {
-    dbio_printf("%d %d ", st.start_time, st.the_vm->task_id);
+    dbio_printf("%lf %d ", timeval_to_double(&st.start_time), st.the_vm->task_id);
     dbio_write_var(st.value);
     write_vm(st.the_vm);
 }
@@ -1547,21 +1684,23 @@ read_task_queue(void)
 	return 0;
     }
     for (; count > 0; count--) {
-	int first_lineno, id, old_size, st;
+	int first_lineno, id, old_size;
+        double st;
 	char c;
-	time_t start_time;
+	struct timeval start_time;
 	Program *program;
 	Var *rt_env, *old_rt_env;
 	const char **old_names;
 	activation a;
 
-	if (dbio_scanf("%d %d %d %d%c",
+	if (dbio_scanf("%d %d %lf %d%c",
 		       &dummy, &first_lineno, &st, &id, &c) != 5
 	    || c != '\n') {
 	    errlog("READ_TASK_QUEUE: Bad numbers, count = %d.\n", count);
 	    return 0;
 	}
-	start_time = st;
+        double_to_timeval(st, &start_time);
+
 	if (!read_activ_as_pi(&a)) {
 	    errlog("READ_TASK_QUEUE: Bad activation, count = %d.\n", count);
 	    return 0;
@@ -1592,16 +1731,17 @@ read_task_queue(void)
     }
     for (; suspended_count > 0; suspended_count--) {
 	task *t = (task *) mymalloc(sizeof(task), M_TASK);
-	int task_id, start_time;
+	int task_id;
+        double st;
 	char c;
 
 	t->kind = TASK_SUSPENDED;
-	if (dbio_scanf("%d %d%c", &start_time, &task_id, &c) != 3) {
+	if (dbio_scanf("%lf %d%c", &st, &task_id, &c) != 3) {
 	    errlog("READ_TASK_QUEUE: Bad suspended task header, count = %d\n",
 		   suspended_count);
 	    return 0;
 	}
-	t->t.suspended.start_time = start_time;
+        double_to_timeval(st, &t->t.suspended.start_time);
 	if (c == ' ')
 	    t->t.suspended.value = dbio_read_var();
 	else if (c == '\n')
@@ -1784,9 +1924,8 @@ list_for_forked_task(forked_task ft)
     list.v.list[1].type = TYPE_INT;
     list.v.list[1].v.num = ft.id;
     list.v.list[2].type = TYPE_INT;
-    list.v.list[2].v.num = ft.start_time;
-    list.v.list[3].type = TYPE_INT;
-    list.v.list[3].v.num = 0;	/* OBSOLETE: was clock ID */
+    list.v.list[2].v.num = ft.start_time.tv_sec;
+    list.v.list[3] = new_float(timeval_to_double(&ft.start_time));	/* was clock ID, now float start time */
     list.v.list[4].type = TYPE_INT;
     list.v.list[4].v.num = DEFAULT_BG_TICKS;	/* OBSOLETE: was clock ticks */
     list.v.list[5].type = TYPE_OBJ;
@@ -1828,7 +1967,7 @@ list_for_vm(vm the_vm)
     list.v.list[1].v.num = the_vm->task_id;
 
     list.v.list[3].type = TYPE_INT;
-    list.v.list[3].v.num = 0;	/* OBSOLETE: was clock ID */
+    list.v.list[3].v.num = 0;	/* was clock ID, now float start time (but not set here) */
     list.v.list[4].type = TYPE_INT;
     list.v.list[4].v.num = DEFAULT_BG_TICKS;	/* OBSOLETE: was clock ticks */
     list.v.list[5].type = TYPE_OBJ;
@@ -1854,7 +1993,8 @@ list_for_suspended_task(suspended_task st)
 
     list = list_for_vm(st.the_vm);
     list.v.list[2].type = TYPE_INT;
-    list.v.list[2].v.num = st.start_time;
+    list.v.list[2].v.num = st.start_time.tv_sec;
+    list.v.list[3] = new_float(timeval_to_double(&st.start_time));
 
     return list;
 }
@@ -1867,6 +2007,7 @@ list_for_reading_task(Objid player, vm the_vm)
     list = list_for_vm(the_vm);
     list.v.list[2].type = TYPE_INT;
     list.v.list[2].v.num = -1;	/* conventional value */
+    list.v.list[3] = new_float(0.0);
 
     list.v.list[5].v.obj = player;
 
@@ -2192,7 +2333,7 @@ do_resume(int id, Var value, Objid progr)
 
 	if (!is_wizard(progr) && progr != owner)
 	    return E_PERM;
-	t->t.suspended.start_time = time(0);	/* runnable now */
+	double_to_timeval(0.0, &t->t.suspended.start_time);	/* runnable now */
 	free_var(t->t.suspended.value);
 	t->t.suspended.value = value;
 	tq = find_tqueue(owner, 1);

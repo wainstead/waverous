@@ -48,7 +48,7 @@ extern void mplex_add_writer(int fd);
 				 * set, marked for writing.
 				 */
 
-extern int mplex_wait(unsigned timeout);
+extern int mplex_wait(struct timeval *timeout);
 				/* Wait until it is possible either to do the
 				 * appropriate kind of I/O on some descriptor
 				 * in the wait set or until `timeout' seconds

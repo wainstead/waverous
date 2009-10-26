@@ -53,13 +53,14 @@ mplex_add_writer(int fd)
 }
 
 int
-mplex_wait(unsigned timeout)
+mplex_wait(struct timeval *timeout)
 {
-    struct timeval tv;
+    struct timeval tv;  /* Make a copy since select() might write to it */
     int n;
 
-    tv.tv_sec = timeout;
-    tv.tv_usec = 0;
+    if (timeout) {
+	tv = *timeout;
+    }
 
     n = select(max_descriptor + 1, (fd_set *) &input, (fd_set *) &output, 0, &tv);
 
