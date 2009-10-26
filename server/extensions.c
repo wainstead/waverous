@@ -242,13 +242,19 @@ bf_vrandomseed(Var arglist, Byte next, void *vdata, Objid progr)
     free_var(arglist);
 
     if (nargs != 0) {
-        unsigned long newRegA = (unsigned long) *arglist.v.list[1].v.list[1].v.fnum;
-        unsigned long newRegB = (unsigned long) *arglist.v.list[1].v.list[2].v.fnum;
-        unsigned long newRegC = (unsigned long) *arglist.v.list[1].v.list[3].v.fnum;
+	if (nargs != 1 || arglist.v.list[1].v.list[0].v.num != 3) {
+            return make_error_pack(E_INVARG);
+	} else if (arglist.v.list[1].v.list[1].type != TYPE_FLOAT || arglist.v.list[1].v.list[2].type != TYPE_FLOAT || arglist.v.list[1].v.list[3].type != TYPE_FLOAT) {
+            return make_error_pack(E_INVARG);
+        } else {
+            unsigned long newRegA = (unsigned long) *arglist.v.list[1].v.list[1].v.fnum;
+            unsigned long newRegB = (unsigned long) *arglist.v.list[1].v.list[2].v.fnum;
+            unsigned long newRegC = (unsigned long) *arglist.v.list[1].v.list[3].v.fnum;
 
-        regA = newRegA;
-        regB = newRegB;
-        regC = newRegC;
+            regA = newRegA;
+            regB = newRegB;
+            regC = newRegC;
+        }
     }
 
     r = new_list(3);
