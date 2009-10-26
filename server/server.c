@@ -1042,8 +1042,18 @@ server_refuse_connection(server_listener sl, network_handle nh)
 void
 server_receive_line(server_handle sh, const char *line)
 {
+    int v = server_int_option("idle_time", 1800);
+    Var args;
     shandle *h = (shandle *) sh.ptr;
 
+    if ((time(0) - h->last_activity_time) > v) {
+        args = new_list(2);
+        args.v.list[1].type = TYPE_OBJ;
+        args.v.list[1].v.obj = h->player;
+        args.v.list[2].type = TYPE_INT;
+        args.v.list[2].v.num = (time(0) - h->last_activity_time);
+        run_server_task(h->player, h->listener, "user_unidled", args, "", 0);
+    }
     h->last_activity_time = time(0);
     new_input_task(h->tasks, line, h->binary);
 }
