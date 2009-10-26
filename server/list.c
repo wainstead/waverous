@@ -35,7 +35,7 @@
 #include "unparse.h"
 #include "utils.h"
 
-#include <crypt.h>
+#include <unistd.h>
 
 Var
 new_list(int size)

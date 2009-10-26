@@ -17,13 +17,13 @@
 # with autoconf2 I'll go edit it to support --with-expat=
 # Until then, set this to where you unpacked and compiled expat
 #
-EXPAT = /usr/local/src/standard/expat
 
 
-EXPAT_OBJS = $(EXPAT)/xmltok/*.o $(EXPAT)/xmlparse/*.o 
 
-CC = @CC@ -I$(EXPAT)/xmlparse
-LIBRARIES = @LIBS@ $(EXPAT_OBJS)
+EXPAT_OBJS = -lexpat
+
+CC = @CC@ 
+LIBRARIES = @LIBS@ $(EXPAT_OBJS) -lident
 YACC = @YACC@
 
 CFLAGS = -O -DEXPAT_XML
