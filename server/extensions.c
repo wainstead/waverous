@@ -58,6 +58,13 @@
 
 extern void register_files(void);
 
+/* utime - andy */
+#include <sys/time.h>    /* these two for gettimeofday() */
+#include <unistd.h>
+#include "numbers.h"     /* for new_float() */
+#include "exceptions.h"  /* for panic() */
+/* utime - andy */
+
 #if EXAMPLE
 
 typedef struct stdin_waiter {
@@ -302,6 +309,24 @@ bf_vrandom(Var arglist, Byte next, void *vdata, Objid progr)
 
 // end VERYRANDOM code
 
+// begin utime - andy
+static package
+bf_utime(Var arglist, Byte next, void *vdata, Objid progr)
+{
+    double t;
+    struct timeval tv;
+
+    free_var(arglist);
+
+    if (gettimeofday(&tv, NULL))
+      panic("BF_UTIME: gettimeofday() failed");
+
+    t = tv.tv_sec + (tv.tv_usec / (double)1000000.0);
+
+    return make_var_pack(new_float(t));
+}
+// end utime - andy
+
 void
 register_extensions()
 {
@@ -317,6 +342,9 @@ register_extensions()
     register_function("isa", 2, 2, bf_isa, TYPE_OBJ, TYPE_OBJ);
     register_function("vrandomseed", 0, 3, bf_vrandomseed, TYPE_LIST);
     register_function("vrandom", 0, 1, bf_vrandom, TYPE_INT);
+// begin utime - andy
+    register_function("utime", 0, 0, bf_utime);
+// end utime - andy
   register_files();
   oklog("          LOADING: extensions ... finished\n");
 }
