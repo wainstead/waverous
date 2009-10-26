@@ -35,6 +35,8 @@
 #include "unparse.h"
 #include "utils.h"
 
+#include <crypt.h>
+
 Var
 new_list(int size)
 {
@@ -563,7 +565,6 @@ bf_crypt(Var arglist, Byte next, void *vdata, Objid progr)
     const char *saltp;
     static char saltstuff[] =
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./";
-    extern const char *crypt(const char *, const char *);
 
     if (arglist.v.list[0].v.num == 1 || memo_strlen(arglist.v.list[2].v.str) < 2) {
 	/* provide a random 2-letter salt, works with old and new crypts */
