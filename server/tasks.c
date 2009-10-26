@@ -679,6 +679,13 @@ do_command_task(tqueue * tq, char *command)
     } else {
 	Parsed_Command *pc = parse_command(command, tq->player);
 
+        {
+            char *s = str_dup("");
+            run_server_task(tq->player, SYSTEM_OBJECT, "do_prompt",
+                            parse_into_wordlist(s), s, 0);
+            free_str(s);
+        }
+
 	if (!pc)
 	    return 0;
 
@@ -718,6 +725,13 @@ do_command_task(tqueue * tq, char *command)
 		notify(tq->player, tq->output_suffix);
 
 	    free_var(result);
+
+            {
+                char *s = str_dup("");
+                run_server_task(tq->player, SYSTEM_OBJECT, "do_prompt",
+                                parse_into_wordlist(s), s, 0);
+                free_str(s);
+            }
 	}
 
 	free_parsed_command(pc);

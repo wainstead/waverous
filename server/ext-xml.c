@@ -27,6 +27,8 @@
  * {"foo", {{"a", "1"}}, {{"bar", {}, {"11"}}}}
  */
 
+#define NS_DELIMITER '\t'
+
 typedef struct XMLdata XMLdata;
 
 struct XMLdata {
@@ -34,7 +36,6 @@ struct XMLdata {
   Stream *body;
   Var element;
 };
-
 
 static XMLdata *
 new_node(XMLdata *parent, const char *name) 
@@ -44,18 +45,42 @@ new_node(XMLdata *parent, const char *name)
    */
   XMLdata *node;
   Var element;
+
+  char *nametemp=NULL;
+  const char *nodename=NULL;
+  char *nsname=NULL;
+  char *delim=NULL;
+
+  if ((delim=strchr(name, NS_DELIMITER)) != NULL) {
+    int index = delim - name;
+    nametemp=str_dup(name);
+    nametemp[index]='\0';
+    nodename = nametemp + index + 1;
+    nsname = nametemp;
+  } else {
+    nodename = name;
+  }
+
   node = (XMLdata *)mymalloc(1*sizeof(XMLdata), M_XML_DATA);
-  element = new_list(4);
+  element = new_list(nsname ? 5 : 4);
+
   /* {name, attribs, body, children} */ 
   element.v.list[1].type = TYPE_STR;
-  element.v.list[1].v.str = str_dup(name);
+  element.v.list[1].v.str = str_dup(nodename);
   element.v.list[2] = new_list(0);
   element.v.list[3].type = TYPE_INT;
   element.v.list[3].v.num = 0;
   element.v.list[4] = new_list(0);
+  if (nsname) {
+    element.v.list[5].type = TYPE_STR;
+    element.v.list[5].v.str = str_dup(nsname);
+  }
   node->body = NULL;
   node->element = element;
   node->parent = parent;
+
+  if (nametemp) free_str(nametemp);
+
   return node;
 }			
 
@@ -107,15 +132,35 @@ xml_startElement(void *userData, const char *name, const char **atts)
   XMLdata *node = new_node(parent, name);
   const char **patts = atts;
 
+  char *delim;
+
   while(*patts != NULL) {
-    Var pair = new_list(2);
-    pair.v.list[1].type = TYPE_STR;
-    pair.v.list[1].v.str = str_dup(patts[0]);
+    Var pair;
+    if (delim = strchr(patts[0], NS_DELIMITER))
+    {
+      int index = delim - patts[0];
+      char *nametemp = str_dup(patts[0]);
+      nametemp[index] = '\0';
+
+      pair = new_list(3);
+      pair.v.list[3].type = TYPE_STR;
+      pair.v.list[3].v.str = str_dup(nametemp);
+      pair.v.list[1].type = TYPE_STR;
+      pair.v.list[1].v.str = str_dup(nametemp + index + 1);
+      if (nametemp) free_str(nametemp);
+    }
+    else
+    {
+      pair = new_list(2);
+      pair.v.list[1].type = TYPE_STR;
+      pair.v.list[1].v.str = str_dup(patts[0]);
+    }
     pair.v.list[2].type = TYPE_STR;
-    pair.v.list[2].v.str = str_dup(patts[1]); 
+    pair.v.list[2].v.str = str_dup(patts[1]);
     patts += 2;
     node->element.v.list[2] = listappend(node->element.v.list[2], pair);
   }
+
   *data = node;
 }
 
@@ -167,7 +212,7 @@ xml_endElement(void *userData, const char *name)
  * See documentation (ext-xml.README) for examples.
  */
 static package 
-parse_xml(const char *data, int bool_stream)
+parse_xml(const char *data, int bool_stream, int bool_parsens)
   {
   /*
    * FIXME: Feed expat smaller chunks of the string and 
@@ -177,9 +222,15 @@ parse_xml(const char *data, int bool_stream)
   int decoded_length;
   const char *decoded;
   package result; 
-  XML_Parser parser = XML_ParserCreate(NULL);
+  XML_Parser parser;
   XMLdata *root = new_node(NULL, "");
   XMLdata *child = root;
+
+  if (bool_parsens) {
+    parser = XML_ParserCreateNS(NULL, NS_DELIMITER);
+  } else {
+    parser = XML_ParserCreate(NULL);
+  }
   
   decoded_length = strlen(data);
   decoded = data;
@@ -211,7 +262,8 @@ parse_xml(const char *data, int bool_stream)
 static package
 bf_parse_xml_document(Var arglist, Byte next, void *vdata, Objid progr) 
 {
-  package result = parse_xml(arglist.v.list[1].v.str, 1);
+  int bool_parsens = (arglist.v.list[0].v.num >= 2 && is_true(arglist.v.list[2]));
+  package result = parse_xml(arglist.v.list[1].v.str, 1, bool_parsens);
   free_var(arglist);
   return result;
 }
@@ -219,7 +271,8 @@ bf_parse_xml_document(Var arglist, Byte next, void *vdata, Objid progr)
 static package
 bf_parse_xml_tree(Var arglist, Byte next, void *vdata, Objid progr)
 {
-  package result = parse_xml(arglist.v.list[1].v.str, 0);
+  int bool_parsens = (arglist.v.list[0].v.num >= 2 && is_true(arglist.v.list[2]));
+  package result = parse_xml(arglist.v.list[1].v.str, 0, bool_parsens);
   free_var(arglist);
   return result;
 }
@@ -227,7 +280,7 @@ bf_parse_xml_tree(Var arglist, Byte next, void *vdata, Objid progr)
 void
 register_xml()
 {
-    register_function("xml_parse_tree", 1, 1, bf_parse_xml_tree, TYPE_STR);
-    register_function("xml_parse_document", 1, 1, bf_parse_xml_document, TYPE_STR);
+    register_function("xml_parse_tree", 1, 2, bf_parse_xml_tree, TYPE_STR, TYPE_ANY);
+    register_function("xml_parse_document", 1, 2, bf_parse_xml_document, TYPE_STR, TYPE_ANY);
 }
 

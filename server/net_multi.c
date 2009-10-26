@@ -88,6 +88,7 @@ typedef struct nhandle {
 #endif
     char *user_name;
     int user_client;
+    char *connect_host;
 } nhandle;
 
 static nhandle *all_nhandles = 0;
@@ -333,6 +334,7 @@ new_nhandle(int rfd, int wfd, const char *local_name, const char *remote_name,
     h->client_echo = 1;
 #endif
     h->user_name = NULL;
+    h->connect_host = NULL;
 
 #ifdef NETWORK_IDENT
     if (server_int_option("ident_lookup", 1)) {
