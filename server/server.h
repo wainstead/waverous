@@ -26,6 +26,10 @@
 #ifndef Server_H
 #define Server_H 1
 
+/* bg_name_lookup */
+#include <sys/types.h> /* pid_t */
+/* !bg_name_lookup */
+
 #include "my-stdio.h"
 
 #include "config.h"
@@ -148,7 +152,11 @@ extern int get_server_option(Objid oid, const char *name, Var * r);
 enum Fork_Result {
     FORK_PARENT, FORK_CHILD, FORK_ERROR
 };
-extern enum Fork_Result fork_server(const char *subtask_name);
+
+/* bg_name_lookup */
+extern pid_t checkpoint_pid;
+extern enum Fork_Result fork_server(const char *subtask_name, pid_t *child_pid);
+/* !bg_name_lookup */
 
 extern void player_connected(Objid old_id, Objid new_id,
 			     int is_newly_created);

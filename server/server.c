@@ -48,6 +48,10 @@
 
 #include "execute.h"
 
+/* bg_name_lookup */
+pid_t checkpoint_pid = 0;
+/* !bg_name_lookup */
+
 static pid_t parent_pid;
 int in_child = 0;
 
@@ -223,7 +227,9 @@ panic(const char *message)
 }
 
 enum Fork_Result
-fork_server(const char *subtask_name)
+/* bg_name_lookup - Throw pid in *child_pid if child_pid not NULL */
+fork_server(const char *subtask_name, pid_t *child_pid)
+/* !bg_name_lookup */
 {
     pid_t pid;
     Stream *s = new_stream(100);
@@ -240,7 +246,13 @@ fork_server(const char *subtask_name)
 	in_child = 1;
 	return FORK_CHILD;
     } else
-	return FORK_PARENT;
+/* bg_name_lookup */
+    {
+        if (child_pid != NULL)
+          *child_pid=pid;
+        return FORK_PARENT;
+    }
+/* !bg_name_lookup */
 }
 
 static void
@@ -282,26 +294,42 @@ child_completed_signal(int sig)
 {
     int status;
 
-    /* (Void *) casts to avoid warnings on systems that mis-declare the
-     * argument type.
-     */
+    /* bg_name_lookup */
+    pid_t pid;
+     
+#   define CHECKPID                                   \
+    if (pid && pid == checkpoint_pid)                 \
+    {                                                 \
+      /* 1 = failure, 2 = success */                  \
+      checkpoint_finished = (status == 0) + 1;        \
+    }                                                 \
+     
 #if HAVE_WAITPID
-    while (waitpid(-1, (int *) &status, WNOHANG) > 0);
+    do {
+      pid = waitpid(-1, (int *) &status, WNOHANG);
+      CHECKPID;
+    } while (pid > 0);
 #else
 #if HAVE_WAIT3
-    while (wait3((void *) &status, WNOHANG, 0) >= 0);
+    do {
+      pid = wait3((int *) &status, WNOHANG, 0);
+      CHECKPID;
+    } while (pid > 0)
 #else
 #if HAVE_WAIT2
-    while (wait2((void *) &status, WNOHANG) >= 0);
+    do {
+      pid = wait2((int *) &status, WNOHANG);
+      CHECKPID;
+    } while (pid > 0)
 #else
-    wait((void *) &status);
+    pid = wait((int *) &status);
+    CHECKPID;
 #endif
 #endif
 #endif
-
+     
     signal(sig, child_completed_signal);
-
-    checkpoint_finished = (status == 0) + 1;	/* 1 = failure, 2 = success */
+    /* !bg_name_lookup */
 }
 
 static void

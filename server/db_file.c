@@ -627,7 +627,9 @@ dump_database(Dump_Reason reason)
     reset_command_history();
 #else
     if (reason == DUMP_CHECKPOINT) {
-	switch (fork_server("checkpointer")) {
+/* bg_name_lookup */
+        switch (fork_server("checkpointer", &checkpoint_pid)) {
+/* !bg_name_lookup */
 	case FORK_PARENT:
 	    reset_command_history();
 	    free_stream(s);

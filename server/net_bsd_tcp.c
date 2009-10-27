@@ -180,7 +180,9 @@ proto_accept_connection(int listener_fd, int *read_fd, int *write_fd,
     }
     *read_fd = *write_fd = fd;
     stream_printf(s, "%s, port %d",
-		  lookup_name_from_addr(&address, timeout),
+/* bg_name_lookup */
+                  inet_ntoa(address. sin_addr),
+/* !bg_name_lookup */
 		  (int) ntohs(address.sin_port));
     *name = reset_stream(s);
     return PA_OKAY;

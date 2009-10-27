@@ -27,6 +27,9 @@ extern void register_property(void);
 extern void register_server(void);
 extern void register_tasks(void);
 extern void register_verbs(void);
+/* bg_name_lookup */
+extern void register_name_lookup(void);
+/* !bg_name_lookup */
 
 /* 
  * $Log: not supported by cvs2svn $

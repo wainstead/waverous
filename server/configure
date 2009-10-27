@@ -1403,6 +1403,93 @@ rm -f conftest*
 
 done
 
+for func in ident_id
+do
+    trfrom='[a-z]' trto='[A-Z]'
+  var=HAVE_`echo $func | tr "$trfrom" "$trto"`
+    echo checking for $func
+cat > conftest.c <<EOF
+#include "confdefs.h"
+#include <assert.h>
+int main() { exit(0); }
+int t() { 
+/* The GNU C library defines this for functions which it implements
+    to always fail with ENOSYS.  Some functions are actually named
+    something starting with __ and the normal name is an alias.  */
+#if defined (__stub_$func) || defined (__stub___$func)
+choke me
+#else
+/* Override any gcc2 internal prototype to avoid an error.  */
+extern char $func(); $func();
+#endif
+ }
+EOF
+if eval $compile; then
+  rm -rf conftest*
+  {
+test -n "$verbose" && \
+echo "	defining $var"
+echo "#define" $var 1 >> confdefs.h
+DEFS="$DEFS -D$var=1"
+SEDDEFS="${SEDDEFS}\${SEDdA}$var\${SEDdB}$var\${SEDdC}1\${SEDdD}
+\${SEDuA}$var\${SEDuB}$var\${SEDuC}1\${SEDuD}
+\${SEDeA}$var\${SEDeB}$var\${SEDeC}1\${SEDeD}
+"
+}
+
+
+else
+  rm -rf conftest*
+  SAVELIBS="$LIBS"
+    for lib in -lident
+    do
+      LIBS="$LIBS $lib"
+      echo checking for $func
+cat > conftest.c <<EOF
+#include "confdefs.h"
+#include <assert.h>
+int main() { exit(0); }
+int t() { 
+/* The GNU C library defines this for functions which it implements
+    to always fail with ENOSYS.  Some functions are actually named
+    something starting with __ and the normal name is an alias.  */
+#if defined (__stub_$func) || defined (__stub___$func)
+choke me
+#else
+/* Override any gcc2 internal prototype to avoid an error.  */
+extern char $func(); $func();
+#endif
+ }
+EOF
+if eval $compile; then
+  rm -rf conftest*
+  
+{
+test -n "$verbose" && \
+echo "	defining $var"
+echo "#define" $var 1 >> confdefs.h
+DEFS="$DEFS -D$var=1"
+SEDDEFS="${SEDDEFS}\${SEDdA}$var\${SEDdB}$var\${SEDdC}1\${SEDdD}
+\${SEDuA}$var\${SEDuB}$var\${SEDuC}1\${SEDuD}
+\${SEDeA}$var\${SEDeB}$var\${SEDeC}1\${SEDeD}
+"
+}
+
+			 break
+
+else
+  rm -rf conftest*
+  LIBS="$SAVELIBS"
+fi
+rm -f conftest*
+
+    done
+    
+fi
+rm -f conftest*
+
+done
+
 for hdr in unistd.h sys/cdefs.h stdlib.h tiuser.h machine/endian.h
 do
 trhdr=HAVE_`echo $hdr | tr '[a-z]./' '[A-Z]__'`
