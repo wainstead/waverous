@@ -66,7 +66,7 @@ network_connection_option(network_handle nh, const char *option, Var * value)
     }
     if (!mystrcasecmp(option, "connect_host")) {
         (value)->type = TYPE_STR;
-        (value)->v.str = str_ref(((nhandle *)(nh).ptr)->connect_host);
+        (value)->v.str = (((nhandle *)(nh).ptr)->connect_host) ? str_ref((((nhandle *)(nh).ptr)->connect_host)) : str_dup("");
         return 1;
     }
     return 0;
