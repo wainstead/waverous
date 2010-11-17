@@ -1,5 +1,7 @@
 #!/usr/bin/expect
 
+# Start up the server, login, run commands, shutdown
+
 puts "MOO test starting"
 
 #cd "~swain/Sites/projects/lambdamoo/build"
