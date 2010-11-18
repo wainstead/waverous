@@ -46,10 +46,10 @@ new_node(XMLdata *parent, const char *name)
   XMLdata *node;
   Var element;
 
-  char *nametemp=NULL;
-  const char *nodename=NULL;
-  char *nsname=NULL;
-  char *delim=NULL;
+  char *nametemp       = NULL;
+  const char *nodename = NULL;
+  char *nsname         = NULL;
+  char *delim          = NULL;
 
   if ((delim=strchr(name, NS_DELIMITER)) != NULL) {
     int index = delim - name;
