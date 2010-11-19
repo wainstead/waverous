@@ -1,7 +1,7 @@
 body { background-color : #FFE; font-family:arial narrow; margin:.5in }
-pre { margin-left : 3em; }
-dl { margin-left: 2em; }
+pre  { margin-left : 3em; }
+dl   { margin-left: 2em; }
 code { font-family:courier new}
-var { font-family:courier new }
-pre { font-family:courier new; margin-bottom:0pt; }
-b { color:blue }
+var  { font-family:courier new }
+pre  { font-family:courier new; margin-bottom:0pt; }
+b    { color:blue }
