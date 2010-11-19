@@ -488,11 +488,13 @@ void parse_obj(FILE *fh) {
   struct property *propstructs;
 
   objnumber = read_obj(fh);
-  if (mode == OBJECTS)
-    if (objnumber < 0)
+  if (mode == OBJECTS) {
+    if (objnumber < 0) {
       printf("#%d recycled\n", -objnumber);
-    else
+    } else {
       printf("#%d\n", objnumber);
+    }
+  }
 
   if (objnumber < 0) {
      if (mode_object == -objnumber)
