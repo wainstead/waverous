@@ -51,12 +51,12 @@ new_node(XMLdata *parent, const char *name)
   char *nsname         = NULL;
   char *delim          = NULL;
 
-  if ((delim=strchr(name, NS_DELIMITER)) != NULL) {
-    int index = delim - name;
-    nametemp=str_dup(name);
-    nametemp[index]='\0';
-    nodename = nametemp + index + 1;
-    nsname = nametemp;
+  if ( (delim = strchr((char *)name, NS_DELIMITER)) != NULL ) {
+    int index       = delim - name;
+    nametemp        = str_dup(name);
+    nametemp[index] = '\0';
+    nodename        = nametemp + index + 1;
+    nsname          = nametemp;
   } else {
     nodename = name;
   }
@@ -65,12 +65,12 @@ new_node(XMLdata *parent, const char *name)
   element = new_list(nsname ? 5 : 4);
 
   /* {name, attribs, body, children} */ 
-  element.v.list[1].type = TYPE_STR;
+  element.v.list[1].type  = TYPE_STR;
   element.v.list[1].v.str = str_dup(nodename);
-  element.v.list[2] = new_list(0);
-  element.v.list[3].type = TYPE_INT;
+  element.v.list[2]       = new_list(0);
+  element.v.list[3].type  = TYPE_INT;
   element.v.list[3].v.num = 0;
-  element.v.list[4] = new_list(0);
+  element.v.list[4]       = new_list(0);
   if (nsname) {
     element.v.list[5].type = TYPE_STR;
     element.v.list[5].v.str = str_dup(nsname);
@@ -136,10 +136,10 @@ xml_startElement(void *userData, const char *name, const char **atts)
 
   while(*patts != NULL) {
     Var pair;
-    if (delim = strchr(patts[0], NS_DELIMITER))
+    if (delim = (char *)strchr(patts[0], NS_DELIMITER))
     {
-      int index = delim - patts[0];
-      char *nametemp = str_dup(patts[0]);
+      int index       = delim - patts[0];
+      char *nametemp  = str_dup(patts[0]);
       nametemp[index] = '\0';
 
       pair = new_list(3);
