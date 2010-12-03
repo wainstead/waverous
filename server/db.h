@@ -181,7 +181,7 @@ typedef enum {
      * (not saved; can be renumbered with impunity)
      * make sure FLAG_FIRST_TEMP > last permanent flag
      */
-    FLAG_FIRST_TEMP = 14,
+    FLAG_FIRST_TEMP = 14
     /* allows space for the 2 needed by validate_hierarchies(),
      * just in case int is only 16 bits
      */
