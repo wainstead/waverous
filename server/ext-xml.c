@@ -136,7 +136,7 @@ xml_startElement(void *userData, const char *name, const char **atts)
 
   while(*patts != NULL) {
     Var pair;
-    if (delim = (char *)strchr(patts[0], NS_DELIMITER))
+    if ( (delim = (char *)strchr(patts[0], NS_DELIMITER)) )
     {
       int index       = delim - patts[0];
       char *nametemp  = str_dup(patts[0]);
