@@ -401,7 +401,8 @@ db_find_property(Objid oid, const char *name, Var * value)
 	}
     };
     static int ptable_init = 0;
-    int i, n;
+    unsigned int i;
+    int n, p;
     db_prop_handle h;
     int hash = str_hash(name);
     Object *o;
@@ -432,9 +433,9 @@ db_find_property(Objid oid, const char *name, Var * value)
 	Propdef *defs = props->l;
 	int length = props->cur_length;
 
-	for (i = 0; i < length; i++, n++) {
-	    if (defs[i].hash == hash
-		&& !mystrcasecmp(defs[i].name, name)) {
+	for (p = 0; p < length; p++, n++) {
+	    if (defs[p].hash == hash
+		&& !mystrcasecmp(defs[p].name, name)) {
 		Pval *prop;
 
 		h.definer = o->id;
