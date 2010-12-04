@@ -160,7 +160,6 @@ enum proto_accept_error
 proto_accept_connection(int listener_fd, int *read_fd, int *write_fd,
 			const char **name)
 {
-    int timeout = server_int_option("name_lookup_timeout", 5);
     int fd;
     struct sockaddr_in address;
     socklen_t addr_length = sizeof(address);
