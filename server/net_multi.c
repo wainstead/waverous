@@ -220,6 +220,9 @@ network_set_nonblocking(int fd)
 #endif
 }
 
+/**
+ * This is the function that prints output to the player
+ */
 static int
 push_output(nhandle * h)
 {
