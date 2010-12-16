@@ -119,6 +119,10 @@ else
 endif
 .
 
+@verb lander:"title" this none this
+@program lander:title
+return "Mars Polar Lander";
+.
 
 @property lander.help_msg "The Mars Polar Lander has several fun verbs to pick from. The Lander goes into Search Mode when you knock on its hull (if it's in Safe Mode); if you knock on the hull while it's in Search Mode it takes your picture. You can pet the Lander to make it happy. The 'state' verb will tell you its current mode, though in practice this hasn't been needed much. (I guess that makes it a debugging tool). You can give the lander thought bubbles with the 'thought' verb, i.e. th*ought lander with yup, I'm the Mars Polar Lander, ayup."
 

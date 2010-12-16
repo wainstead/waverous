@@ -8,4 +8,10 @@ Many (all?) of them contain ANSI color codes in their titles (names)
 so you'll see gobbledeegook for their names. Until I get around to
 adding ANSI color support to one or more of the databases.
 
+There are other objects missing as well; and a function called $name,
+it seems... but this has long been one of the pitfalls of sharing MOO
+code: a dump of some object may contain object references or code
+references that don't exist in your copy of the MOO database. It's a
+problem that needs solving.
+
 ~swain dec 2010
