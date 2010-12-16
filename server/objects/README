@@ -1,0 +1,11 @@
+These are a handful of objects I've created over the years; toys, mostly.
+
+To load them via tf, do:
+
+/quote 'objects/filename.moo
+
+Many (all?) of them contain ANSI color codes in their titles (names)
+so you'll see gobbledeegook for their names. Until I get around to
+adding ANSI color support to one or more of the databases.
+
+~swain dec 2010
