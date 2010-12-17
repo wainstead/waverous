@@ -760,12 +760,12 @@ diff -uN MOO-1.8.1/utf8.h MOO-1.8.1u4/utf8.h
 diff -uN MOO-1.8.1/version.c MOO-1.8.1u4/version.c
 --- MOO-1.8.1/version.c	Mon Jan 10 19:15:09 2000
 +++ MOO-1.8.1u4/version.c	Thu Jun  6 09:00:30 2002
-@@ -40,7 +40,7 @@
+@@ -40,4 +40,4 @@
  #include "config.h"
  #include "version.h"
  
 -const char *server_version = "1.8.1";
 +const char *server_version = "1.8.1u4";
- 
+
  int
  check_version(DB_Version version)
