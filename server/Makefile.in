@@ -93,6 +93,7 @@ OBJS = $(COBJS) $(YOBJS)
 moo:	$(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) $(LIBRARIES) -o $@
 
+# 'purify' is a memory leak checker, now IBM Rational Purify. --sw
 pure_moo: moo
 	purify $(CC) $(CFLAGS) $(OBJS) $(LIBRARIES) -o $@
 
