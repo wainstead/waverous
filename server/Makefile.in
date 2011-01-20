@@ -149,7 +149,7 @@ dist.tar.Z:	$(DISTFILES)
 	rm -fr MOO-`cat version_number` version_number
 
 tags:
-	etags -t $(SRCS)
+	etags $(SRCS)
 
 clean:
 	rm -f $(OBJS) $(OPT_NET_OBJS) core parser.c y.tab.c y.tab.h y.output makedep eddep
