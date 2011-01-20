@@ -152,7 +152,7 @@ clean:
 	rm -f $(OBJS) $(OPT_NET_OBJS) core parser.c y.tab.c y.tab.h y.output makedep eddep
 
 distclean:	clean
-	rm -f config.h Makefile config.status
+	rm -f config.h Makefile config.status config.log config.cache
 
 depend: ${ALL_CSRCS}
 	rm -f eddep makedep
