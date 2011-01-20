@@ -80,7 +80,7 @@ ALL_CSRCS = $(CSRCS) $(OPT_CSRCS) $(CLIENT_SRCS)
 SRCS = $(ALL_CSRCS) keywords.gperf $(YSRCS) $(HDRS) $(SYSHDRS)
 
 DISTFILES = $(SRCS) Makefile.in restart restart.sh \
-	Minimal.db README.Minimal \
+	databases/Minimal.db README.Minimal \
 	ChangeLog.txt README configure.in configure config.h.in \
 	MOOCodeSequences.txt AddingNewMOOTypes.txt pgperf aclocal.m4
 
