@@ -95,7 +95,7 @@ dnl <malloc.h> exists.
 define(MOO_MALLOC_H, [
 echo checking whether stdlib.h declares malloc and friends
 MOO_FUNC_DECL_CHECK(stdlib.h, malloc, ,
-	AC_HEADER_CHECK(malloc.h, AC_DEFINE(NEED_MALLOC_H)))])
+	[AC_HEADER_CHECK(malloc.h, AC_DEFINE(NEED_MALLOC_H))])])
 
 dnl ***************************************************************************
 dnl	MOO_FUNC_DECL_CHECK(header, func,
@@ -110,7 +110,7 @@ changequote([,])dnl
 AC_PROGRAM_EGREP($pattern, [
 #include <$1>
 $5
-], $3, $4)])
+], [$3], [$4])])
 
 dnl ***************************************************************************
 dnl 	MOO_NDECL_FUNCS(header, func1 func2 ...[, extra-hdr])
@@ -185,12 +185,12 @@ do
   trfrom='[a-z]' trto='[A-Z]'
   var=HAVE_`echo $func | tr "$trfrom" "$trto"`
   changequote([,])dnl
-  AC_FUNC_CHECK($func, AC_DEFINE($var), [
+  AC_FUNC_CHECK($func, AC_DEFINE_UNQUOTED($var), [
     SAVELIBS="$LIBS"
     for lib in $2
     do
       LIBS="$LIBS $lib"
-      AC_FUNC_CHECK($func, [AC_DEFINE($var)
+      AC_FUNC_CHECK($func, [AC_DEFINE_UNQUOTED($var)
 			 break],
 		    LIBS="$SAVELIBS")
     done
@@ -315,7 +315,6 @@ MOO_HAVE_FUNC_LIBS(mkfifo waitpid sigemptyset, -lposix /lib/libposix.a)
 MOO_HAVE_FUNC_LIBS(accept, "-lsocket -lnsl" -lsocket -linet)
 MOO_HAVE_FUNC_LIBS(t_open, -lnsl -lnsl_s)
 MOO_HAVE_FUNC_LIBS(crypt, -lcrypt -lcrypt_d)
-MOO_HAVE_FUNC_LIBS(ident_id, -lident)
 AC_HAVE_HEADERS(unistd.h sys/cdefs.h stdlib.h tiuser.h machine/endian.h)
 AC_HAVE_FUNCS(remove rename poll select strerror strftime strtoul matherr)
 AC_HAVE_FUNCS(random lrand48 wait3 wait2 sigsetmask sigprocmask sigrelse)
@@ -521,7 +520,13 @@ echo "----------------------------------------------------------------------"
 
 AC_OUTPUT(Makefile)
 
-# $Log: not supported by cvs2svn $
+# $Log$
+# Revision 1.1.1.1.4.1  2005/09/29 06:56:18  bjj
+# Merge HEAD onto WAIF, bringing it approximately to 1.8.2
+#
+# Revision 1.2  2004/05/22 01:25:43  wrog
+# merging in WROGUE changes (W_SRCIP, W_STARTUP, W_OOB)
+#
 # Revision 1.1.1.1.12.1  2003/06/01 12:39:27  wrog
 # ensure definitions for in_addr_t, INADDR_NONE
 #
