@@ -126,6 +126,8 @@ config.h: config.h.in config.status
 y.tab.h: parser.o
 	touch y.tab.h
 
+# see the README file in the directory pgperf for an explanation of
+# the custom version of gperf used by this project. --sw
 keywords.c: keywords.gperf
 	pgperf -aCIptT -k1,3,$$ keywords.gperf \
 		| sed -e 's/#include <ctype.h>/#include "my-ctype.h"/' \
