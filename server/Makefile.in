@@ -164,7 +164,7 @@ depend: ${ALL_CSRCS}
 	echo '$$r makedep' >>eddep
 	echo 'w' >>eddep
 	cp Makefile.in Makefile.in.bak
-	ed - Makefile.in < eddep
+	ex - Makefile.in < eddep
 	rm -f eddep makedep
 
 ###############################################################################
