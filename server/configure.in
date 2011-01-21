@@ -15,8 +15,13 @@ dnl   3333 Coyote Hill Rd.
 dnl   Palo Alto, CA 94304
 dnl   Pavel@Xerox.Com
 dnl
-AC_INIT(Makefile.in)
+AC_PREREQ([2.66])
+AC_INIT([Waverous LambdaMOO], [beta1], [wainstead@gmail.com], [waverous-lambdamoo], [http://code.google.com/p/waverous/])
+AC_CONFIG_SRCDIR([functions.c])
 AC_CONFIG_HEADER(config.h)
+
+
+
 
 dnl ***************************************************************************
 dnl	MOO_AUX
@@ -509,6 +514,23 @@ AC_PROGRAM_EGREP(yes, [
 yes
 #endif
 ], test -r /dev/tcp && MOO_ADD_NET_CONFIG(NS_SYSV/NP_TCP))
+
+AC_CHECK_HEADERS([arpa/inet.h fcntl.h float.h limits.h malloc.h memory.h netdb.h netinet/in.h stdlib.h string.h sys/ioctl.h sys/param.h sys/socket.h sys/time.h unistd.h])
+AC_C_INLINE
+AC_FUNC_ALLOCA
+AC_FUNC_ERROR_AT_LINE
+AC_FUNC_FORK
+AC_FUNC_MALLOC
+AC_FUNC_REALLOC
+AC_FUNC_STRTOD
+AC_FUNC_WAIT3
+AC_HEADER_STDBOOL
+AC_PREREQ
+AC_PROG_LN_S
+AC_TYPE_SSIZE_T
+AC_CHECK_FUNCS([alarm bzero floor gethostbyaddr gethostbyname getpagesize gettimeofday inet_ntoa memmove memset mkdir mkfifo modf pow re_comp rmdir select socket strchr strcspn strerror strrchr strstr strtol strtoul])
+
+AC_CHECK_LIB([expat], [main])
 
 echo "----------------------------------------------------------------------"
 echo "| The following networking configurations will probably work on your"
