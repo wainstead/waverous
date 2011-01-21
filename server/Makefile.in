@@ -28,7 +28,7 @@ CC = @CXX@
 LIBRARIES = @LIBS@ $(EXPAT_OBJS)
 YACC = @YACC@
 
-CFLAGS = -O -DEXPAT_XML
+CFLAGS = -m32 -O -DEXPAT_XML 
 # If you're using GCC, you may prefer:
 # CFLAGS = -O2 -finline-functions
 #
