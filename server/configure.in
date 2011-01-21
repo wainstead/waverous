@@ -18,7 +18,7 @@ dnl
 AC_PREREQ([2.66])
 AC_INIT([Waverous LambdaMOO], [beta1], [wainstead@gmail.com], [waverous-lambdamoo], [http://code.google.com/p/waverous/])
 AC_CONFIG_SRCDIR([functions.c])
-AC_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADERS(config.h)
 
 
 
