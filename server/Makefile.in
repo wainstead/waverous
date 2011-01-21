@@ -18,7 +18,7 @@
 # Until then, set this to where you unpacked and compiled expat
 #
 
-
+# @configure_input@
 
 EXPAT_OBJS = -lexpat
 
