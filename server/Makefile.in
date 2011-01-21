@@ -23,6 +23,8 @@
 EXPAT_OBJS = -lexpat
 
 
+CC = @CXX@
+
 LIBRARIES = @LIBS@ $(EXPAT_OBJS)
 YACC = @YACC@
 
@@ -36,7 +38,7 @@ CFLAGS = -O -DEXPAT_XML
 # CFLAGS = -O2 -Dinline=
 
 YFLAGS = -d
-COMPILE.c = $(CXX) $(CFLAGS) $(CPPFLAGS) -c
+COMPILE.c = $(CC) $(CFLAGS) $(CPPFLAGS) -c
 
 CSRCS = ast.c code_gen.c db_file.c db_io.c db_objects.c db_properties.c \
 	db_verbs.c decompile.c disassemble.c eval_env.c eval_vm.c \
@@ -91,17 +93,17 @@ YOBJS = $(YSRCS:.y=.o)
 OBJS = $(COBJS) $(YOBJS)
 
 moo:	$(OBJS)
-	$(CXX) $(CFLAGS) $(OBJS) $(LIBRARIES) -o $@
+	$(CC) $(CFLAGS) $(OBJS) $(LIBRARIES) -o $@
 
 # 'purify' is a memory leak checker, now IBM Rational Purify. --sw
 pure_moo: moo
-	purify $(CXX) $(CFLAGS) $(OBJS) $(LIBRARIES) -o $@
+	purify $(CC) $(CFLAGS) $(OBJS) $(LIBRARIES) -o $@
 
 client_bsd: client_bsd.o
-	$(CXX) $(CFLAGS) client_bsd.o $(LIBRARIES) -o $@
+	$(CC) $(CFLAGS) client_bsd.o $(LIBRARIES) -o $@
 
 client_sysv: client_sysv.o
-	$(CXX) $(CFLAGS) client_sysv.o $(LIBRARIES) -o $@
+	$(CC) $(CFLAGS) client_sysv.o $(LIBRARIES) -o $@
 
 # This rule gets around some "make"s' desire to `derive' it from `restart.sh'.
 restart:
