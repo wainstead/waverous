@@ -13,12 +13,12 @@
 #   Palo Alto, CA 94304
 #   Pavel@Xerox.Com
 
-# 
-# with autoconf2 I'll go edit it to support --with-expat=
-# Until then, set this to where you unpacked and compiled expat
-#
 
 # @configure_input@
+
+
+# with autoconf2 I'll go edit it to support --with-expat=
+# Until then, set this to where you unpacked and compiled expat
 
 EXPAT_OBJS = -lexpat
 
@@ -28,14 +28,11 @@ CC = @CXX@
 LIBRARIES = @LIBS@ $(EXPAT_OBJS)
 YACC = @YACC@
 
+# for debugging you might prefer:
+# CFLAGS='-g -m32 -O0 -Wall -DEXPAT_XML
+
 CFLAGS = -m32 -O -DEXPAT_XML 
-# If you're using GCC, you may prefer:
-# CFLAGS = -O2 -finline-functions
-#
-# If you're not using GCC, and your compiler doesn't understand the
-# inline keyword, use the following.  (This will be fixed in autoconf2
-# upgrade).
-# CFLAGS = -O2 -Dinline=
+
 
 YFLAGS = -d
 COMPILE.c = $(CC) $(CFLAGS) $(CPPFLAGS) -c
@@ -168,6 +165,10 @@ depend: ${ALL_CSRCS}
 	cp Makefile.in Makefile.in.bak
 	ex - Makefile.in < eddep
 	rm -f eddep makedep
+
+all: moo
+
+.PHONY: all clean distclean tags depend pure_moo
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
