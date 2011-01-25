@@ -55,7 +55,7 @@ typedef enum {
     TASK_BINARY,	/* in-band; binary mode string */
     /* Background Tasks */
     TASK_FORKED,
-    TASK_SUSPENDED,
+    TASK_SUSPENDED
 } task_kind;
 
 typedef struct forked_task {
