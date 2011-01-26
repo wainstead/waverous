@@ -224,7 +224,7 @@ re_compile_initialize()
     regexp_ansi_sequences = (regexp_syntax & RE_ANSI_HEX) != 0;
 }
 
-int 
+int
 re_set_syntax(int syntax)
 {
     int ret;
@@ -258,7 +258,8 @@ re_compile_pattern(char *regex, int size, regexp_t bufp)
     int future_jumps[MAX_NESTING], num_jumps;
     unsigned char ch = 0;	/* silence warnings */
     char *pattern, *translate;
-    int next_register, paren_depth, num_open_registers, open_registers[RE_NREGS];
+    int next_register, paren_depth, num_open_registers,
+	open_registers[RE_NREGS];
     int beginning_context;
 
 #define NEXTCHAR(var)			\
@@ -408,24 +409,26 @@ re_compile_pattern(char *regex, int size, regexp_t bufp)
 	if (pos >= size)
 	    op = Rend;
 	else {
-            //NEXTCHAR(ch);
+	    //NEXTCHAR(ch);
 
-            do {
-              if (pos >= size) goto ends_prematurely;
-              (ch) = regex[pos];
-              pos++;
-            } while (0);
+	    do {
+		if (pos >= size)
+		    goto ends_prematurely;
+		(ch) = regex[pos];
+		pos++;
+	    } while (0);
 
 	    if (translate)
 		ch = translate[(unsigned char) ch];
 	    op = regexp_plain_ops[(unsigned char) ch];
 	    if (op == Rquote) {
-                //NEXTCHAR(ch);
-              do {
-                if (pos >= size) goto ends_prematurely;
-                (ch) = regex[pos];
-                pos++;
-              } while (0);
+		//NEXTCHAR(ch);
+		do {
+		    if (pos >= size)
+			goto ends_prematurely;
+		    (ch) = regex[pos];
+		    pos++;
+		} while (0);
 		op = regexp_quoted_ops[(unsigned char) ch];
 		if (op == Rnormal && regexp_ansi_sequences)
 		    ANSI_TRANSLATE(ch);
@@ -454,7 +457,14 @@ re_compile_pattern(char *regex, int size, regexp_t bufp)
 	  store_opcode_and_arg:	/* opcode & ch must be set */
 	    SET_LEVEL_START;
 	    //ALLOC(2);
-            do { if (pattern_offset+(2) > alloc) { alloc += 256 + (2); pattern = (char *) realloc(pattern, alloc); if (!pattern) goto out_of_memory; } } while (0);
+	    do {
+		if (pattern_offset + (2) > alloc) {
+		    alloc += 256 + (2);
+		    pattern = (char *) realloc(pattern, alloc);
+		    if (!pattern)
+			goto out_of_memory;
+		}
+	    } while (0);
 	    STORE(opcode);
 	    STORE(ch);
 	    break;
@@ -463,7 +473,14 @@ re_compile_pattern(char *regex, int size, regexp_t bufp)
 	  store_opcode:
 	    SET_LEVEL_START;
 	    //ALLOC(1);
-            do { if (pattern_offset+(1) > alloc) { alloc += 256 + (1); pattern = (char *) realloc(pattern, alloc); if (!pattern) goto out_of_memory; } } while (0);
+	    do {
+		if (pattern_offset + (1) > alloc) {
+		    alloc += 256 + (1);
+		    pattern = (char *) realloc(pattern, alloc);
+		    if (!pattern)
+			goto out_of_memory;
+		}
+	    } while (0);
 
 	    STORE(opcode);
 	    break;
@@ -508,7 +525,14 @@ re_compile_pattern(char *regex, int size, regexp_t bufp)
 	    if (CURRENT_LEVEL_START == pattern_offset)
 		break;		/* ignore empty patterns for ? */
 	    //ALLOC(3);
-            do { if (pattern_offset+(3) > alloc) { alloc += 256 + (3); pattern = (char *) realloc(pattern, alloc); if (!pattern) goto out_of_memory; } } while (0);
+	    do {
+		if (pattern_offset + (3) > alloc) {
+		    alloc += 256 + (3);
+		    pattern = (char *) realloc(pattern, alloc);
+		    if (!pattern)
+			goto out_of_memory;
+		}
+	    } while (0);
 	    INSERT_JUMP(CURRENT_LEVEL_START, Cfailure_jump,
 			pattern_offset + 3);
 	    break;
@@ -523,7 +547,14 @@ re_compile_pattern(char *regex, int size, regexp_t bufp)
 	    if (CURRENT_LEVEL_START == pattern_offset)
 		break;		/* ignore empty patterns for + and * */
 	    //ALLOC(9);
-            do { if (pattern_offset+(9) > alloc) { alloc += 256 + (9); pattern = (char *) realloc(pattern, alloc); if (!pattern) goto out_of_memory; } } while (0);
+	    do {
+		if (pattern_offset + (9) > alloc) {
+		    alloc += 256 + (9);
+		    pattern = (char *) realloc(pattern, alloc);
+		    if (!pattern)
+			goto out_of_memory;
+		}
+	    } while (0);
 	    INSERT_JUMP(CURRENT_LEVEL_START, Cfailure_jump,
 			pattern_offset + 6);
 	    INSERT_JUMP(pattern_offset, Cstar_jump, CURRENT_LEVEL_START);
@@ -532,8 +563,15 @@ re_compile_pattern(char *regex, int size, regexp_t bufp)
 			    CURRENT_LEVEL_START + 6);
 	    break;
 	case Ror:
-            //ALLOC(6);
-          do { if (pattern_offset+(6) > alloc) { alloc += 256 + (6); pattern = (char *) realloc(pattern, alloc); if (!pattern) goto out_of_memory; } } while (0);
+	    //ALLOC(6);
+	    do {
+		if (pattern_offset + (6) > alloc) {
+		    alloc += 256 + (6);
+		    pattern = (char *) realloc(pattern, alloc);
+		    if (!pattern)
+			goto out_of_memory;
+		}
+	    } while (0);
 	    INSERT_JUMP(CURRENT_LEVEL_START, Cfailure_jump,
 			pattern_offset + 6);
 	    if (num_jumps >= MAX_NESTING)
@@ -549,7 +587,14 @@ re_compile_pattern(char *regex, int size, regexp_t bufp)
 	    if (next_register < RE_NREGS) {
 		bufp->uses_registers = 1;
 		//ALLOC(2);
-                do { if (pattern_offset+(2) > alloc) { alloc += 256 + (2); pattern = (char *) realloc(pattern, alloc); if (!pattern) goto out_of_memory; } } while (0);
+		do {
+		    if (pattern_offset + (2) > alloc) {
+			alloc += 256 + (2);
+			pattern = (char *) realloc(pattern, alloc);
+			if (!pattern)
+			    goto out_of_memory;
+		    }
+		} while (0);
 		STORE(Cstart_memory);
 		STORE(next_register);
 		open_registers[num_open_registers++] = next_register;
@@ -569,7 +614,14 @@ re_compile_pattern(char *regex, int size, regexp_t bufp)
 	    if (paren_depth < num_open_registers) {
 		bufp->uses_registers = 1;
 		//ALLOC(2);
-                do { if (pattern_offset+(2) > alloc) { alloc += 256 + (2); pattern = (char *) realloc(pattern, alloc); if (!pattern) goto out_of_memory; } } while (0);
+		do {
+		    if (pattern_offset + (2) > alloc) {
+			alloc += 256 + (2);
+			pattern = (char *) realloc(pattern, alloc);
+			if (!pattern)
+			    goto out_of_memory;
+		    }
+		} while (0);
 		STORE(Cend_memory);
 		num_open_registers--;
 		STORE(open_registers[num_open_registers]);
@@ -602,7 +654,14 @@ re_compile_pattern(char *regex, int size, regexp_t bufp)
 
 		SET_LEVEL_START;
 		//ALLOC(1 + 256 / 8);
-                do { if (pattern_offset+(1 + 256 / 8) > alloc) { alloc += 256 + (1 + 256 / 8); pattern = (char *) realloc(pattern, alloc); if (!pattern) goto out_of_memory; } } while (0);
+		do {
+		    if (pattern_offset + (1 + 256 / 8) > alloc) {
+			alloc += 256 + (1 + 256 / 8);
+			pattern = (char *) realloc(pattern, alloc);
+			if (!pattern)
+			    goto out_of_memory;
+		    }
+		} while (0);
 		STORE(Cset);
 		offset = pattern_offset;
 		for (a = 0; a < 256 / 8; a++)
@@ -703,7 +762,14 @@ re_compile_pattern(char *regex, int size, regexp_t bufp)
 	goto parenthesis_error;
     assert(num_jumps == 0);
     //ALLOC(1);
-    do { if (pattern_offset+(1) > alloc) { alloc += 256 + (1); pattern = (char *) realloc(pattern, alloc); if (!pattern) goto out_of_memory; } } while (0);
+    do {
+	if (pattern_offset + (1) > alloc) {
+	    alloc += 256 + (1);
+	    pattern = (char *) realloc(pattern, alloc);
+	    if (!pattern)
+		goto out_of_memory;
+	}
+    } while (0);
     STORE(Cend);
     SET_FIELDS;
     return NULL;
@@ -736,6 +802,7 @@ re_compile_pattern(char *regex, int size, regexp_t bufp)
     SET_FIELDS;
     return "Regular expression too complex";
 }
+
 #undef CHARAT
 #undef NEXTCHAR
 #undef GETHEX
@@ -753,7 +820,8 @@ re_compile_pattern(char *regex, int size, regexp_t bufp)
 static void re_compile_fastmap_aux(char *, int, char *, char *, char *);
 
 static void
-re_compile_fastmap_aux(char *code, int pos, char *visited, char *can_be_null, char *fastmap)
+re_compile_fastmap_aux(char *code, int pos, char *visited,
+		       char *can_be_null, char *fastmap)
 {
     int a, b, syntaxcode;
 
@@ -847,14 +915,15 @@ re_compile_fastmap_aux(char *code, int pos, char *visited, char *can_be_null, ch
 
 static int re_do_compile_fastmap(char *, int, int, char *, char *);
 static int
-re_do_compile_fastmap(char *buffer, int used, int pos, char *can_be_null, char *fastmap)
+re_do_compile_fastmap(char *buffer, int used, int pos, char *can_be_null,
+		      char *fastmap)
 {
     char small_visited[512], *visited;
 
     if (used <= sizeof(small_visited))
 	visited = small_visited;
     else {
-      visited = (char *) malloc(used);
+	visited = (char *) malloc(used);
 	if (!visited)
 	    return 0;
     }
@@ -873,8 +942,8 @@ re_compile_fastmap(regexp_t bufp)
     if (!bufp->fastmap || bufp->fastmap_accurate)
 	return;
     assert(bufp->used > 0);
-    if (!re_do_compile_fastmap(bufp->buffer, bufp->used, 0, &bufp->can_be_null,
-			       bufp->fastmap))
+    if (!re_do_compile_fastmap
+	(bufp->buffer, bufp->used, 0, &bufp->can_be_null, bufp->fastmap))
 	return;
     if (bufp->buffer[0] == Cbol)
 	bufp->anchor = 1;	/* begline */
@@ -890,12 +959,13 @@ re_compile_fastmap(regexp_t bufp)
 
 
 int
-re_match_2(regexp_t bufp, char *string1, int size1, char *string2, int size2, int pos, regexp_registers_t regs, int mstop)
+re_match_2(regexp_t bufp, char *string1, int size1, char *string2,
+	   int size2, int pos, regexp_registers_t regs, int mstop)
 {
     struct failure_point {
 	char *text, *partend, *code;
     } *failure_stack_start, *failure_sp, *failure_stack_end,
-     initial_failure_stack[INITIAL_FAILURES];
+	initial_failure_stack[INITIAL_FAILURES];
     int failure_stack_size;
     char *code, *translate, *text, *textend, *partend, *part_2_end;
     char *regmaybe_text[RE_NREGS], *regmaybe_partend[RE_NREGS];
@@ -999,11 +1069,13 @@ re_match_2(regexp_t bufp, char *string1, int size1, char *string2, int size2, in
 			if (regstart_partend[a] != part_2_end)
 			    regs->start[a] = regstart_text[a] - string1;
 			else
-			    regs->start[a] = regstart_text[a] - string2 + size1;
+			    regs->start[a] =
+				regstart_text[a] - string2 + size1;
 			if (regend_partend[a] != part_2_end)
 			    regs->end[a] = regend_text[a] - string1;
 			else
-			    regs->end[a] = regend_text[a] - string2 + size1;
+			    regs->end[a] =
+				regend_text[a] - string2 + size1;
 		    }
 		}
 	    }
@@ -1017,8 +1089,7 @@ re_match_2(regexp_t bufp, char *string1, int size1, char *string2, int size2, in
 	case Ceol:
 	    if (text == string2 + size2 ||
 		(text == string1 + size1 ?
-		 (size2 == 0 || *string2 == '\n') :
-		 *text == '\n'))
+		 (size2 == 0 || *string2 == '\n') : *text == '\n'))
 		break;
 	    goto fail;
 	case Cset:
@@ -1101,7 +1172,8 @@ re_match_2(regexp_t bufp, char *string1, int size1, char *string2, int size2, in
 		p2 = code;
 		/* p1 points inside loop, p2 points to after loop */
 		if (!re_do_compile_fastmap(bufp->buffer, bufp->used,
-				   p2 - bufp->buffer, &can_be_null, map))
+					   p2 - bufp->buffer, &can_be_null,
+					   map))
 		    goto make_normal_jump;
 		/* If we might introduce a new update point inside the loop,
 		   we can't optimize because then update_jump would update a
@@ -1181,7 +1253,9 @@ re_match_2(regexp_t bufp, char *string1, int size1, char *string2, int size2, in
 		    case Cdummy_failure_jump:
 			goto make_normal_jump;
 		    default:
-			printf("regexpr.c: processing star_jump: unknown op %d\n", p1[-1]);
+			printf
+			    ("regexpr.c: processing star_jump: unknown op %d\n",
+			     p1[-1]);
 			break;
 		    }
 		}
@@ -1217,7 +1291,8 @@ re_match_2(regexp_t bufp, char *string1, int size1, char *string2, int size2, in
 		if (2 * failure_stack_size > MAX_FAILURES)
 		    goto error;
 		new_stack_start = (struct failure_point *)
-		    malloc(2 * failure_stack_size * sizeof(*failure_stack_start));
+		    malloc(2 * failure_stack_size *
+			   sizeof(*failure_stack_start));
 		if (new_stack_start == NULL)
 		    goto error;
 		memcpy((char *) new_stack_start,
@@ -1228,7 +1303,8 @@ re_match_2(regexp_t bufp, char *string1, int size1, char *string2, int size2, in
 		failure_stack_start = new_stack_start;
 		failure_sp = failure_stack_start + failure_stack_size;
 		failure_stack_size *= 2;
-		failure_stack_end = failure_stack_start + failure_stack_size;
+		failure_stack_end =
+		    failure_stack_start + failure_stack_size;
 	    }
 	    a = (unsigned char) *code++;
 	    a |= (unsigned char) *code++ << 8;
@@ -1252,7 +1328,8 @@ re_match_2(regexp_t bufp, char *string1, int size1, char *string2, int size2, in
 		break;
 	    goto fail;
 	case Cendbuf:
-	    if (size2 == 0 ? text == string1 + size1 : text == string2 + size2)
+	    if (size2 == 0 ? text == string1 + size1 : text ==
+		string2 + size2)
 		break;
 	    goto fail;
 	case Cwordbeg:
@@ -1260,7 +1337,8 @@ re_match_2(regexp_t bufp, char *string1, int size1, char *string2, int size2, in
 		goto fail;
 	    if (size2 == 0 && text == string1 + size1)
 		goto fail;
-	    if (SYNTAX(text == string1 + size1 ? *string1 : *text) != Sword)
+	    if (SYNTAX(text == string1 + size1 ? *string1 : *text) !=
+		Sword)
 		goto fail;
 	    if (text == string1)
 		break;
@@ -1286,7 +1364,8 @@ re_match_2(regexp_t bufp, char *string1, int size1, char *string2, int size2, in
 		(size2 == 0 && text == string1 + size1))
 		break;
 	    if ((SYNTAX(text[-1]) == Sword) ^
-	    (SYNTAX(text == string1 + size1 ? *string2 : *text) == Sword))
+		(SYNTAX(text == string1 + size1 ? *string2 : *text) ==
+		 Sword))
 		break;
 	    goto fail;
 	case Cnotwordbound:
@@ -1296,7 +1375,8 @@ re_match_2(regexp_t bufp, char *string1, int size1, char *string2, int size2, in
 		(size2 == 0 && text == string1 + size1))
 		goto fail;
 	    if (!((SYNTAX(text[-1]) == Sword) ^
-		  (SYNTAX(text == string1 + size1 ? *string2 : *text) == Sword)))
+		  (SYNTAX(text == string1 + size1 ? *string2 : *text) ==
+		   Sword)))
 		goto fail;
 	    break;
 	case Csyntaxspec:
@@ -1350,13 +1430,16 @@ re_match_2(regexp_t bufp, char *string1, int size1, char *string2, int size2, in
 #undef PUSH_FAILURE
 
 int
-re_match(regexp_t bufp, char *string, int size, int pos, regexp_registers_t regs)
+re_match(regexp_t bufp, char *string, int size, int pos,
+	 regexp_registers_t regs)
 {
-    return re_match_2(bufp, string, size, (char *) NULL, 0, pos, regs, size);
+    return re_match_2(bufp, string, size, (char *) NULL, 0, pos, regs,
+		      size);
 }
 
 int
-re_search_2(regexp_t bufp, char *string1, int size1, char *string2, int size2, int pos, int range, regexp_registers_t regs,
+re_search_2(regexp_t bufp, char *string1, int size1, char *string2,
+	    int size2, int pos, int range, regexp_registers_t regs,
 	    int mstop)
 {
     char *fastmap, *translate, *text, *partstart, *partend;
@@ -1400,12 +1483,14 @@ re_search_2(regexp_t bufp, char *string1, int size1, char *string2, int size2, i
 		}
 		partstart = text;
 		if (translate)
-		    while (text != partend &&
-			   !fastmap[(unsigned char)
-				    translate[(unsigned char) *text]])
+		    while (text != partend && !fastmap[(unsigned char)
+						       translate[(unsigned
+								  char)
+								 *text]])
 			text++;
 		else
-		    while (text != partend && !fastmap[(unsigned char) *text])
+		    while (text != partend
+			   && !fastmap[(unsigned char) *text])
 			text++;
 		pos += text - partstart;
 		range -= text - partstart;
@@ -1424,9 +1509,8 @@ re_search_2(regexp_t bufp, char *string1, int size1, char *string2, int size2, i
 		}
 		partend = text;
 		if (translate)
-		    while (text != partstart &&
-			   !fastmap[(unsigned char)
-				    translate[(unsigned char) *text]])
+		    while (text != partstart && !fastmap[(unsigned char)
+							 translate[(unsigned char) *text]])
 			text--;
 		else
 		    while (text != partstart &&
@@ -1443,7 +1527,9 @@ re_search_2(regexp_t bufp, char *string1, int size1, char *string2, int size2, i
 		continue;
 	}
 	assert(pos >= 0 && pos <= size1 + size2);
-	ret = re_match_2(bufp, string1, size1, string2, size2, pos, regs, mstop);
+	ret =
+	    re_match_2(bufp, string1, size1, string2, size2, pos, regs,
+		       mstop);
 	if (ret >= 0)
 	    return pos;
 	if (ret == -2)
@@ -1453,7 +1539,8 @@ re_search_2(regexp_t bufp, char *string1, int size1, char *string2, int size2, i
 }
 
 int
-re_search(regexp_t bufp, char *string, int size, int startpos, int range, regexp_registers_t regs)
+re_search(regexp_t bufp, char *string, int size, int startpos, int range,
+	  regexp_registers_t regs)
 {
     return re_search_2(bufp, string, size, (char *) NULL, 0,
 		       startpos, range, regs, size);
@@ -1488,7 +1575,8 @@ re_exec(s)
 {
     int len = strlen(s);
 
-    return re_search(&re_comp_buf, s, len, 0, len, (regexp_registers_t) NULL) >= 0;
+    return re_search(&re_comp_buf, s, len, 0, len,
+		     (regexp_registers_t) NULL) >= 0;
 }
 
 #endif
@@ -1628,7 +1716,8 @@ main()
 	    printf("search returns %d\n", a);
 	    if (a != -1) {
 		for (a = 0; a < RE_NREGS; a++) {
-		    printf("buf %d: %d to %d\n", a, regs.start[a], regs.end[a]);
+		    printf("buf %d: %d to %d\n", a, regs.start[a],
+			   regs.end[a]);
 		}
 	    }
 	}

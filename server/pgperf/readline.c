@@ -28,60 +28,52 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Recursively fills up the buffer. */
 
 static char *
-readln_aux (chunks) 
-     int chunks;
+readln_aux(chunks)
+    int chunks;
 {
-  char *buffered_malloc ();
-  char buf[CHUNK_SIZE];
-  register char *bufptr = buf;
-  register char *ptr;
-  int c;
+    char *buffered_malloc();
+    char buf[CHUNK_SIZE];
+    register char *bufptr = buf;
+    register char *ptr;
+    int c;
 
-  while ((c = getchar ()) != EOF && c != '\n') /* fill the current buffer */
-    {
-      *bufptr++ = c;
-      if (bufptr - buf >= CHUNK_SIZE) /* prepend remainder to ptr buffer */
-        {
-          if (ptr = readln_aux (chunks + 1))
+    while ((c = getchar()) != EOF && c != '\n') {	/* fill the current buffer */
+	*bufptr++ = c;
+	if (bufptr - buf >= CHUNK_SIZE) {	/* prepend remainder to ptr buffer */
+	    if (ptr = readln_aux(chunks + 1))
 
-            for (; bufptr != buf; *--ptr = *--bufptr);
+		for (; bufptr != buf; *--ptr = *--bufptr);
 
-          return ptr;
-        }
+	    return ptr;
+	}
     }
 
-  if (c == EOF && bufptr == buf)
-    return NULL;
+    if (c == EOF && bufptr == buf)
+	return NULL;
 
-  c = (chunks * CHUNK_SIZE + bufptr - buf) + 1;
+    c = (chunks * CHUNK_SIZE + bufptr - buf) + 1;
 
-  if (ptr = buffered_malloc (c))
-    {
+    if (ptr = buffered_malloc(c)) {
 
-      for (*(ptr += (c - 1)) = '\0'; bufptr != buf; *--ptr = *--bufptr)
-        ;
+	for (*(ptr += (c - 1)) = '\0'; bufptr != buf; *--ptr = *--bufptr);
 
-      return ptr;
-    } 
-  else 
-    return NULL;
+	return ptr;
+    } else
+	return NULL;
 }
 
 /* Returns the ``next'' line, ignoring comments beginning with '#'. */
 
-char *read_line () 
+char *
+read_line()
 {
-  int c;
-  if ((c = getchar ()) == '#')
-    {
-      while ((c = getchar ()) != '\n' && c != EOF)
-        ;
+    int c;
+    if ((c = getchar()) == '#') {
+	while ((c = getchar()) != '\n' && c != EOF);
 
-      return c != EOF ? read_line () : NULL;
-    }
-  else
-    {
-      ungetc (c, stdin);
-      return readln_aux (0);
+	return c != EOF ? read_line() : NULL;
+    } else {
+	ungetc(c, stdin);
+	return readln_aux(0);
     }
 }

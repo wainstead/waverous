@@ -20,8 +20,8 @@
 #include <fcntl.h>
 
 #if NDECL_FCNTL
-extern int fcntl(int, int,...);
-extern int open(const char *, int,...);
+extern int fcntl(int, int, ...);
+extern int open(const char *, int, ...);
 #endif
 
 #if POSIX_NONBLOCKING_WORKS

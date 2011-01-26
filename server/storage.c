@@ -28,7 +28,8 @@
 
 static unsigned alloc_num[Sizeof_Memory_Type];
 #ifdef USE_GNU_MALLOC
-static unsigned alloc_size[Sizeof_Memory_Type], alloc_real_size[Sizeof_Memory_Type];
+static unsigned alloc_size[Sizeof_Memory_Type],
+    alloc_real_size[Sizeof_Memory_Type];
 #endif
 
 static inline int
@@ -47,7 +48,7 @@ refcount_overhead(Memory_Type type)
 	return sizeof(int) + sizeof(int);
 #else
 	return sizeof(int);
-#endif /* MEMO_STRLEN */
+#endif				/* MEMO_STRLEN */
     case M_LIST:
 	/* for systems with picky pointer alignment */
 	return MAX(sizeof(int), sizeof(Var *));
@@ -89,7 +90,7 @@ mymalloc(unsigned size, Memory_Type type)
 #ifdef MEMO_STRLEN
 	if (type == M_STRING)
 	    ((int *) memptr)[-2] = size - 1;
-#endif /* MEMO_STRLEN */
+#endif				/* MEMO_STRLEN */
     }
     return memptr;
 }
@@ -229,7 +230,8 @@ memory_usage(void)
     return r;
 }
 
-char rcsid_storage[] = "$Id: storage.c,v 1.6 2006-09-07 00:55:02 bjj Exp $";
+char rcsid_storage[] =
+    "$Id: storage.c,v 1.6 2006-09-07 00:55:02 bjj Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $

@@ -29,20 +29,20 @@ ITERATOR iterator;
 /* Constructor for ITERATOR. */
 
 void
-iterator_init (s, lo, hi, word_end, bad_val, key_end)
-     char *s;
-     int lo;
-     int hi;
-     int word_end;
-     int bad_val;
-     int key_end;
+iterator_init(s, lo, hi, word_end, bad_val, key_end)
+    char *s;
+    int lo;
+    int hi;
+    int word_end;
+    int bad_val;
+    int key_end;
 {
-  iterator.end         = key_end;
-  iterator.error_value = bad_val;
-  iterator.end_word    = word_end;
-  iterator.str         = s;
-  iterator.hi_bound    = hi;
-  iterator.lo_bound    = lo;
+    iterator.end = key_end;
+    iterator.error_value = bad_val;
+    iterator.end_word = word_end;
+    iterator.str = s;
+    iterator.hi_bound = hi;
+    iterator.lo_bound = lo;
 }
 
 /* Define several useful macros to clarify subsequent code. */
@@ -52,55 +52,50 @@ iterator_init (s, lo, hi, word_end, bad_val, key_end)
 /* Provide an Iterator, returning the ``next'' value from 
    the list of valid values given in the constructor. */
 
-int 
-next ()
-{ 
+int
+next()
+{
 /* Variables to record the Iterator's status when handling ranges, e.g., 3-12. */
 
-  static int size;              
-  static int curr_value;           
-  static int upper_bound;
+    static int size;
+    static int curr_value;
+    static int upper_bound;
 
-  if (size) 
-    { 
-      if (++curr_value >= upper_bound) 
-        size = 0;    
-      return curr_value; 
-    }
-  else 
-    {
-      while (*iterator.str) 
-        {
-          if (*iterator.str == ',') 
-            iterator.str++;
-          else if (*iterator.str == '$') 
-            {
-              iterator.str++;
-              return iterator.end_word;
-            }
-          else if (ISPOSDIGIT (*iterator.str))
-            {
+    if (size) {
+	if (++curr_value >= upper_bound)
+	    size = 0;
+	return curr_value;
+    } else {
+	while (*iterator.str) {
+	    if (*iterator.str == ',')
+		iterator.str++;
+	    else if (*iterator.str == '$') {
+		iterator.str++;
+		return iterator.end_word;
+	    } else if (ISPOSDIGIT(*iterator.str)) {
 
-              for (curr_value = 0; isdigit (*iterator.str); iterator.str++) 
-                curr_value = curr_value * 10 + *iterator.str - '0';
+		for (curr_value = 0; isdigit(*iterator.str);
+		     iterator.str++)
+		    curr_value = curr_value * 10 + *iterator.str - '0';
 
-              if (*iterator.str == '-') 
-                {
+		if (*iterator.str == '-') {
 
-                  for (size = 1, upper_bound = 0; 
-                       isdigit (*++iterator.str); 
-                       upper_bound = upper_bound * 10 + *iterator.str - '0');
+		    for (size = 1, upper_bound = 0;
+			 isdigit(*++iterator.str);
+			 upper_bound =
+			 upper_bound * 10 + *iterator.str - '0');
 
-                  if (upper_bound <= curr_value || upper_bound > iterator.hi_bound) 
-                    return iterator.error_value;
-                }
-              return curr_value >= iterator.lo_bound && curr_value <= iterator.hi_bound 
-                ? curr_value : iterator.error_value;
-            }
-          else
-            return iterator.error_value;               
-        }
+		    if (upper_bound <= curr_value
+			|| upper_bound > iterator.hi_bound)
+			return iterator.error_value;
+		}
+		return curr_value >= iterator.lo_bound
+		    && curr_value <=
+		    iterator.hi_bound ? curr_value : iterator.error_value;
+	    } else
+		return iterator.error_value;
+	}
 
-      return iterator.end;
+	return iterator.end;
     }
 }

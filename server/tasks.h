@@ -33,16 +33,14 @@ typedef struct {
 extern task_queue new_task_queue(Objid player, Objid handler);
 extern void free_task_queue(task_queue q);
 
-extern int tasks_connection_option(task_queue, const char *,
-				   Var *);
+extern int tasks_connection_option(task_queue, const char *, Var *);
 extern Var tasks_connection_options(task_queue, Var);
-extern int tasks_set_connection_option(task_queue, const char *,
-				       Var);
+extern int tasks_set_connection_option(task_queue, const char *, Var);
 
 extern void new_input_task(task_queue, const char *, int);
 extern void task_suspend_input(task_queue);
 extern enum error enqueue_forked_task2(activation a, int f_index,
-			       unsigned after_seconds, int vid);
+				       unsigned after_seconds, int vid);
 extern enum error enqueue_suspended_task(vm the_vm, void *data);
 				/* data == &(int after_seconds) */
 extern enum error make_reading_task(vm the_vm, void *data);
@@ -91,11 +89,11 @@ extern enum outcome run_server_task(Objid player, Objid what,
 extern enum outcome run_server_task_setting_id(Objid player, Objid what,
 					       const char *verb, Var args,
 					       const char *argstr,
-					     Var * result, int *task_id);
+					       Var * result, int *task_id);
 extern enum outcome run_server_program_task(Objid self, const char *verb,
 					    Var args, Objid vloc,
 					    const char *verbname,
-					  Program * program, Objid progr,
+					    Program * program, Objid progr,
 					    int debug, Objid player,
 					    const char *argstr,
 					    Var * result);

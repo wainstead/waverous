@@ -122,8 +122,7 @@ struct prec {
     int precedence;
 };
 
-static struct prec prec_table[] =
-{
+static struct prec prec_table[] = {
     {EXPR_ASGN, 1},
 
     {EXPR_COND, 2},		/* the unparser for this depends on only ASGN having
@@ -171,8 +170,7 @@ struct binop {
     const char *string;
 };
 
-static struct binop binop_table[] =
-{
+static struct binop binop_table[] = {
     {EXPR_IN, " in "},
     {EXPR_OR, " || "},
     {EXPR_AND, " && "},
@@ -234,7 +232,8 @@ list_prg(Stmt * program, int p, int i)
 static void
 bracket_lt(Stream * str, enum Expr_Kind parent, Expr * child)
 {
-    if ((fully_parenthesize && expr_prec[child->kind] < expr_prec[EXPR_PROP])
+    if ((fully_parenthesize
+	 && expr_prec[child->kind] < expr_prec[EXPR_PROP])
 	|| expr_prec[parent] > expr_prec[child->kind]) {
 	stream_add_char(str, '(');
 	unparse_expr(str, child);
@@ -247,7 +246,8 @@ bracket_lt(Stream * str, enum Expr_Kind parent, Expr * child)
 static void
 bracket_le(Stream * str, enum Expr_Kind parent, Expr * child)
 {
-    if ((fully_parenthesize && expr_prec[child->kind] < expr_prec[EXPR_PROP])
+    if ((fully_parenthesize
+	 && expr_prec[child->kind] < expr_prec[EXPR_PROP])
 	|| expr_prec[parent] >= expr_prec[child->kind]) {
 	stream_add_char(str, '(');
 	unparse_expr(str, child);
@@ -712,14 +712,14 @@ unparse_program(Program * p, Unparser_Receiver r, void *data,
 static void
 print_line(void *data, const char *line)
 {
-  FILE *fp = (FILE *) data;
+    FILE *fp = (FILE *) data;
 
     fprintf(fp, "%s\n", line);
 }
 
 void
-unparse_to_file(FILE * fp, Program * p, int fully_parenthesize, int indent_lines,
-		int f_index)
+unparse_to_file(FILE * fp, Program * p, int fully_parenthesize,
+		int indent_lines, int f_index)
 {
     unparse_program(p, print_line, fp, fully_parenthesize, indent_lines,
 		    f_index);
@@ -732,7 +732,8 @@ unparse_to_stderr(Program * p, int fully_parenthesize, int indent_lines,
     unparse_to_file(stderr, p, fully_parenthesize, indent_lines, f_index);
 }
 
-char rcsid_unparse[] = "$Id: unparse.c,v 1.3 1998-12-14 13:19:12 nop Exp $";
+char rcsid_unparse[] =
+    "$Id: unparse.c,v 1.3 1998-12-14 13:19:12 nop Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $

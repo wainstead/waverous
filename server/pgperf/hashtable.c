@@ -33,23 +33,21 @@ static HASH_TABLE hash_table;
 /* Basically the algorithm from the Dragon book. */
 
 static unsigned
-hash_pjw (str)
-     char *str;
+hash_pjw(str)
+    char *str;
 {
-  char    *temp;
-  unsigned g, h = 0;
-   
-  for (temp = str; *temp; temp++) 
-    {
-      h = (h << 4) + (*temp * 13);
-      if (g = h & 0xf0000000) 
-        {
-          h ^= (g >> 24);
-          h ^= g;
-        }
+    char *temp;
+    unsigned g, h = 0;
+
+    for (temp = str; *temp; temp++) {
+	h = (h << 4) + (*temp * 13);
+	if (g = h & 0xf0000000) {
+	    h ^= (g >> 24);
+	    h ^= g;
+	}
     }
 
-  return h;
+    return h;
 }
 
 /* The size of the hash table is always the smallest power of 2 >= the size
@@ -62,13 +60,14 @@ hash_pjw (str)
    memory fragmentation, since we can now use alloca! */
 
 void
-hash_table_init (table, s)
-     LIST_NODE **table;
-     int s;
+hash_table_init(table, s)
+    LIST_NODE **table;
+    int s;
 {
-  hash_table.size  = s;
-  hash_table.table = table;
-  bzero ((char *) hash_table.table, hash_table.size * sizeof *hash_table.table);
+    hash_table.size = s;
+    hash_table.table = table;
+    bzero((char *) hash_table.table,
+	  hash_table.size * sizeof *hash_table.table);
 }
 
 /* Frees the dynamically allocated table.  Note that since we don't
@@ -76,24 +75,28 @@ hash_table_init (table, s)
    big it is best to return it when we are done. */
 
 void
-hash_table_destroy ()
-{ 
-  if (OPTION_ENABLED (option, DEBUG))
-    {
-      int i;
+hash_table_destroy()
+{
+    if (OPTION_ENABLED(option, DEBUG)) {
+	int i;
 
-      fprintf (stderr, "\ndumping the hash table\ntotal elements = %d, bytes = %d\n",
-               hash_table.size, hash_table.size * sizeof *hash_table.table);
-    
-      for (i = hash_table.size - 1; i >= 0; i--)
-        if (hash_table.table[i])
-          fprintf (stderr, "location[%d] has charset \"%s\" and keyword \"%s\"\n",
-                   i, hash_table.table[i]->char_set, hash_table.table[i]->key);
+	fprintf(stderr,
+		"\ndumping the hash table\ntotal elements = %d, bytes = %d\n",
+		hash_table.size,
+		hash_table.size * sizeof *hash_table.table);
+
+	for (i = hash_table.size - 1; i >= 0; i--)
+	    if (hash_table.table[i])
+		fprintf(stderr,
+			"location[%d] has charset \"%s\" and keyword \"%s\"\n",
+			i, hash_table.table[i]->char_set,
+			hash_table.table[i]->key);
 
 #ifdef GATHER_STATISTICS
-      fprintf (stderr, "\ntotal collisions during hashing = %d\n", collisions);
+	fprintf(stderr, "\ntotal collisions during hashing = %d\n",
+		collisions);
 #endif
-      fprintf (stderr, "end dumping hash table\n\n");
+	fprintf(stderr, "end dumping hash table\n\n");
     }
 }
 
@@ -102,31 +105,28 @@ hash_table_destroy ()
    Uses double hashing. */
 
 LIST_NODE *
-retrieve (item, ignore_length)
-     LIST_NODE *item;
-     int        ignore_length;
+retrieve(item, ignore_length)
+    LIST_NODE *item;
+    int ignore_length;
 {
-  unsigned hash_val  = hash_pjw (item->char_set);
-  int      probe     = hash_val & hash_table.size - 1;
-  int      increment = (hash_val ^ item->length | 1) & hash_table.size - 1;
-  
-  while (hash_table.table[probe]
-         && (strcmp (hash_table.table[probe]->char_set, item->char_set)
-             || (!ignore_length && hash_table.table[probe]->length != item->length)))
-    {
+    unsigned hash_val = hash_pjw(item->char_set);
+    int probe = hash_val & hash_table.size - 1;
+    int increment = (hash_val ^ item->length | 1) & hash_table.size - 1;
+
+    while (hash_table.table[probe]
+	   && (strcmp(hash_table.table[probe]->char_set, item->char_set)
+	       || (!ignore_length
+		   && hash_table.table[probe]->length != item->length))) {
 #ifdef GATHER_STATISTICS
-      collisions++;
+	collisions++;
 #endif
-      probe = probe + increment & hash_table.size - 1;
+	probe = probe + increment & hash_table.size - 1;
     }
 
-  if (hash_table.table[probe])
-    return hash_table.table[probe];
-  else
-    {
-      hash_table.table[probe] = item;
-      return 0;
+    if (hash_table.table[probe])
+	return hash_table.table[probe];
+    else {
+	hash_table.table[probe] = item;
+	return 0;
     }
 }
-
-

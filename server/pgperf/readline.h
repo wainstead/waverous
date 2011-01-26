@@ -26,6 +26,5 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define _readline_h
 #include "prototype.h"
 
-extern char *read_line P ((void));
-#endif /* _readline_h */
-
+extern char *read_line P((void));
+#endif				/* _readline_h */

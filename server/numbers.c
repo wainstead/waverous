@@ -99,8 +99,7 @@ become_integer(Var in, int *ret, int called_from_tonum)
 	*ret = in.v.num;
 	break;
     case TYPE_STR:
-	if (!(called_from_tonum
-	      ? parse_number(in.v.str, ret, 1)
+	if (!(called_from_tonum ? parse_number(in.v.str, ret, 1)
 	      : parse_object(in.v.str, ret)))
 	    *ret = 0;
 	break;
@@ -156,7 +155,7 @@ new_float(double d)
 {
     Var v;
 
-    v.type = (var_type)TYPE_FLOAT;
+    v.type = (var_type) TYPE_FLOAT;
     v.v.fnum = (double *) mymalloc(sizeof(double), M_FLOAT);
     *v.v.fnum = d;
 
@@ -193,9 +192,9 @@ to_float(Var v, double *dp)
 // borrowed from:
 // http://docs.sun.com/app/docs/doc/805-3175/6j31emoh8?l=Ja&a=view
 struct exception {
-	int type;
-	char *name;
-	double arg1, arg2, retval;
+    int type;
+    char *name;
+    double arg1, arg2, retval;
 };
 
 
@@ -302,8 +301,8 @@ compare_numbers(Var a, Var b)
 		}
 
 SIMPLE_BINARY(add, +)
-SIMPLE_BINARY(subtract, -)
-SIMPLE_BINARY(multiply, *)
+    SIMPLE_BINARY(subtract, -)
+    SIMPLE_BINARY(multiply, *)
 #define DIVISION_OP(name, iop, fexpr)				\
 		Var						\
 		do_ ## name(Var a, Var b)			\
@@ -333,10 +332,9 @@ SIMPLE_BINARY(multiply, *)
 								\
 		    return ans;					\
 		}
-
-DIVISION_OP(divide, /, *a.v.fnum / *b.v.fnum)
-DIVISION_OP(modulus, %, fmod(*a.v.fnum, *b.v.fnum))
-Var
+    DIVISION_OP(divide, /, *a.v.fnum / *b.v.fnum)
+    DIVISION_OP(modulus, %, fmod(*a.v.fnum, *b.v.fnum))
+    Var
 do_power(Var lhs, Var rhs)
 {				/* LHS ^ RHS */
     Var ans;
@@ -534,21 +532,21 @@ bf_abs(Var arglist, Byte next, void *vdata, Objid progr)
 		}
 
 MATH_FUNC(sqrt)
-MATH_FUNC(sin)
-MATH_FUNC(cos)
-MATH_FUNC(tan)
-MATH_FUNC(asin)
-MATH_FUNC(acos)
-MATH_FUNC(sinh)
-MATH_FUNC(cosh)
-MATH_FUNC(tanh)
-MATH_FUNC(exp)
-MATH_FUNC(log)
-MATH_FUNC(log10)
-MATH_FUNC(ceil)
-MATH_FUNC(floor)
+    MATH_FUNC(sin)
+    MATH_FUNC(cos)
+    MATH_FUNC(tan)
+    MATH_FUNC(asin)
+    MATH_FUNC(acos)
+    MATH_FUNC(sinh)
+    MATH_FUNC(cosh)
+    MATH_FUNC(tanh)
+    MATH_FUNC(exp)
+    MATH_FUNC(log)
+    MATH_FUNC(log10)
+    MATH_FUNC(ceil)
+    MATH_FUNC(floor)
     static package
-     bf_trunc(Var arglist, Byte next, void *vdata, Objid progr)
+	bf_trunc(Var arglist, Byte next, void *vdata, Objid progr)
 {
     double d;
 
@@ -633,7 +631,7 @@ bf_ctime(Var arglist, Byte next, void *vdata, Objid progr)
 
     if (buffer[8] == '0')
 	buffer[8] = ' ';
-    r.type = (var_type)TYPE_STR;
+    r.type = (var_type) TYPE_STR;
     r.v.str = str_dup(buffer);
 
     free_var(arglist);
@@ -680,7 +678,7 @@ bf_floatstr(Var arglist, Byte next, void *vdata, Objid progr)
     sprintf(fmt, "%%.%d%c", prec, use_sci ? 'e' : 'f');
     sprintf(output, fmt, d);
 
-    r.type = (var_type)TYPE_STR;
+    r.type = (var_type) TYPE_STR;
     r.v.str = str_dup(output);
 
     return make_var_pack(r);
@@ -723,7 +721,8 @@ register_numbers(void)
     register_function("trunc", 1, 1, bf_trunc, TYPE_FLOAT);
 }
 
-char rcsid_numbers[] = "$Id: numbers.c,v 1.4 1998-12-14 13:18:37 nop Exp $";
+char rcsid_numbers[] =
+    "$Id: numbers.c,v 1.4 1998-12-14 13:18:37 nop Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $

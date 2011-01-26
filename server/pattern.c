@@ -120,8 +120,7 @@ new_pattern(const char *pattern, int case_matters)
     buf->translate = case_matters ? 0 : casefold;
     re_set_syntax(MOO_SYNTAX);
 
-    if (tpattern
-	&& !re_compile_pattern((char *) tpattern, tpatlen, buf)) {
+    if (tpattern && !re_compile_pattern((char *) tpattern, tpatlen, buf)) {
 	buf->fastmap = (char *) mymalloc(256 * sizeof(char), M_PATTERN);
 	re_compile_fastmap(buf);
 	p.ptr = buf;
@@ -146,8 +145,7 @@ match_pattern(Pattern p, const char *string, Match_Indices * indices,
 
     switch (re_search(buf, (char *) string, len,
 		      is_reverse ? len : 0,
-		      is_reverse ? -len : len,
-		      (re_registers *) &regs)) {
+		      is_reverse ? -len : len, (re_registers *) & regs)) {
     default:
 	for (i = 0; i < 10; i++) {
 	    /* Convert from 0-based open interval to 1-based closed one. */

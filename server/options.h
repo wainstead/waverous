@@ -280,7 +280,7 @@
  ******************************************************************************
  */
 
-#define STRING_INTERNING /* */
+#define STRING_INTERNING	/* */
 
 /******************************************************************************
  * Store the length of the string WITH the string rather than recomputing
@@ -344,7 +344,7 @@
 #    if HAVE_SELECT
 #      define MPLEX_STYLE MP_SELECT
 #    else
-       #error You cannot use BSD sockets without having select()!
+#error You cannot use BSD sockets without having select()!
 #    endif
 #  else				/* NETWORK_STYLE == NS_SYSV */
 #    if NETWORK_PROTOCOL == NP_LOCAL
@@ -357,7 +357,7 @@
 #	   if FSTAT_WORKS_ON_FIFOS
 #	     define MPLEX_STYLE MP_FAKE
 #	   else
-	     #error I need to be able to do a multiplexing wait on FIFOs!
+#error I need to be able to do a multiplexing wait on FIFOs!
 #	   endif
 #	 endif
 #      endif
@@ -365,7 +365,7 @@
 #      if HAVE_POLL
 #        define MPLEX_STYLE MP_POLL
 #      else
-         #error You cannot use TLI without having poll()!
+#error You cannot use TLI without having poll()!
 #      endif
 #    endif
 #  endif

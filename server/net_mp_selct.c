@@ -55,14 +55,15 @@ mplex_add_writer(int fd)
 int
 mplex_wait(struct timeval *timeout)
 {
-    struct timeval tv;  /* Make a copy since select() might write to it */
+    struct timeval tv;		/* Make a copy since select() might write to it */
     int n;
 
     if (timeout) {
 	tv = *timeout;
     }
 
-    n = select(max_descriptor + 1, (fd_set *) &input, (fd_set *) &output, 0, &tv);
+    n = select(max_descriptor + 1, (fd_set *) & input, (fd_set *) & output,
+	       0, &tv);
 
     if (n < 0) {
 	if (errno != EINTR)
@@ -84,7 +85,8 @@ mplex_is_writable(int fd)
     return FD_ISSET(fd, &output);
 }
 
-char rcsid_net_mp_selct[] = "$Id: net_mp_selct.c,v 1.3 1998-12-14 13:18:28 nop Exp $";
+char rcsid_net_mp_selct[] =
+    "$Id: net_mp_selct.c,v 1.3 1998-12-14 13:18:28 nop Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $

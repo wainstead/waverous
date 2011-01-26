@@ -94,7 +94,9 @@ alloc_rt_stack(activation * a, int size)
 	res = rt_stack_quick;
 	rt_stack_quick = rt_stack_quick[0].v.list;
     } else {
-	res = (Var *) mymalloc(MAX(size, RT_STACK_QUICKSIZE) * sizeof(Var), M_RT_STACK);
+	res =
+	    (Var *) mymalloc(MAX(size, RT_STACK_QUICKSIZE) * sizeof(Var),
+			     M_RT_STACK);
     }
     a->base_rt_stack = a->top_rt_stack = res;
     a->rt_stack_size = size;
@@ -160,7 +162,7 @@ output_to_list(const char *line)
 {
     Var str;
 
-    str.type = (var_type)TYPE_STR;
+    str.type = (var_type) TYPE_STR;
     str.v.str = str_dup(line);
     backtrace_list = listappend(backtrace_list, str);
 }
@@ -265,8 +267,7 @@ unwind_stack(Finally_Reason why, Var value, enum outcome *outcome)
 	if (top_activ_stack == 0) {	/* done */
 	    if (outcome)
 		*outcome = (why == FIN_RETURN
-			    ? OUTCOME_DONE
-			    : OUTCOME_ABORTED);
+			    ? OUTCOME_DONE : OUTCOME_ABORTED);
 	    return 1;
 	}
 	top_activ_stack--;
@@ -325,8 +326,8 @@ unwind_stack(Finally_Reason why, Var value, enum outcome *outcome)
 		 * the future.
 		 */
 		do {
-		    p = call_bi_func(bi_func_id, zero, bi_func_pc, a->progr,
-				     bi_func_data);
+		    p = call_bi_func(bi_func_id, zero, bi_func_pc,
+				     a->progr, bi_func_data);
 		    switch (p.kind) {
 		    case package::BI_RETURN:
 			free_var(p.u.ret);
@@ -340,14 +341,15 @@ unwind_stack(Finally_Reason why, Var value, enum outcome *outcome)
 		    case package::BI_KILL:
 			break;
 		    case package::BI_CALL:
-			free_activation(&activ_stack[top_activ_stack--], 0);
+			free_activation(&activ_stack[top_activ_stack--],
+					0);
 			bi_func_pc = p.u.call.pc;
 			bi_func_data = p.u.call.data;
 			break;
 		    }
-		} while (p.kind == p.BI_CALL && bi_func_pc != 0);		/* !tailcall */
+		} while (p.kind == p.BI_CALL && bi_func_pc != 0);	/* !tailcall */
 	    }
-	} else if (why == FIN_RETURN) {		/* Push the value on the stack & go */
+	} else if (why == FIN_RETURN) {	/* Push the value on the stack & go */
 	    a = &(activ_stack[top_activ_stack]);
 	    *(a->top_rt_stack++) = value;
 	    return 0;
@@ -402,7 +404,7 @@ make_stack_list(activation * stack, int start, int end, int include_end,
 	    v = r.v.list[j++] = new_list(line_numbers_too ? 6 : 5);
 	    v.v.list[1].type = TYPE_OBJ;
 	    v.v.list[1].v.obj = stack[i].self;
-	    v.v.list[2].type = (var_type)TYPE_STR;
+	    v.v.list[2].type = (var_type) TYPE_STR;
 	    v.v.list[2].v.str = str_ref(stack[i].verb);
 	    v.v.list[3].type = TYPE_OBJ;
 	    v.v.list[3].v.obj = stack[i].progr;
@@ -422,8 +424,9 @@ make_stack_list(activation * stack, int start, int end, int include_end,
 	    v = r.v.list[j++] = new_list(line_numbers_too ? 6 : 5);
 	    v.v.list[1].type = TYPE_OBJ;
 	    v.v.list[1].v.obj = NOTHING;
-	    v.v.list[2].type = (var_type)TYPE_STR;
-	    v.v.list[2].v.str = str_dup(name_func_by_num(stack[i].bi_func_id));
+	    v.v.list[2].type = (var_type) TYPE_STR;
+	    v.v.list[2].v.str =
+		str_dup(name_func_by_num(stack[i].bi_func_id));
 	    v.v.list[3].type = TYPE_OBJ;
 	    v.v.list[3].v.obj = NOTHING;
 	    v.v.list[4].type = TYPE_OBJ;
@@ -466,7 +469,7 @@ raise_error(package p, enum outcome *outcome)
 	handler_activ = 0;	/* get entire stack in list */
     }
     value.v.list[1] = p.u.raise.code;
-    value.v.list[2].type = (var_type)TYPE_STR;
+    value.v.list[2].type = (var_type) TYPE_STR;
     value.v.list[2].v.str = p.u.raise.msg;
     value.v.list[3] = p.u.raise.value;
     value.v.list[4] = make_stack_list(activ_stack, handler_activ,
@@ -488,7 +491,7 @@ abort_task(int is_ticks)
 		       : "Task ran out of seconds");
 
     value = new_list(3);
-    value.v.list[1].type = (var_type)TYPE_STR;
+    value.v.list[1].type = (var_type) TYPE_STR;
     value.v.list[1].v.str = str_dup(is_ticks ? "ticks" : "seconds");
     value.v.list[2] = make_stack_list(activ_stack, 0, top_activ_stack, 1,
 				      root_activ_vector, 1);
@@ -534,7 +537,8 @@ free_activation(activation * ap, char data_too)
 /** Set up another activation for calling a verb
   does not change the vm in case of any error **/
 
-enum error call_verb2(Objid self, const char *vname, Var args, int do_pass);
+enum error call_verb2(Objid self, const char *vname, Var args,
+		      int do_pass);
 
 /*
  * Historical interface for things which want to call with vname not
@@ -628,7 +632,7 @@ call_verb2(Objid self, const char *vname, Var args, int do_pass)
 
 #undef ENV_COPY
 
-    v.type = (var_type)TYPE_STR;
+    v.type = (var_type) TYPE_STR;
     v.v.str = str_ref(vname);
     set_rt_env_var(env, SLOT_VERB, v);	/* no var_dup */
     set_rt_env_var(env, SLOT_ARGS, args);	/* no var_dup */
@@ -785,7 +789,7 @@ do {    						    	\
     for (;;) {
       next_opcode:
 	error_bv = bv;
-	op = (Opcode)*bv++;
+	op = (Opcode) * bv++;
 
 	if (COUNT_TICK(op)) {
 	    if (--ticks_remaining <= 0) {
@@ -813,8 +817,7 @@ do {    						    	\
 		if (!is_true(cond)) {	/* jump if false */
 		    unsigned lab = READ_BYTES(bv, bc.numbytes_label);
 		    JUMP(lab);
-		}
-		else {
+		} else {
 		    SKIP_BYTES(bv, bc.numbytes_label);
 		}
 		free_var(cond);
@@ -847,7 +850,8 @@ do {    						    	\
 		    JUMP(lab);
 		} else {
 		    free_var(RUN_ACTIV.rt_env[id]);
-		    RUN_ACTIV.rt_env[id] = var_ref(list.v.list[count.v.num]);
+		    RUN_ACTIV.rt_env[id] =
+			var_ref(list.v.list[count.v.num]);
 		    count.v.num++;	/* increment count */
 		    TOP_RT_VALUE = count;
 		}
@@ -956,16 +960,18 @@ do {    						    	\
 		/* whole thing should mean list[index] = value */
 		if ((list.type != TYPE_LIST && list.type != TYPE_STR)
 		    || index.type != TYPE_INT
-		  || (list.type == TYPE_STR && value.type != TYPE_STR)) {
+		    || (list.type == TYPE_STR && value.type != TYPE_STR)) {
 		    free_var(value);
 		    free_var(index);
 		    free_var(list);
 		    PUSH_ERROR(E_TYPE);
 		} else if (index.v.num < 1
 			   || (list.type == TYPE_LIST
-		       && index.v.num > list.v.list[0].v.num /* size */ )
+			       && index.v.num >
+			       list.v.list[0].v.num /* size */ )
 			   || (list.type == TYPE_STR
-			    && index.v.num > (int) memo_strlen(list.v.str))) {
+			       && index.v.num >
+			       (int) memo_strlen(list.v.str))) {
 		    free_var(value);
 		    free_var(index);
 		    free_var(list);
@@ -1032,8 +1038,7 @@ do {    						    	\
 		rhs = POP();
 		lhs = POP();
 		ans.type = TYPE_INT;
-		ans.v.num = (op == OP_EQ
-			     ? equality(rhs, lhs, 0)
+		ans.v.num = (op == OP_EQ ? equality(rhs, lhs, 0)
 			     : !equality(rhs, lhs, 0));
 		PUSH(ans);
 		free_var(rhs);
@@ -1069,10 +1074,12 @@ do {    						    	\
 		} else {
 		    switch (rhs.type) {
 		    case TYPE_INT:
-			comparison = compare_integers(lhs.v.num, rhs.v.num);
+			comparison =
+			    compare_integers(lhs.v.num, rhs.v.num);
 			break;
 		    case TYPE_OBJ:
-			comparison = compare_integers(lhs.v.obj, rhs.v.obj);
+			comparison =
+			    compare_integers(lhs.v.obj, rhs.v.obj);
 			break;
 		    case TYPE_ERR:
 			comparison = ((int) lhs.v.err) - ((int) rhs.v.err);
@@ -1102,7 +1109,8 @@ do {    						    	\
 			ans.v.num = (comparison >= 0);
 			break;
 		    default:
-			errlog("RUN: Imposible opcode in comparison: %d\n", op);
+			errlog("RUN: Imposible opcode in comparison: %d\n",
+			       op);
 			break;
 		    }
 		    PUSH(ans);
@@ -1157,7 +1165,8 @@ do {    						    	\
 			ans = do_modulus(lhs, rhs);
 			break;
 		    default:
-			errlog("RUN: Impossible opcode in arith ops: %d\n", op);
+			errlog("RUN: Impossible opcode in arith ops: %d\n",
+			       op);
 			break;
 		    }
 		} else {
@@ -1186,10 +1195,12 @@ do {    						    	\
 		    char *str;
 		    int llen = memo_strlen(lhs.v.str);
 
-		    str = (char *) mymalloc(llen + memo_strlen(rhs.v.str) + 1, M_STRING);
+		    str =
+			(char *) mymalloc(llen + memo_strlen(rhs.v.str) +
+					  1, M_STRING);
 		    strcpy(str, lhs.v.str);
 		    strcpy(str + llen, rhs.v.str);
-		    ans.type = (var_type)TYPE_STR;
+		    ans.type = (var_type) TYPE_STR;
 		    ans.v.str = str;
 		} else {
 		    ans.type = TYPE_ERR;
@@ -1267,7 +1278,8 @@ do {    						    	\
 		    free_var(list);
 		    PUSH_ERROR(E_TYPE);
 		} else if (list.type == TYPE_LIST) {
-		    if (index.v.num <= 0 || index.v.num > list.v.list[0].v.num) {
+		    if (index.v.num <= 0
+			|| index.v.num > list.v.list[0].v.num) {
 			free_var(index);
 			free_var(list);
 			PUSH_ERROR(E_RANGE);
@@ -1322,8 +1334,9 @@ do {    						    	\
 		    free_var(from);
 		    PUSH_ERROR(E_TYPE);
 		} else {
-		    int len = (base.type == TYPE_STR ? memo_strlen(base.v.str)
-			       : base.v.list[0].v.num);
+		    int len =
+			(base.type == TYPE_STR ? memo_strlen(base.v.str)
+			 : base.v.list[0].v.num);
 		    if (from.v.num <= to.v.num
 			&& (from.v.num <= 0 || from.v.num > len
 			    || to.v.num <= 0 || to.v.num > len)) {
@@ -1355,7 +1368,8 @@ do {    						    	\
 	    {
 		Var value;
 
-		value = RUN_ACTIV.rt_env[READ_BYTES(bv, bc.numbytes_var_name)];
+		value =
+		    RUN_ACTIV.rt_env[READ_BYTES(bv, bc.numbytes_var_name)];
 		if (value.type == TYPE_NONE)
 		    PUSH_ERROR(E_VARNF);
 		else
@@ -1386,8 +1400,10 @@ do {    						    	\
 		    if (!h.ptr)
 			PUSH_ERROR(E_PROPNF);
 		    else if (h.built_in
-			 ? bi_prop_protected(h.built_in, RUN_ACTIV.progr)
-		      : !db_property_allows(h, RUN_ACTIV.progr, PF_READ))
+			     ? bi_prop_protected(h.built_in,
+						 RUN_ACTIV.progr)
+			     : !db_property_allows(h, RUN_ACTIV.progr,
+						   PF_READ))
 			PUSH_ERROR(E_PERM);
 		    else if (h.built_in)
 			PUSH(prop);	/* it's already freshly allocated */
@@ -1414,8 +1430,10 @@ do {    						    	\
 		    if (!h.ptr)
 			PUSH_ERROR(E_PROPNF);
 		    else if (h.built_in
-			 ? bi_prop_protected(h.built_in, RUN_ACTIV.progr)
-		      : !db_property_allows(h, RUN_ACTIV.progr, PF_READ))
+			     ? bi_prop_protected(h.built_in,
+						 RUN_ACTIV.progr)
+			     : !db_property_allows(h, RUN_ACTIV.progr,
+						   PF_READ))
 			PUSH_ERROR(E_PERM);
 		    else if (h.built_in)
 			PUSH(prop);
@@ -1461,7 +1479,8 @@ do {    						    	\
 				err = E_TYPE;
 			    else if (!is_wizard(progr)
 				     && (is_user(obj.v.obj)
-				 || progr != db_object_owner(obj.v.obj)))
+					 || progr !=
+					 db_object_owner(obj.v.obj)))
 				err = E_PERM;
 			    break;
 			case BP_OWNER:
@@ -1475,17 +1494,19 @@ do {    						    	\
 			    if (!is_wizard(progr))
 				err = E_PERM;
 			    else if (h.built_in == BP_WIZARD
-			     && !is_true(rhs) != !is_wizard(obj.v.obj)) {
+				     && !is_true(rhs) !=
+				     !is_wizard(obj.v.obj)) {
 				/* Notify only on changes in state; the !'s above
 				 * serve to canonicalize the truth values.
 				 */
 				/* First make sure traceback will be accurate. */
 				STORE_STATE_VARIABLES();
-				oklog("%sWIZARDED: #%d by programmer #%d\n",
-				      is_wizard(obj.v.obj) ? "DE" : "",
-				      obj.v.obj, progr);
+				oklog
+				    ("%sWIZARDED: #%d by programmer #%d\n",
+				     is_wizard(obj.v.obj) ? "DE" : "",
+				     obj.v.obj, progr);
 				print_error_backtrace(is_wizard(obj.v.obj)
-						    ? "Wizard bit unset."
+						      ? "Wizard bit unset."
 						      : "Wizard bit set.",
 						      output_to_log);
 			    }
@@ -1502,7 +1523,8 @@ do {    						    	\
 			    err = E_PERM;
 			    break;
 			default:
-			    panic("Unknown built-in property in OP_PUT_PROP!");
+			    panic
+				("Unknown built-in property in OP_PUT_PROP!");
 			}
 		    }
 
@@ -1538,8 +1560,10 @@ do {    						    	\
 		} else {
 		    enum error e;
 
-		    e = enqueue_forked_task2(RUN_ACTIV, f_index, time.v.num,
-					op == OP_FORK_WITH_ID ? id : -1);
+		    e = enqueue_forked_task2(RUN_ACTIV, f_index,
+					     time.v.num,
+					     op ==
+					     OP_FORK_WITH_ID ? id : -1);
 		    if (e != E_NONE)
 			RAISE_ERROR(e);
 		}
@@ -1664,7 +1688,7 @@ do {    						    	\
 
 	case OP_EXTENDED:
 	    {
-              register enum Extended_Opcode eop = (Extended_Opcode)*bv;
+		register enum Extended_Opcode eop = (Extended_Opcode) * bv;
 		bv++;
 		if (COUNT_EOP_TICK(eop))
 		    ticks_remaining--;
@@ -1679,8 +1703,10 @@ do {    						    	\
 			base = POP();	/* lhs (list or string) */
 			/* base[from..to] = value */
 			if (to.type != TYPE_INT || from.type != TYPE_INT
-			    || (base.type != TYPE_LIST && base.type != TYPE_STR)
-			    || (value.type != TYPE_LIST && value.type != TYPE_STR)
+			    || (base.type != TYPE_LIST
+				&& base.type != TYPE_STR)
+			    || (value.type != TYPE_LIST
+				&& value.type != TYPE_STR)
 			    || (base.type != value.type)) {
 			    free_var(base);
 			    free_var(to);
@@ -1697,9 +1723,11 @@ do {    						    	\
 			    free_var(value);
 			    PUSH_ERROR(E_RANGE);
 			} else if (base.type == TYPE_LIST)
-			    PUSH(listrangeset(base, from.v.num, to.v.num, value));
+			    PUSH(listrangeset
+				 (base, from.v.num, to.v.num, value));
 			else	/* TYPE_STR */
-			    PUSH(strrangeset(base, from.v.num, to.v.num, value));
+			    PUSH(strrangeset
+				 (base, from.v.num, to.v.num, value));
 		    }
 		    break;
 
@@ -1764,17 +1792,20 @@ do {    						    	\
 			    }
 			} else {
 			    nopt_avail = len - nreq;
-			    nrest = (have_rest && len >= nargs ? len - nargs + 1
-				     : 0);
+			    nrest = (have_rest
+				     && len >=
+				     nargs ? len - nargs + 1 : 0);
 			    for (offset = 0, i = 1; i <= nargs; i++) {
-				int id = READ_BYTES(bv, bc.numbytes_var_name);
-				int label = READ_BYTES(bv, bc.numbytes_label);
+				int id =
+				    READ_BYTES(bv, bc.numbytes_var_name);
+				int label =
+				    READ_BYTES(bv, bc.numbytes_label);
 
 				if (i == rest) {	/* rest */
 				    free_var(RUN_ACTIV.rt_env[id]);
-				    RUN_ACTIV.rt_env[id] = sublist(var_ref(list),
-								   i,
-							  i + nrest - 1);
+				    RUN_ACTIV.rt_env[id] =
+					sublist(var_ref(list), i,
+						i + nrest - 1);
 				    offset += nrest - 1;
 				} else if (label == 0) {	/* required */
 				    free_var(RUN_ACTIV.rt_env[id]);
@@ -1785,7 +1816,8 @@ do {    						    	\
 					nopt_avail--;
 					free_var(RUN_ACTIV.rt_env[id]);
 					RUN_ACTIV.rt_env[id] =
-					    var_ref(list.v.list[i + offset]);
+					    var_ref(list.v.
+						    list[i + offset]);
 				    } else {
 					offset--;
 					if (where == 0 && label != 1)
@@ -1808,7 +1840,9 @@ do {    						    	\
 		    {
 			Var v;
 
-			v.type = (eop == EOP_PUSH_LABEL ? TYPE_INT : TYPE_FINALLY);
+			v.type =
+			    (eop ==
+			     EOP_PUSH_LABEL ? TYPE_INT : TYPE_FINALLY);
 			v.v.num = READ_BYTES(bv, bc.numbytes_label);
 			PUSH(v);
 		    }
@@ -1820,7 +1854,8 @@ do {    						    	\
 			Var v;
 
 			v.type = TYPE_CATCH;
-			v.v.num = (eop == EOP_CATCH ? 1 : READ_BYTES(bv, 1));
+			v.v.num =
+			    (eop == EOP_CATCH ? 1 : READ_BYTES(bv, 1));
 			PUSH(v);
 		    }
 		    break;
@@ -1880,8 +1915,9 @@ do {    						    	\
 			case FIN_RETURN:
 			case FIN_UNCAUGHT:
 			    STORE_STATE_VARIABLES();
-                            //unwind_stack(Finally_Reason why, Var value, enum outcome *outcome)
-			    if (unwind_stack((Finally_Reason)why.v.num, v, &outcome))
+			    //unwind_stack(Finally_Reason why, Var value, enum outcome *outcome)
+			    if (unwind_stack
+				((Finally_Reason) why.v.num, v, &outcome))
 				return outcome;
 			    LOAD_STATE_VARIABLES();
 			    break;
@@ -1908,9 +1944,11 @@ do {    						    	\
 
 			v = new_list(2);
 			v.v.list[1].type = TYPE_INT;
-			v.v.list[1].v.num = READ_BYTES(bv, bc.numbytes_stack);
+			v.v.list[1].v.num =
+			    READ_BYTES(bv, bc.numbytes_stack);
 			v.v.list[2].type = TYPE_INT;
-			v.v.list[2].v.num = READ_BYTES(bv, bc.numbytes_label);
+			v.v.list[2].v.num =
+			    READ_BYTES(bv, bc.numbytes_label);
 			STORE_STATE_VARIABLES();
 			unwind_stack(FIN_EXIT, v, 0);
 			LOAD_STATE_VARIABLES();
@@ -2111,11 +2149,11 @@ run_interpreter(char raise, enum error e,
     enum outcome ret;
 
     setup_task_execution_limits(is_fg ? server_int_option("fg_seconds",
-						      DEFAULT_FG_SECONDS)
+							  DEFAULT_FG_SECONDS)
 				: server_int_option("bg_seconds",
 						    DEFAULT_BG_SECONDS),
 				is_fg ? server_int_option("fg_ticks",
-							DEFAULT_FG_TICKS)
+							  DEFAULT_FG_TICKS)
 				: server_int_option("bg_ticks",
 						    DEFAULT_BG_TICKS));
 
@@ -2129,7 +2167,7 @@ run_interpreter(char raise, enum error e,
 
     if (ret == OUTCOME_ABORTED && handler_verb_name) {
 	db_verb_handle h;
-        enum outcome hret;
+	enum outcome hret;
 	Var args, handled, traceback;
 	int i;
 
@@ -2139,12 +2177,12 @@ run_interpreter(char raise, enum error e,
 	    hret = do_server_verb_task(SYSTEM_OBJECT, handler_verb_name,
 				       var_ref(handler_verb_args), h,
 				       activ_stack[0].player, "", &handled,
-				       0/*no-traceback*/);
+				       0 /*no-traceback */ );
 	    if ((hret == OUTCOME_DONE && is_true(handled))
 		|| hret == OUTCOME_BLOCKED) {
 		/* Assume the in-DB code handled it */
 		free_var(args);
-		return OUTCOME_ABORTED;		/* original ret value */
+		return OUTCOME_ABORTED;	/* original ret value */
 	    }
 	}
 	i = args.v.list[0].v.num;
@@ -2170,7 +2208,8 @@ check_activ_stack_size(int max)
 	if (activ_stack)
 	    myfree(activ_stack, M_VM);
 
-	activ_stack = (activation *) mymalloc(sizeof(activation) * max, M_VM);
+	activ_stack =
+	    (activation *) mymalloc(sizeof(activation) * max, M_VM);
 	max_stack_size = max;
     }
 }
@@ -2178,7 +2217,8 @@ check_activ_stack_size(int max)
 static int
 current_max_stack_size(void)
 {
-    int max = server_int_option("max_stack_depth", DEFAULT_MAX_STACK_DEPTH);
+    int max =
+	server_int_option("max_stack_depth", DEFAULT_MAX_STACK_DEPTH);
 
     if (max < DEFAULT_MAX_STACK_DEPTH)
 	max = DEFAULT_MAX_STACK_DEPTH;
@@ -2193,7 +2233,8 @@ current_max_stack_size(void)
 /* procedure to create a new task */
 
 static enum outcome
-do_task(Program * prog, int which_vector, Var * result, int is_fg, int do_db_tracebacks)
+do_task(Program * prog, int which_vector, Var * result, int is_fg,
+	int do_db_tracebacks)
 {				/* which vector determines the vector for the root_activ.
 				   a forked task can also have which_vector == MAIN_VECTOR.
 				   this happens iff it is recovered from a read from disk,
@@ -2205,7 +2246,8 @@ do_task(Program * prog, int which_vector, Var * result, int is_fg, int do_db_tra
     root_activ_vector = which_vector;	/* main or which of the forked */
     alloc_rt_stack(&RUN_ACTIV, (which_vector == MAIN_VECTOR
 				? prog->main_vector.max_stack
-			  : prog->fork_vectors[which_vector].max_stack));
+				: prog->fork_vectors[which_vector].
+				max_stack));
 
     RUN_ACTIV.pc = 0;
     RUN_ACTIV.error_pc = 0;
@@ -2231,12 +2273,14 @@ resume_from_previous_vm(vm the_vm, Var v)
     free_vm(the_vm, 0);
 
     if (v.type == TYPE_ERR)
-	return run_interpreter(1, v.v.err, 0, 0/*bg*/, 1/*traceback*/);
+	return run_interpreter(1, v.v.err, 0, 0 /*bg */ ,
+			       1 /*traceback */ );
     else {
 	/* PUSH_REF(v) */
 	*(RUN_ACTIV.top_rt_stack++) = var_ref(v);
 
-	return run_interpreter(0, E_NONE, 0, 0/*bg*/, 1/*traceback*/);
+	return run_interpreter(0, E_NONE, 0, 0 /*bg */ ,
+			       1 /*traceback */ );
     }
 }
 
@@ -2244,22 +2288,24 @@ resume_from_previous_vm(vm the_vm, Var v)
 /*** external functions ***/
 
 enum outcome
-do_server_verb_task(Objid self, const char *verb, Var args, db_verb_handle h,
-		    Objid player, const char *argstr, Var * result,
-		    int do_db_tracebacks)
+do_server_verb_task(Objid self, const char *verb, Var args,
+		    db_verb_handle h, Objid player, const char *argstr,
+		    Var * result, int do_db_tracebacks)
 {
     return do_server_program_task(self, verb, args, db_verb_definer(h),
 				  db_verb_names(h), db_verb_program(h),
 				  db_verb_owner(h),
 				  db_verb_flags(h) & VF_DEBUG,
-			       player, argstr, result, do_db_tracebacks);
+				  player, argstr, result,
+				  do_db_tracebacks);
 }
 
 enum outcome
 do_server_program_task(Objid self, const char *verb, Var args, Objid vloc,
-		    const char *verbname, Program * program, Objid progr,
-		       int debug, Objid player, const char *argstr,
-		       Var * result, int do_db_tracebacks)
+		       const char *verbname, Program * program,
+		       Objid progr, int debug, Objid player,
+		       const char *argstr, Var * result,
+		       int do_db_tracebacks)
 {
     Var *env;
 
@@ -2287,11 +2333,13 @@ do_server_program_task(Objid self, const char *verb, Var args, Objid vloc,
     set_rt_env_str(env, SLOT_VERB, str_ref(RUN_ACTIV.verb));
     set_rt_env_var(env, SLOT_ARGS, args);
 
-    return do_task(program, MAIN_VECTOR, result, 1/*fg*/, do_db_tracebacks);
+    return do_task(program, MAIN_VECTOR, result, 1 /*fg */ ,
+		   do_db_tracebacks);
 }
 
 enum outcome
-do_input_task(Objid user, Parsed_Command * pc, Objid self, db_verb_handle vh)
+do_input_task(Objid user, Parsed_Command * pc, Objid self,
+	      db_verb_handle vh)
 {
     Program *prog = db_verb_program(vh);
     Var *env;
@@ -2320,7 +2368,7 @@ do_input_task(Objid user, Parsed_Command * pc, Objid self, db_verb_handle vh)
     set_rt_env_str(env, SLOT_VERB, str_ref(pc->verb));
     set_rt_env_var(env, SLOT_ARGS, var_ref(pc->args));
 
-    return do_task(prog, MAIN_VECTOR, 0, 1/*fg*/, 1/*traceback*/);
+    return do_task(prog, MAIN_VECTOR, 0, 1 /*fg */ , 1 /*traceback */ );
 }
 
 enum outcome
@@ -2332,7 +2380,7 @@ do_forked_task(Program * prog, Var * rt_env, activation a, int f_id)
     RUN_ACTIV = a;
     RUN_ACTIV.rt_env = rt_env;
 
-    return do_task(prog, f_id, 0, 0/*bg*/, 1/*traceback*/);
+    return do_task(prog, f_id, 0, 0 /*bg */ , 1 /*traceback */ );
 }
 
 /* this is called from bf_eval to set up stack for an eval call */
@@ -2402,14 +2450,14 @@ bf_call_function(Var arglist, Byte next, void *vdata, Objid progr)
 	    p = call_bi_func(fnum, arglist, next, progr, vdata);
 	}
     } else {			/* return to function */
-      s = (cf_state *)vdata;
+	s = (cf_state *) vdata;
 	fnum = s->fnum;
 	p = call_bi_func(fnum, arglist, next, progr, s->data);
 	free_data(s);
     }
 
     if (p.kind == p.BI_CALL) {
-      s = (cf_state *)alloc_data(sizeof(struct cf_state));
+	s = (cf_state *) alloc_data(sizeof(struct cf_state));
 	s->fnum = fnum;
 	s->data = p.u.call.data;
 	p.u.call.data = s;
@@ -2420,7 +2468,7 @@ bf_call_function(Var arglist, Byte next, void *vdata, Objid progr)
 static void
 bf_call_function_write(void *data)
 {
-  struct cf_state *s = (cf_state *)data;
+    struct cf_state *s = (cf_state *) data;
 
     dbio_printf("bf_call_function data: fname = %s\n",
 		name_func_by_num(s->fnum));
@@ -2430,7 +2478,7 @@ bf_call_function_write(void *data)
 static void *
 bf_call_function_read(void)
 {
-  struct cf_state *s = (cf_state *)alloc_data(sizeof(struct cf_state));
+    struct cf_state *s = (cf_state *) alloc_data(sizeof(struct cf_state));
     const char *line = dbio_read_string();
     const char *hdr = "bf_call_function data: fname = ";
     int hlen = strlen(hdr);
@@ -2439,7 +2487,8 @@ bf_call_function_read(void)
 	line += hlen;
 	if ((s->fnum = number_func_by_name(line)) == FUNC_NOT_FOUND)
 	    errlog("CALL_FUNCTION: Unknown built-in function: %s\n", line);
-	else if (read_bi_func_data(s->fnum, &s->data, pc_for_bi_func_data()))
+	else if (read_bi_func_data
+		 (s->fnum, &s->data, pc_for_bi_func_data()))
 	    return s;
     }
     return 0;
@@ -2451,8 +2500,7 @@ bf_raise(Var arglist, Byte next, void *vdata, Objid progr)
     package p;
     int nargs = arglist.v.list[0].v.num;
     Var code = var_ref(arglist.v.list[1]);
-    const char *msg = (nargs >= 2
-		       ? str_ref(arglist.v.list[2].v.str)
+    const char *msg = (nargs >= 2 ? str_ref(arglist.v.list[2].v.str)
 		       : str_dup(value2str(code)));
     Var value;
 
@@ -2472,14 +2520,12 @@ bf_suspend(Var arglist, Byte next, void *vdata, Objid progr)
     static double seconds;
     int nargs = arglist.v.list[0].v.num;
 
-    if (nargs >= 1)
-    {
-        if (arglist.v.list[1].type == TYPE_INT)
+    if (nargs >= 1) {
+	if (arglist.v.list[1].type == TYPE_INT)
 	    seconds = (double) arglist.v.list[1].v.num;
 	else
 	    seconds = *arglist.v.list[1].v.fnum;
-    }
-    else
+    } else
 	seconds = -1.0;
     free_var(arglist);
 
@@ -2494,8 +2540,7 @@ bf_read(Var arglist, Byte next, void *vdata, Objid progr)
 {
     int argc = arglist.v.list[0].v.num;
     static Objid connection;
-    int non_blocking = (argc >= 2
-			&& is_true(arglist.v.list[2]));
+    int non_blocking = (argc >= 2 && is_true(arglist.v.list[2]));
 
     if (argc >= 1)
 	connection = arglist.v.list[1].v.obj;
@@ -2596,8 +2641,10 @@ bf_callers(Var arglist, Byte next, void *vdata, Objid progr)
 	line_numbers_too = is_true(arglist.v.list[1]);
     free_var(arglist);
 
-    return make_var_pack(make_stack_list(activ_stack, 0, top_activ_stack, 0,
-				   root_activ_vector, line_numbers_too));
+    return
+	make_var_pack(make_stack_list
+		      (activ_stack, 0, top_activ_stack, 0,
+		       root_activ_vector, line_numbers_too));
 }
 
 static package
@@ -2624,11 +2671,12 @@ bf_task_stack(Var arglist, Byte next, void *vdata, Objid progr)
 void
 register_execute(void)
 {
-    register_function_with_read_write("call_function", 1, -1, bf_call_function,
+    register_function_with_read_write("call_function", 1, -1,
+				      bf_call_function,
 				      bf_call_function_read,
-				      bf_call_function_write,
-				      TYPE_STR);
-    register_function("raise", 1, 3, bf_raise, TYPE_ANY, TYPE_STR, TYPE_ANY);
+				      bf_call_function_write, TYPE_STR);
+    register_function("raise", 1, 3, bf_raise, TYPE_ANY, TYPE_STR,
+		      TYPE_ANY);
     register_function("suspend", 0, 1, bf_suspend, TYPE_NUMERIC);
     register_function("read", 0, 2, bf_read, TYPE_OBJ, TYPE_ANY);
 
@@ -2638,7 +2686,8 @@ register_execute(void)
     register_function("set_task_perms", 1, 1, bf_set_task_perms, TYPE_OBJ);
     register_function("caller_perms", 0, 0, bf_caller_perms);
     register_function("callers", 0, 1, bf_callers, TYPE_ANY);
-    register_function("task_stack", 1, 2, bf_task_stack, TYPE_INT, TYPE_ANY);
+    register_function("task_stack", 1, 2, bf_task_stack, TYPE_INT,
+		      TYPE_ANY);
 }
 
 
@@ -2654,7 +2703,8 @@ write_activ_as_pi(activation a)
     dbio_write_var(dummy);
 
     dbio_printf("%d %d %d %d %d %d %d %d %d\n",
-	    a.self, -7, -8, a.player, -9, a.progr, a.vloc, -10, a.debug);
+		a.self, -7, -8, a.player, -9, a.progr, a.vloc, -10,
+		a.debug);
     dbio_write_string("No");
     dbio_write_string("More");
     dbio_write_string("Parse");
@@ -2678,9 +2728,8 @@ read_activ_as_pi(activation * a)
      * of `scanf'...
      */
     if (dbio_scanf("%d %d %d %d %d %d %d %d %d%c",
-		 &a->self, &dummy, &dummy, &a->player, &dummy, &a->progr,
-		   &a->vloc, &dummy, &a->debug, &c) != 10
-	|| c != '\n') {
+		   &a->self, &dummy, &dummy, &a->player, &dummy, &a->progr,
+		   &a->vloc, &dummy, &a->debug, &c) != 10 || c != '\n') {
 	errlog("READ_A: Bad numbers.\n");
 	return 0;
     }
@@ -2816,8 +2865,7 @@ read_activ(activation * a, int which_vector)
 	errlog("READ_ACTIV: Malformed language version\n");
 	return 0;
     } else if (!check_version(version)) {
-	errlog("READ_ACTIV: Unrecognized language version: %d\n",
-	       version);
+	errlog("READ_ACTIV: Unrecognized language version: %d\n", version);
 	return 0;
     }
     if (!(a->prog = dbio_read_program(version,
@@ -2851,7 +2899,8 @@ read_activ(activation * a, int which_vector)
     a->temp = dbio_read_var();
 
     if (dbio_scanf("%u %u%c", &a->pc, &i, &c) != 3) {
-	errlog("READ_ACTIV: bad pc, next. stack_in_use = %d\n", stack_in_use);
+	errlog("READ_ACTIV: bad pc, next. stack_in_use = %d\n",
+	       stack_in_use);
 	return 0;
     }
     a->bi_func_pc = i;
@@ -2869,14 +2918,16 @@ read_activ(activation * a, int which_vector)
     if (a->bi_func_pc != 0) {
 	func_name = dbio_read_string();
 	if ((i = number_func_by_name(func_name)) == FUNC_NOT_FOUND) {
-	    errlog("READ_ACTIV: Unknown built-in function `%s'\n", func_name);
+	    errlog("READ_ACTIV: Unknown built-in function `%s'\n",
+		   func_name);
 	    return 0;
 	}
 	a->bi_func_id = i;
 	if (!read_bi_func_data(a->bi_func_id, &a->bi_func_data,
 			       &a->bi_func_pc)) {
-	    errlog("READ_ACTIV: Bad saved state for built-in function `%s'\n",
-		   func_name);
+	    errlog
+		("READ_ACTIV: Bad saved state for built-in function `%s'\n",
+		 func_name);
 	    return 0;
 	}
     }
@@ -2884,7 +2935,8 @@ read_activ(activation * a, int which_vector)
 }
 
 
-char rcsid_execute[] = "$Id: execute.c,v 1.19 2006-12-06 23:54:53 wrog Exp $";
+char rcsid_execute[] =
+    "$Id: execute.c,v 1.19 2006-12-06 23:54:53 wrog Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $

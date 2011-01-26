@@ -34,7 +34,8 @@ new_vm(int task_id, int stack_size)
     vm the_vm = (vmstruct *) mymalloc(sizeof(vmstruct), M_VM);
 
     the_vm->task_id = task_id;
-    the_vm->activ_stack = (activation *) mymalloc(sizeof(activation) * stack_size, M_VM);
+    the_vm->activ_stack =
+	(activation *) mymalloc(sizeof(activation) * stack_size, M_VM);
 
     return the_vm;
 }
@@ -71,8 +72,7 @@ suspended_lineno_of_vm(vm the_vm)
     top = top_activ(the_vm);
     return find_line_number(top.prog, (the_vm->top_activ_stack == 0
 				       ? the_vm->root_activ_vector
-				       : MAIN_VECTOR),
-			    top.error_pc);
+				       : MAIN_VECTOR), top.error_pc);
 }
 
 /**** read/write data base ****/
@@ -120,7 +120,8 @@ read_vm(int task_id)
     return the_vm;
 }
 
-char rcsid_eval_vm[] = "$Id: eval_vm.c,v 1.4 2002-08-18 09:47:26 bjj Exp $";
+char rcsid_eval_vm[] =
+    "$Id: eval_vm.c,v 1.4 2002-08-18 09:47:26 bjj Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $

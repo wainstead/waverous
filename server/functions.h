@@ -77,10 +77,10 @@ typedef void *(*bf_read_type) (void);
 extern const char *name_func_by_num(unsigned);
 extern unsigned number_func_by_name(const char *);
 
-extern unsigned register_function(const char *, int, int, bf_type,...);
+extern unsigned register_function(const char *, int, int, bf_type, ...);
 extern unsigned register_function_with_read_write(const char *, int, int,
 						  bf_type, bf_read_type,
-						  bf_write_type,...);
+						  bf_write_type, ...);
 
 extern package call_bi_func(unsigned, Var, Byte, Objid, void *);
 /* will free or use Var arglist */

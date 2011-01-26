@@ -57,7 +57,7 @@ dbio_read_line(char *s, int n)
 }
 
 int
-dbio_scanf(const char *format,...)
+dbio_scanf(const char *format, ...)
 {
     va_list args;
     int count;
@@ -108,11 +108,11 @@ dbio_scanf(const char *format,...)
 		n = fscanf(input, "%u", up);
 		goto finish;
 	    case 'l':
-		if ((*(ptr+1)) && (*(ptr+1) == 'f')) {
-			ptr++;
-			dp = va_arg(args, double *);
-			n = fscanf(input, "%lf", dp);
-			goto finish;
+		if ((*(ptr + 1)) && (*(ptr + 1) == 'f')) {
+		    ptr++;
+		    dp = va_arg(args, double *);
+		    n = fscanf(input, "%lf", dp);
+		    goto finish;
 		}
 		panic("DBIO_SCANF: Unsupported directive!");
 	    case 'c':
@@ -231,7 +231,7 @@ dbio_read_var(void)
 	break;
     case _TYPE_STR:
 	r.v.str = dbio_read_string_intern();
-	r.type = (var_type) ( r.type | 128 );
+	r.type = (var_type) (r.type | 128);
 	break;
     case TYPE_OBJ:
     case TYPE_ERR:
@@ -268,7 +268,7 @@ static const char *
 program_name(struct state *s)
 {
     if (!s->fmtr)
-      return (char *)s->data;
+	return (char *) s->data;
     else
 	return (*s->fmtr) (s->data);
 }
@@ -276,21 +276,21 @@ program_name(struct state *s)
 static void
 my_error(void *data, const char *msg)
 {
-  errlog("PARSER: Error in %s:\n", program_name((state *)data));
+    errlog("PARSER: Error in %s:\n", program_name((state *) data));
     errlog("           %s\n", msg);
 }
 
 static void
 my_warning(void *data, const char *msg)
 {
-  oklog("PARSER: Warning in %s:\n", program_name((state *)data));
+    oklog("PARSER: Warning in %s:\n", program_name((state *) data));
     oklog("           %s\n", msg);
 }
 
 static int
 my_getc(void *data)
 {
-  struct state *s = (state *)data;
+    struct state *s = (state *) data;
     int c;
 
     c = fgetc(input);
@@ -305,11 +305,11 @@ my_getc(void *data)
     return c;
 }
 
-static Parser_Client parser_client =
-{my_error, my_warning, my_getc};
+static Parser_Client parser_client = { my_error, my_warning, my_getc };
 
 Program *
-dbio_read_program(DB_Version version, const char *(*fmtr) (void *), void *data)
+dbio_read_program(DB_Version version, const char *(*fmtr) (void *),
+		  void *data)
 {
     struct state s;
 
@@ -333,7 +333,7 @@ dbpriv_set_dbio_output(FILE * f)
 }
 
 void
-dbio_printf(const char *format,...)
+dbio_printf(const char *format, ...)
 {
     va_list args;
 

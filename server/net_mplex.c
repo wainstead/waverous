@@ -29,7 +29,8 @@
 #    include "net_mp_fake.c"
 #  endif
 
-char rcsid_net_mplex[] = "$Id: net_mplex.c,v 1.2 1998-12-14 13:18:29 nop Exp $";
+char rcsid_net_mplex[] =
+    "$Id: net_mplex.c,v 1.2 1998-12-14 13:18:29 nop Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $

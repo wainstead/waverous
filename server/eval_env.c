@@ -38,7 +38,9 @@ new_rt_env(unsigned size)
 	ret = ready_size_rt_envs;
 	ready_size_rt_envs = ret[0].v.list;
     } else
-	ret = (Var *) mymalloc(MAX(size, NUM_READY_VARS) * sizeof(Var), M_RT_ENV);
+	ret =
+	    (Var *) mymalloc(MAX(size, NUM_READY_VARS) * sizeof(Var),
+			     M_RT_ENV);
 
     for (i = 0; i < size; i++)
 	ret[i].type = TYPE_NONE;
@@ -110,7 +112,7 @@ void
 set_rt_env_str(Var * env, int slot, const char *s)
 {
     Var v;
-    v.type = (var_type)TYPE_STR;
+    v.type = (var_type) TYPE_STR;
     v.v.str = s;
     env[slot] = v;
 }
@@ -121,7 +123,8 @@ set_rt_env_var(Var * env, int slot, Var v)
     env[slot] = v;
 }
 
-char rcsid_rt_env[] = "$Id: eval_env.c,v 1.5 1998-12-14 13:17:44 nop Exp $";
+char rcsid_rt_env[] =
+    "$Id: eval_env.c,v 1.5 1998-12-14 13:17:44 nop Exp $";
 
 
 /* 

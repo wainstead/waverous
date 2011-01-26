@@ -40,7 +40,8 @@ set_log_file(FILE * f)
 
 int log_pcount = 5000;
 static time_t log_prev = 0;
-int log_report_progress_cktime()
+int
+log_report_progress_cktime()
 {
     time_t now = time(0);
     log_pcount = 5000;
@@ -68,7 +69,7 @@ do_log(const char *fmt, va_list args, const char *prefix)
 }
 
 void
-oklog(const char *fmt,...)
+oklog(const char *fmt, ...)
 {
     va_list args;
 
@@ -78,7 +79,7 @@ oklog(const char *fmt,...)
 }
 
 void
-errlog(const char *fmt,...)
+errlog(const char *fmt, ...)
 {
     va_list args;
 
@@ -125,8 +126,7 @@ add_command_to_history(Objid player, const char *command)
     char *nowstr = ctime(&now);
 
     nowstr[19] = '\0';		/* kill the year and newline at the end */
-    stream_printf(command_history, "%s: #%d: %s\n",
-		  nowstr + 4,	/* skip day of week */
+    stream_printf(command_history, "%s: #%d: %s\n", nowstr + 4,	/* skip day of week */
 		  player, command);
 #endif				/* LOG_COMMANDS */
 }
@@ -156,7 +156,8 @@ bf_server_log(Var arglist, Byte next, void *vdata, Objid progr)
 void
 register_log(void)
 {
-    register_function("server_log", 1, 2, bf_server_log, TYPE_STR, TYPE_ANY);
+    register_function("server_log", 1, 2, bf_server_log, TYPE_STR,
+		      TYPE_ANY);
 }
 
 char rcsid_log[] = "$Id: log.c,v 1.4 2004-05-22 01:25:43 wrog Exp $";

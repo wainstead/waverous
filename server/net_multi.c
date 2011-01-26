@@ -121,7 +121,8 @@ network_register_fd(int fd, network_fd_callback readable,
 
     if (!reg_fds) {
 	max_reg_fds = 5;
-	reg_fds = (fd_reg *) mymalloc(max_reg_fds * sizeof(fd_reg), M_NETWORK);
+	reg_fds =
+	    (fd_reg *) mymalloc(max_reg_fds * sizeof(fd_reg), M_NETWORK);
 	for (i = 0; i < max_reg_fds; i++)
 	    reg_fds[i].fd = -1;
     }
@@ -131,7 +132,8 @@ network_register_fd(int fd, network_fd_callback readable,
 	    break;
     if (i >= max_reg_fds) {	/* No free slots */
 	int new_max = 2 * max_reg_fds;
-	fd_reg *_new = (fd_reg *) mymalloc(new_max * sizeof(fd_reg), M_NETWORK);
+	fd_reg *_new =
+	    (fd_reg *) mymalloc(new_max * sizeof(fd_reg), M_NETWORK);
 
 	for (i = 0; i < new_max; i++)
 	    if (i < max_reg_fds)
@@ -301,8 +303,8 @@ pull_input(nhandle * h)
 }
 
 static nhandle *
-new_nhandle(int rfd, int wfd, const char *local_name, const char *remote_name,
-	    int outbound)
+new_nhandle(int rfd, int wfd, const char *local_name,
+	    const char *remote_name, int outbound)
 {
     nhandle *h;
     static Stream *s = 0;
@@ -341,13 +343,14 @@ new_nhandle(int rfd, int wfd, const char *local_name, const char *remote_name,
 
 #ifdef NETWORK_IDENT
     if (server_int_option("ident_lookup", 1)) {
-      h->user_name = ident_id(rfd, server_int_option("ident_lookup_timeout", 5));
+	h->user_name =
+	    ident_id(rfd, server_int_option("ident_lookup_timeout", 5));
     }
 #endif
 
     h->user_client = 0;
     if (!h->user_name || h->user_name[0] == '[') {
-      h->user_name = str_dup("unknown");
+	h->user_name = str_dup("unknown");
     }
 
     stream_printf(s, "%s %s %s",
@@ -435,7 +438,8 @@ accept_new_connection(nlistener * l)
     case PA_FULL:
 	for (i = 0; i < proto.pocket_size; i++)
 	    close(pocket_descriptors[i]);
-	if (proto_accept_connection(l->fd, &rfd, &wfd, &host_name) != PA_OKAY)
+	if (proto_accept_connection(l->fd, &rfd, &wfd, &host_name) !=
+	    PA_OKAY)
 	    errlog("Can't accept connection even by emptying pockets!\n");
 	else {
 	    nh.ptr = h = new_nhandle(rfd, wfd, l->name, host_name, 0);
@@ -455,13 +459,12 @@ static int
 enqueue_output(network_handle nh, const char *line, int line_length,
 	       int add_eol, int flush_ok)
 {
-    nhandle *h = (nhandle *)nh.ptr;
+    nhandle *h = (nhandle *) nh.ptr;
     int length = line_length + (add_eol ? eol_length : 0);
     char *buffer;
     text_block *block;
 
-    if (h->output_length != 0
-	&& h->output_length + length > MAX_QUEUED_OUTPUT) {	/* must flush... */
+    if (h->output_length != 0 && h->output_length + length > MAX_QUEUED_OUTPUT) {	/* must flush... */
 	int to_flush;
 	text_block *b;
 
@@ -528,7 +531,8 @@ network_initialize(int argc, char **argv, Var * desc)
 
 enum error
 network_make_listener(server_listener sl, Var desc,
-		   network_listener * nl, Var * canon, const char **name)
+		      network_listener * nl, Var * canon,
+		      const char **name)
 {
     int fd;
     enum error e = proto_make_listener(desc, &fd, canon, name);
@@ -551,7 +555,7 @@ network_make_listener(server_listener sl, Var desc,
 int
 network_listen(network_listener nl)
 {
-    nlistener *l = (nlistener *)nl.ptr;
+    nlistener *l = (nlistener *) nl.ptr;
 
     return proto_listen(l->fd);
 }
@@ -572,7 +576,7 @@ network_send_bytes(network_handle nh, const char *buffer, int buflen,
 int
 network_buffered_output_length(network_handle nh)
 {
-    nhandle *h = (nhandle *)nh.ptr;
+    nhandle *h = (nhandle *) nh.ptr;
 
     return h->output_length;
 }
@@ -580,7 +584,7 @@ network_buffered_output_length(network_handle nh)
 void
 network_suspend_input(network_handle nh)
 {
-    nhandle *h = (nhandle *)nh.ptr;
+    nhandle *h = (nhandle *) nh.ptr;
 
     h->input_suspended = 1;
 }
@@ -588,7 +592,7 @@ network_suspend_input(network_handle nh)
 void
 network_resume_input(network_handle nh)
 {
-    nhandle *h = (nhandle *)nh.ptr;
+    nhandle *h = (nhandle *) nh.ptr;
 
     h->input_suspended = 0;
 }
@@ -648,7 +652,7 @@ network_connection_user(network_handle nh)
 void
 network_set_connection_binary(network_handle nh, int do_binary)
 {
-    nhandle *h = (nhandle *)nh.ptr;
+    nhandle *h = (nhandle *) nh.ptr;
 
     h->binary = do_binary;
 }
@@ -666,7 +670,7 @@ network_set_connection_binary(network_handle nh, int do_binary)
 void
 network_set_client_echo(network_handle nh, int is_on)
 {
-    nhandle *h = (nhandle *)nh.ptr;
+    nhandle *h = (nhandle *) nh.ptr;
 
     /* These values taken from RFC 854 and RFC 857. */
 #define TN_IAC	255		/* Interpret As Command */
@@ -674,8 +678,7 @@ network_set_client_echo(network_handle nh, int is_on)
 #define TN_WONT	252
 #define TN_ECHO	1
 
-    static char telnet_cmd[4] =
-	{TN_IAC, 0, TN_ECHO, 0};
+    static char telnet_cmd[4] = { TN_IAC, 0, TN_ECHO, 0 };
 
     h->client_echo = is_on;
     if (is_on)
@@ -685,11 +688,11 @@ network_set_client_echo(network_handle nh, int is_on)
     enqueue_output(nh, telnet_cmd, 3, 0, 1);
 }
 
-#else /* NETWORK_PROTOCOL == NP_SINGLE */
+#else				/* NETWORK_PROTOCOL == NP_SINGLE */
 
 #  error "NP_SINGLE ???"
 
-#endif /* NETWORK_PROTOCOL */
+#endif				/* NETWORK_PROTOCOL */
 
 
 #ifdef OUTBOUND_NETWORK
@@ -701,10 +704,10 @@ network_open_connection(Var arglist, server_listener sl)
     const char *local_name, *remote_name;
     enum error e;
 
-    e = proto_open_connection(arglist, &rfd, &wfd, &local_name, &remote_name);
+    e = proto_open_connection(arglist, &rfd, &wfd, &local_name,
+			      &remote_name);
     if (e == E_NONE)
-	make_new_connection(sl, rfd, wfd,
-			    local_name, remote_name, 1);
+	make_new_connection(sl, rfd, wfd, local_name, remote_name, 1);
 
     return e;
 }
@@ -713,13 +716,13 @@ network_open_connection(Var arglist, server_listener sl)
 void
 network_close(network_handle h)
 {
-    close_nhandle((nhandle *)h.ptr);
+    close_nhandle((nhandle *) h.ptr);
 }
 
 void
 network_close_listener(network_listener nl)
 {
-    close_nlistener((nlistener *)nl.ptr);
+    close_nlistener((nlistener *) nl.ptr);
 }
 
 void
@@ -731,7 +734,8 @@ network_shutdown(void)
 	close_nlistener(all_nlisteners);
 }
 
-char rcsid_net_multi[] = "$Id: net_multi.c,v 1.6 2006-12-06 23:57:51 wrog Exp $";
+char rcsid_net_multi[] =
+    "$Id: net_multi.c,v 1.6 2006-12-06 23:57:51 wrog Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $

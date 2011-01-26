@@ -69,13 +69,17 @@ ensure_new_object(void)
 {
     if (max_objects == 0) {
 	max_objects = 100;
-	objects = (Object **) mymalloc(max_objects * sizeof(Object *), M_OBJECT_TABLE);
+	objects =
+	    (Object **) mymalloc(max_objects * sizeof(Object *),
+				 M_OBJECT_TABLE);
     }
     if (num_objects >= max_objects) {
 	int i;
 	Object **_new;
 
-	_new = (Object **) mymalloc(max_objects * 2 * sizeof(Object *), M_OBJECT_TABLE);
+	_new =
+	    (Object **) mymalloc(max_objects * 2 * sizeof(Object *),
+				 M_OBJECT_TABLE);
 	for (i = 0; i < max_objects; i++)
 	    _new[i] = objects[i];
 	myfree(objects, M_OBJECT_TABLE);
@@ -90,7 +94,8 @@ dbpriv_new_object(void)
     Object *o;
 
     ensure_new_object();
-    o = objects[num_objects] = (Object *) mymalloc(sizeof(Object), M_OBJECT);
+    o = objects[num_objects] =
+	(Object *) mymalloc(sizeof(Object), M_OBJECT);
     o->id = num_objects;
     num_objects++;
 
@@ -206,8 +211,7 @@ db_renumber_object(Objid old)
 		    *oidp = _new;
 		}
 		for (oid = o->child;
-		     oid != NOTHING;
-		     oid = objects[oid]->sibling)
+		     oid != NOTHING; oid = objects[oid]->sibling)
 		    objects[oid]->parent = _new;
 	    }
 
@@ -224,8 +228,7 @@ db_renumber_object(Objid old)
 		    *oidp = _new;
 		}
 		for (oid = o->contents;
-		     oid != NOTHING;
-		     oid = objects[oid]->next)
+		     oid != NOTHING; oid = objects[oid]->next)
 		    objects[oid]->location = _new;
 	    }
 
@@ -550,7 +553,8 @@ dbpriv_set_all_users(Var v)
     all_users = v;
 }
 
-char rcsid_db_objects[] = "$Id: db_objects.c,v 1.5 2006-09-07 00:55:02 bjj Exp $";
+char rcsid_db_objects[] =
+    "$Id: db_objects.c,v 1.5 2006-09-07 00:55:02 bjj Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $

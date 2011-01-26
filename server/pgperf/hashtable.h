@@ -24,14 +24,13 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "keylist.h"
 #include "prototype.h"
 
-typedef struct hash_table 
-{
-  LIST_NODE **table; /* Vector of pointers to linked lists of List_Node's. */
-  int         size;  /* Size of the vector. */
+typedef struct hash_table {
+    LIST_NODE **table;		/* Vector of pointers to linked lists of List_Node's. */
+    int size;			/* Size of the vector. */
 } HASH_TABLE;
 
-extern void       hash_table_init P ((LIST_NODE **table, int size));
-extern void       hash_table_destroy P ((void));
-extern LIST_NODE *retrieve P ((LIST_NODE *item, int ignore_length));
+extern void hash_table_init P((LIST_NODE ** table, int size));
+extern void hash_table_destroy P((void));
+extern LIST_NODE *retrieve P((LIST_NODE * item, int ignore_length));
 
-#endif /* _hashtable_h */
+#endif				/* _hashtable_h */

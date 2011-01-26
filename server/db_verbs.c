@@ -43,8 +43,7 @@
  * end, never in the middle, and no entries should every be removed from this
  * list; the list indices are stored raw in the DB file.
  */
-static const char *prep_list[] =
-{
+static const char *prep_list[] = {
     "with/using",
     "at/to",
     "in front of",
@@ -102,7 +101,8 @@ dbpriv_build_prep_table(void)
 	     */
 	    words = parse_into_words(cprep, &nwords);
 
-	    current_alias = (pt_entry *)mymalloc(sizeof(struct pt_entry), M_PREP);
+	    current_alias =
+		(pt_entry *) mymalloc(sizeof(struct pt_entry), M_PREP);
 	    current_alias->nwords = nwords;
 	    current_alias->next = 0;
 	    for (j = 0; j < nwords; j++)
@@ -158,7 +158,7 @@ db_match_prep(const char *prepname)
     first = s[0];
     if (first == '#')
 	first = (++s)[0];
-    prep = (db_prep_spec)strtol(s, &ptr, 10);
+    prep = (db_prep_spec) strtol(s, &ptr, 10);
     if (*ptr == '\0') {
 	free_str(s);
 	if (!isdigit(first) || prep >= NPREPS)
@@ -249,8 +249,7 @@ db_count_verbs(Objid oid)
 
 int
 db_for_all_verbs(Objid oid,
-		 int (*func) (void *data, const char *vname),
-		 void *data)
+		 int (*func) (void *data, const char *vname), void *data)
 {
     Object *o = dbpriv_find_object(oid);
     Verbdef *v;
@@ -305,10 +304,10 @@ db_find_command_verb(Objid oid, const char *verb,
 
     for (o = dbpriv_find_object(oid); o; o = dbpriv_find_object(o->parent))
 	for (v = o->verbdefs; v; v = v->next) {
-          //db_arg_spec vdobj = (v->perms >> DOBJSHIFT) & OBJMASK;
-          //db_arg_spec viobj = (v->perms >> IOBJSHIFT) & OBJMASK;
-          int vdobj = (v->perms >> DOBJSHIFT) & OBJMASK;
-          int viobj = (v->perms >> IOBJSHIFT) & OBJMASK;
+	    //db_arg_spec vdobj = (v->perms >> DOBJSHIFT) & OBJMASK;
+	    //db_arg_spec viobj = (v->perms >> IOBJSHIFT) & OBJMASK;
+	    int vdobj = (v->perms >> DOBJSHIFT) & OBJMASK;
+	    int viobj = (v->perms >> IOBJSHIFT) & OBJMASK;
 
 	    if (verbcasecmp(v->name, verb)
 		&& (vdobj == ASPEC_ANY || vdobj == dobj)
@@ -382,7 +381,8 @@ make_vc_table(int size)
     int i;
 
     vc_size = size;
-    vc_table = (vc_entry **)mymalloc(size * sizeof(vc_entry *), M_VC_TABLE);
+    vc_table =
+	(vc_entry **) mymalloc(size * sizeof(vc_entry *), M_VC_TABLE);
     for (i = 0; i < size; i++) {
 	vc_table[i] = NULL;
     }
@@ -487,7 +487,7 @@ db_find_callable_verb(Objid oid, const char *verb)
 	first_parent_with_verbs = NOTHING;
     }
 
-    hash = str_hash(verb) ^ (~first_parent_with_verbs);		/* ewww, but who cares */
+    hash = str_hash(verb) ^ (~first_parent_with_verbs);	/* ewww, but who cares */
     bucket = hash % vc_size;
 
     for (vc = vc_table[bucket]; vc; vc = vc->next) {
@@ -561,8 +561,7 @@ db_find_defined_verb(Objid oid, const char *vname, int allow_numbers)
     db_verb_handle vh;
 
     if (!allow_numbers ||
-	(num = strtol(vname, &p, 10),
-	 (isspace(*vname) || *p != '\0')))
+	(num = strtol(vname, &p, 10), (isspace(*vname) || *p != '\0')))
 	num = -1;
 
     for (i = 0, v = o->verbdefs; v; v = v->next, i++)
@@ -724,23 +723,25 @@ db_set_verb_program(db_verb_handle vh, Program * program)
 
 void
 db_verb_arg_specs(db_verb_handle vh,
-	     db_arg_spec * dobj, db_prep_spec * prep, db_arg_spec * iobj)
+		  db_arg_spec * dobj, db_prep_spec * prep,
+		  db_arg_spec * iobj)
 {
     handle *h = (handle *) vh.ptr;
     short foo;
 
     if (h) {
-      *dobj = (db_arg_spec) ((h->verbdef->perms >> DOBJSHIFT) & OBJMASK);
-      *prep = (db_prep_spec) h->verbdef->prep;
-      foo = (h->verbdef->perms >> IOBJSHIFT) & OBJMASK;
-      *iobj = (db_arg_spec)foo;
+	*dobj = (db_arg_spec) ((h->verbdef->perms >> DOBJSHIFT) & OBJMASK);
+	*prep = (db_prep_spec) h->verbdef->prep;
+	foo = (h->verbdef->perms >> IOBJSHIFT) & OBJMASK;
+	*iobj = (db_arg_spec) foo;
     } else
 	panic("DB_VERB_ARG_SPECS: Null handle!");
 }
 
 void
 db_set_verb_arg_specs(db_verb_handle vh,
-		   db_arg_spec dobj, db_prep_spec prep, db_arg_spec iobj)
+		      db_arg_spec dobj, db_prep_spec prep,
+		      db_arg_spec iobj)
 {
     handle *h = (handle *) vh.ptr;
 
@@ -764,7 +765,8 @@ db_verb_allows(db_verb_handle h, Objid progr, db_verb_flag flag)
 }
 
 
-char rcsid_db_verbs[] = "$Id: db_verbs.c,v 1.6 2001-01-29 08:38:44 bjj Exp $";
+char rcsid_db_verbs[] =
+    "$Id: db_verbs.c,v 1.6 2001-01-29 08:38:44 bjj Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $

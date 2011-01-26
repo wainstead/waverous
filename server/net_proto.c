@@ -35,7 +35,8 @@
 #    endif
 #  endif
 
-char rcsid_net_proto[] = "$Id: net_proto.c,v 1.2 1998-12-14 13:18:33 nop Exp $";
+char rcsid_net_proto[] =
+    "$Id: net_proto.c,v 1.2 1998-12-14 13:18:33 nop Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $

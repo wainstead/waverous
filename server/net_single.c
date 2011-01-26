@@ -194,12 +194,12 @@ network_process_io(int timeout)
 		   && (count = read(0, buffer, sizeof(buffer))) > 0) {
 		got_some = 1;
 		if (binary) {
-		    stream_add_string(s, raw_bytes_to_binary(buffer, count));
+		    stream_add_string(s,
+				      raw_bytes_to_binary(buffer, count));
 		    server_receive_line(sh, reset_stream(s));
 		} else
 		    for (ptr = buffer, end = buffer + count;
-			 ptr < end;
-			 ptr++) {
+			 ptr < end; ptr++) {
 			unsigned char c = *ptr;
 
 			if (isgraph(c) || c == ' ' || c == '\t')
@@ -225,7 +225,8 @@ network_process_io(int timeout)
     return got_some;
 }
 
-char rcsid_net_single[] = "$Id: net_single.c,v 1.4 2006-12-06 23:57:51 wrog Exp $";
+char rcsid_net_single[] =
+    "$Id: net_single.c,v 1.4 2006-12-06 23:57:51 wrog Exp $";
 
 /*
  * $Log: not supported by cvs2svn $

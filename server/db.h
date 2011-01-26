@@ -127,9 +127,7 @@ extern void db_set_object_name(Objid oid, const char *name);
 
 extern Objid db_object_parent(Objid);
 extern int db_count_children(Objid);
-extern int db_for_all_children(Objid,
-			       int (*)(void *, Objid),
-			       void *);
+extern int db_for_all_children(Objid, int (*)(void *, Objid), void *);
 				/* The outcome is unspecified if any of the
 				 * following functions are called during a call
 				 * to db_for_all_children():
@@ -149,9 +147,7 @@ extern int db_change_parent(Objid oid, Objid parent);
 
 extern Objid db_object_location(Objid);
 extern int db_count_contents(Objid);
-extern int db_for_all_contents(Objid,
-			       int (*)(void *, Objid),
-			       void *);
+extern int db_for_all_contents(Objid, int (*)(void *, Objid), void *);
 				/* The outcome is unspecified if any of the
 				 * following functions are called during a call
 				 * to db_for_all_contects():
@@ -172,9 +168,9 @@ typedef enum {
     FLAG_OBSOLETE_2,
     FLAG_FERTILE,
     /* NOTE: New permanent flags must always be added here, rather
-     *	     than replacing one of the obsolete ones, since old
-     *	     databases might have old objects around that still have
-     *	     that flag set.
+     *       than replacing one of the obsolete ones, since old
+     *       databases might have old objects around that still have
+     *       that flag set.
      */
 
     /* Temporary flags.
@@ -182,17 +178,16 @@ typedef enum {
      * make sure FLAG_FIRST_TEMP > last permanent flag
      */
     FLAG_FIRST_TEMP = 14
-    /* allows space for the 2 needed by validate_hierarchies(),
-     * just in case int is only 16 bits
-     */
+	/* allows space for the 2 needed by validate_hierarchies(),
+	 * just in case int is only 16 bits
+	 */
 } db_object_flag;
 
 extern int db_object_has_flag(Objid, db_object_flag);
 extern void db_set_object_flag(Objid, db_object_flag);
 extern void db_clear_object_flag(Objid, db_object_flag);
 
-extern int db_object_allows(Objid oid, Objid progr,
-			    db_object_flag flag);
+extern int db_object_allows(Objid oid, Objid progr, db_object_flag flag);
 				/* Returns true iff either OID has FLAG or
 				 * PROGR either is a wizard or owns OID; that
 				 * is, iff PROGR's authority is sufficient to
@@ -221,8 +216,7 @@ typedef enum {
 } db_prop_flag;
 
 extern int db_add_propdef(Objid oid, const char *pname,
-			  Var value, Objid owner,
-			  unsigned flags);
+			  Var value, Objid owner, unsigned flags);
 				/* Returns true (and actually adds the property
 				 * to OID) iff (1) no property named PNAME
 				 * already exists on OID or one of its
@@ -235,8 +229,7 @@ extern int db_add_propdef(Objid oid, const char *pname,
 				 * zero or more elements of `db_prop_flag'.
 				 */
 
-extern int db_rename_propdef(Objid oid, const char *old,
-			     const char *_new);
+extern int db_rename_propdef(Objid oid, const char *old, const char *_new);
 				/* Returns true (and actually renames the
 				 * propdef on OID) iff (1) a propdef with the
 				 * name OLD existed on OID, (2) no property
@@ -255,8 +248,7 @@ extern int db_delete_propdef(Objid, const char *);
 
 extern int db_count_propdefs(Objid);
 extern int db_for_all_propdefs(Objid,
-			       int (*)(void *, const char *),
-			       void *);
+			       int (*)(void *, const char *), void *);
 				/* db_for_all_propdefs() does not change the
 				 * reference counts of the property names
 				 * passed to the given callback function.
@@ -335,8 +327,7 @@ extern void db_set_property_flags(db_prop_handle, unsigned);
 				 * properties.
 				 */
 
-extern int db_property_allows(db_prop_handle, Objid,
-			      db_prop_flag);
+extern int db_property_allows(db_prop_handle, Objid, db_prop_flag);
 				/* Returns true iff either the property has the
 				 * flag or the object either is a wizard or
 				 * owns the property; that is, iff the object's
@@ -402,10 +393,10 @@ extern const char *db_unparse_prep(db_prep_spec);
 				 * persistent.
 				 */
 
-extern int  db_add_verb(Objid oid, const char *vnames,
-			Objid owner, unsigned flags,
-			db_arg_spec dobj, db_prep_spec prep,
-			db_arg_spec iobj);
+extern int db_add_verb(Objid oid, const char *vnames,
+		       Objid owner, unsigned flags,
+		       db_arg_spec dobj, db_prep_spec prep,
+		       db_arg_spec iobj);
 				/* This function does not change the reference
 				 * count of the NAMES string it accepts.  Thus,
 				 * the caller should str_ref() it if it is to
@@ -413,9 +404,7 @@ extern int  db_add_verb(Objid oid, const char *vnames,
 				 */
 
 extern int db_count_verbs(Objid);
-extern int db_for_all_verbs(Objid,
-			    int (*)(void *, const char *),
-			    void *);
+extern int db_for_all_verbs(Objid, int (*)(void *, const char *), void *);
 				/* db_for_all_verbs() does not change the
 				 * reference counts of the verb names
 				 * passed to the given callback function.
@@ -428,7 +417,7 @@ typedef struct {
 } db_verb_handle;
 
 extern db_verb_handle db_find_command_verb(Objid oid, const char *verb,
-					 db_arg_spec dobj, unsigned prep,
+					   db_arg_spec dobj, unsigned prep,
 					   db_arg_spec iobj);
 				/* Returns a handle on the first matching
 				 * verb found defined on OID or one of its
@@ -510,12 +499,10 @@ extern void db_set_verb_program(db_verb_handle, Program *);
 
 extern void db_verb_arg_specs(db_verb_handle h,
 			      db_arg_spec * dobj,
-			      db_prep_spec * prep,
-			      db_arg_spec * iobj);
+			      db_prep_spec * prep, db_arg_spec * iobj);
 extern void db_set_verb_arg_specs(db_verb_handle h,
 				  db_arg_spec dobj,
-				  db_prep_spec prep,
-				  db_arg_spec iobj);
+				  db_prep_spec prep, db_arg_spec iobj);
 
 extern int db_verb_allows(db_verb_handle, Objid, db_verb_flag);
 				/* Returns true iff either the verb has the

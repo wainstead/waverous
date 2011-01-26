@@ -20,7 +20,7 @@ along with GNU GPERF; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Define and implement a simple boolean array abstraction,
-   uses a Guilmette array implementation to save on initialization time. */ 
+   uses a Guilmette array implementation to save on initialization time. */
 
 #ifndef _boolarray_h
 #define _boolarray_h
@@ -33,16 +33,15 @@ typedef unsigned short STORAGE_TYPE;
 #else
 typedef int STORAGE_TYPE;
 #endif
-typedef struct bool_array 
-{
-  STORAGE_TYPE *storage_array;    /* Initialization of the index space. */
-  STORAGE_TYPE  iteration_number; /* Keep track of the current iteration. */
-  int  size;                      /* Size of the entire array (dynamically initialized). */
+typedef struct bool_array {
+    STORAGE_TYPE *storage_array;	/* Initialization of the index space. */
+    STORAGE_TYPE iteration_number;	/* Keep track of the current iteration. */
+    int size;			/* Size of the entire array (dynamically initialized). */
 } BOOL_ARRAY;
 
-extern void bool_array_init P ((int size));
-extern void bool_array_destroy P ((void));
-extern bool lookup P ((int hash_value));
-extern void bool_array_reset P ((void));
+extern void bool_array_init P((int size));
+extern void bool_array_destroy P((void));
+extern bool lookup P((int hash_value));
+extern void bool_array_reset P((void));
 
-#endif /* _boolarray_h */
+#endif				/* _boolarray_h */

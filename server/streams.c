@@ -62,7 +62,7 @@ void
 stream_delete_char(Stream * s)
 {
     if (s->current > 0)
-      s->current--;
+	s->current--;
 }
 
 void
@@ -132,7 +132,7 @@ dbl_fmt(void)
 }
 
 void
-stream_printf(Stream * s, const char *fmt,...)
+stream_printf(Stream * s, const char *fmt, ...)
 {
     char buffer[40];
     va_list args;
@@ -185,8 +185,9 @@ stream_printf(Stream * s, const char *fmt,...)
 		    width = width * 10 + c - '0';
 		    continue;
 		default:
-		    errlog("STREAM_PRINTF: Unknown format directive: %%%c\n",
-			   c);
+		    errlog
+			("STREAM_PRINTF: Unknown format directive: %%%c\n",
+			 c);
 		    goto abort;
 		}
 		break;
@@ -234,7 +235,8 @@ stream_length(Stream * s)
     return s->current;
 }
 
-char rcsid_streams[] = "$Id: streams.c,v 1.4 2006-12-06 23:57:51 wrog Exp $";
+char rcsid_streams[] =
+    "$Id: streams.c,v 1.4 2006-12-06 23:57:51 wrog Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $

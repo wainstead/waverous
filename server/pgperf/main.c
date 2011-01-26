@@ -32,65 +32,67 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
    ADT.  Note that certain initialization routines require
    initialization *after* certain values are computed.  Therefore,
    they cannot be called here. */
-   
-static void 
-init_all (argc, argv)
-     int argc;
-     char *argv[];
+
+static void
+init_all(argc, argv)
+    int argc;
+    char *argv[];
 {
 #ifdef RLIMIT_STACK
-  /* Get rid of any avoidable limit on stack size.  */
-  {
-    struct rlimit rlim;
+    /* Get rid of any avoidable limit on stack size.  */
+    {
+	struct rlimit rlim;
 
-    /* Set the stack limit huge so that alloca does not fail. */
-    getrlimit (RLIMIT_STACK, &rlim);
-    rlim.rlim_cur = rlim.rlim_max;
-    setrlimit (RLIMIT_STACK, &rlim);
-  }
-#endif /* RLIMIT_STACK */
+	/* Set the stack limit huge so that alloca does not fail. */
+	getrlimit(RLIMIT_STACK, &rlim);
+	rlim.rlim_cur = rlim.rlim_max;
+	setrlimit(RLIMIT_STACK, &rlim);
+    }
+#endif				/* RLIMIT_STACK */
 
-  options_init (argc, argv);    
-  key_list_init ();
-  perfect_init ();              
+    options_init(argc, argv);
+    key_list_init();
+    perfect_init();
 }
 
 /* Calls appropriate destruction routines for each ADT.  These
    routines print diagnostics if the debugging option is enabled. */
 
 static void
-destroy_all ()
+destroy_all()
 {
-  options_destroy ();
-  key_list_destroy ();
-  perfect_destroy ();
+    options_destroy();
+    key_list_destroy();
+    perfect_destroy();
 }
 
 /* Driver for perfect hash function generation. */
 
 int
-main (argc, argv)
-     int argc;
-     char *argv[];
+main(argc, argv)
+    int argc;
+    char *argv[];
 {
-  struct tm *tm;
-  time_t     clock; 
-  int        status;
+    struct tm *tm;
+    time_t clock;
+    int status;
 
-  time (&clock);
-  tm = localtime (&clock);
+    time(&clock);
+    tm = localtime(&clock);
 
-  fprintf (stderr, "/* starting time is %d:%d:%d */\n", tm->tm_hour, tm->tm_min, tm->tm_sec);
-  /* Sets the options. */
-  init_all (argc, argv);
+    fprintf(stderr, "/* starting time is %d:%d:%d */\n", tm->tm_hour,
+	    tm->tm_min, tm->tm_sec);
+    /* Sets the options. */
+    init_all(argc, argv);
 
-  /* Generates the perfect hash table.
-     Also prints generated code neatly to the output. */
-  status = perfect_generate ();
-  destroy_all ();
+    /* Generates the perfect hash table.
+       Also prints generated code neatly to the output. */
+    status = perfect_generate();
+    destroy_all();
 
-  time (&clock);
-  tm = localtime (&clock);
-  fprintf (stderr, "/* ending time is %d:%d:%d */\n", tm->tm_hour, tm->tm_min, tm->tm_sec);
-  return status;
+    time(&clock);
+    tm = localtime(&clock);
+    fprintf(stderr, "/* ending time is %d:%d:%d */\n", tm->tm_hour,
+	    tm->tm_min, tm->tm_sec);
+    return status;
 }

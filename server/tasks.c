@@ -49,10 +49,10 @@
 
 typedef enum {
     /* Input Tasks */
-    TASK_INBAND,	/* vanilla in-band */
-    TASK_OOB,		/* out-of-band unless disable_oob */
-    TASK_QUOTED,	/* in-band; needs unquote unless disable-oob */
-    TASK_BINARY,	/* in-band; binary mode string */
+    TASK_INBAND,		/* vanilla in-band */
+    TASK_OOB,			/* out-of-band unless disable_oob */
+    TASK_QUOTED,		/* in-band; needs unquote unless disable-oob */
+    TASK_BINARY,		/* in-band; binary mode string */
     /* Background Tasks */
     TASK_FORKED,
     TASK_SUSPENDED
@@ -76,7 +76,7 @@ typedef struct suspended_task {
 typedef struct {
     char *string;
     int length;
-    struct task *next_itail;	/* see tqueue.first_itail */ 
+    struct task *next_itail;	/* see tqueue.first_itail */
 } input_task;
 
 typedef struct task {
@@ -91,13 +91,13 @@ typedef struct task {
 
 enum icmd_flag {
     /* fix icmd_index() if you change any of the following numbers: */
-    ICMD_SUFFIX       = 1,
+    ICMD_SUFFIX = 1,
     ICMD_OUTPUTSUFFIX = 2,
     ICMD_OUTPUTPREFIX = 3,
-    ICMD_PREFIX       = 4,
-    ICMD_PROGRAM      = 5,  /* .program */
+    ICMD_PREFIX = 4,
+    ICMD_PROGRAM = 5,		/* .program */
     /* mask */
-    ICMD_ALL_CMDS = ((1<<(ICMD_PROGRAM+1))-2)
+    ICMD_ALL_CMDS = ((1 << (ICMD_PROGRAM + 1)) - 2)
 };
 
 typedef struct tqueue {
@@ -186,117 +186,110 @@ static ext_queue *external_queues = 0;
 static void
 double_to_timeval(double d, struct timeval *tv)
 {
-  double secs, usecs, frac;
+    double secs, usecs, frac;
 
-  frac = modf(d, &secs);
-  usecs = ((double) 1000000) * frac;
+    frac = modf(d, &secs);
+    usecs = ((double) 1000000) * frac;
 
-  tv->tv_sec  = (long) secs;
-  tv->tv_usec = (long) usecs;
+    tv->tv_sec = (long) secs;
+    tv->tv_usec = (long) usecs;
 
-  return;
+    return;
 }
 
 static double
 timeval_to_double(struct timeval *tv)
 {
-  double r;
+    double r;
 
-  r  = tv->tv_sec;
-  r += tv->tv_usec / ((double) 1000000);
+    r = tv->tv_sec;
+    r += tv->tv_usec / ((double) 1000000);
 
-  return r;
+    return r;
 }
 
 static int
 timeval_lt(struct timeval *tv1, struct timeval *tv2)
 /* Returns true if tv1 is less than tv2. If either arg is NULL, time 0 is assumed. */
 {
-  long secs1, usecs1;
-  long secs2, usecs2;
+    long secs1, usecs1;
+    long secs2, usecs2;
 
-  if (tv1 == NULL)
-  {
-    secs1  = 0;
-    usecs1 = 0;
-  }
-  else
-  {
-    secs1  = tv1->tv_sec;
-    usecs1 = tv1->tv_usec;
-  }
+    if (tv1 == NULL) {
+	secs1 = 0;
+	usecs1 = 0;
+    } else {
+	secs1 = tv1->tv_sec;
+	usecs1 = tv1->tv_usec;
+    }
 
-  if (tv2 == NULL)
-  {
-    secs2  = 0;
-    usecs2 = 0;
-  }
-  else
-  {
-    secs2  = tv2->tv_sec;
-    usecs2 = tv2->tv_usec;
-  }
+    if (tv2 == NULL) {
+	secs2 = 0;
+	usecs2 = 0;
+    } else {
+	secs2 = tv2->tv_sec;
+	usecs2 = tv2->tv_usec;
+    }
 
-  if (secs1 < secs2)
-    return 1;
+    if (secs1 < secs2)
+	return 1;
 
-  if ((secs1 == secs2) && (usecs1 < usecs2))
-    return 1;
+    if ((secs1 == secs2) && (usecs1 < usecs2))
+	return 1;
 
-  return 0;
+    return 0;
 }
 
 static void
-timeval_add(struct timeval *result, struct timeval *tv1, struct timeval *tv2)
+timeval_add(struct timeval *result, struct timeval *tv1,
+	    struct timeval *tv2)
 /* Adds *tv1 and *tv2 and writes the result to *result. */
 /* Neither *tv1 nor *tv2 should have negative fields. */
 /* It's safe to have (result == tv1) || (result == tv2) */
 {
-  struct timeval sum;
+    struct timeval sum;
 
-  sum.tv_sec  = tv1->tv_sec;
-  sum.tv_sec += tv2->tv_sec;
+    sum.tv_sec = tv1->tv_sec;
+    sum.tv_sec += tv2->tv_sec;
 
-  sum.tv_usec  = tv1->tv_usec;
-  sum.tv_usec += tv2->tv_usec;
+    sum.tv_usec = tv1->tv_usec;
+    sum.tv_usec += tv2->tv_usec;
 
-  if (sum.tv_usec >= 1000000)
-  {
-    /* Microsecond carry */
-    sum.tv_sec += sum.tv_usec / 1000000;
-    sum.tv_usec %= 1000000;
-  }
+    if (sum.tv_usec >= 1000000) {
+	/* Microsecond carry */
+	sum.tv_sec += sum.tv_usec / 1000000;
+	sum.tv_usec %= 1000000;
+    }
 
-  if ((sum.tv_sec < tv1->tv_sec) || (sum.tv_sec < tv2->tv_sec))
-  {
-    /* Seconds overflow */
-    sum.tv_sec = INT_MAX;
-  }
+    if ((sum.tv_sec < tv1->tv_sec) || (sum.tv_sec < tv2->tv_sec)) {
+	/* Seconds overflow */
+	sum.tv_sec = INT_MAX;
+    }
 
-  *result = sum;
+    *result = sum;
 }
 
 static void
-timeval_sub(struct timeval *result, struct timeval *tv1, struct timeval *tv2)
+timeval_sub(struct timeval *result, struct timeval *tv1,
+	    struct timeval *tv2)
 /* Subtracts *tv2 from *tv1 and stores the result in *result. */
 /* It's safe to have (result == tv1) || (result == tv2) */
 {
-  struct timeval diff;
+    struct timeval diff;
 
-  diff.tv_sec  = tv1->tv_sec;
-  diff.tv_usec = tv1->tv_usec;
+    diff.tv_sec = tv1->tv_sec;
+    diff.tv_usec = tv1->tv_usec;
 
-  diff.tv_sec  -= tv2->tv_sec;
-  diff.tv_usec -= tv2->tv_usec;
+    diff.tv_sec -= tv2->tv_sec;
+    diff.tv_usec -= tv2->tv_usec;
 
-  if (diff.tv_usec < 0)
-  {
-    /* Microsecond borrow */
-    diff.tv_sec -= ((-diff.tv_usec) / 1000000) + 1;
-    diff.tv_usec = 1000000 - ((-diff.tv_usec) % 1000000);
-  }
+    if (diff.tv_usec < 0) {
+	/* Microsecond borrow */
+	diff.tv_sec -= ((-diff.tv_usec) / 1000000) + 1;
+	diff.tv_usec = 1000000 - ((-diff.tv_usec) % 1000000);
+    }
 
-  *result = diff;
+    *result = diff;
 }
 
 /* 
@@ -322,12 +315,13 @@ timeval_sub(struct timeval *result, struct timeval *tv1, struct timeval *tv2)
       __IDLM(DEFINE,OUTPUTSUFFIX,(verb))		\
 
 static int
-icmd_index(const char * verb) {
+icmd_index(const char *verb)
+{
     /* evil, poor-man's minimal perfect hash */
     int len = strlen(verb);
     char c2 = len > 2 ? verb[2] : 0;
     char c8 = len > 8 ? verb[8] : 0;
-    switch (((c2&7)^6)+!(c8&2)) {
+    switch (((c2 & 7) ^ 6) + !(c8 & 2)) {
     default:
 	break;
 #define _ICMD_IX(ICMD_PREFIX,_,MATCH)		\
@@ -335,10 +329,11 @@ icmd_index(const char * verb) {
 	    if (MATCH) return ICMD_PREFIX;	\
 	    break;				\
 
-	ICMD_FOR_EACH(_ICMD_IX,verb);
+	ICMD_FOR_EACH(_ICMD_IX, verb);
     }
     return 0;
 }
+
 #undef _ICMD_IX
 
 static Var
@@ -353,9 +348,10 @@ icmd_list(int icmd_flags)
 	    list = listappend(list, s);		\
 	}					\
 
-    ICMD_FOR_EACH(_ICMD_MKSTR,@);
+    ICMD_FOR_EACH(_ICMD_MKSTR, @);
     return list;
 }
+
 #undef _ICMD_MKSTR
 
 static int
@@ -365,8 +361,7 @@ icmd_set_flags(tqueue * tq, Var list)
     int newflags;
     if (list.type == TYPE_INT) {
 	newflags = is_true(list) ? ICMD_ALL_CMDS : 0;
-    }
-    else if(list.type != TYPE_LIST)
+    } else if (list.type != TYPE_LIST)
 	return 0;
     else {
 	newflags = 0;
@@ -377,7 +372,7 @@ icmd_set_flags(tqueue * tq, Var list)
 	    icmd = icmd_index(list.v.list[i].v.str);
 	    if (!icmd)
 		return 0;
-	    newflags |= (1<<icmd);
+	    newflags |= (1 << icmd);
 	}
     }
     tq->icmds = newflags;
@@ -429,7 +424,8 @@ ensure_usage(tqueue * tq)
 char *
 default_flush_command(void)
 {
-    const char *str = server_string_option("default_flush_command", ".flush");
+    const char *str =
+	server_string_option("default_flush_command", ".flush");
 
     return (str && str[0] != '\0') ? str_dup(str) : 0;
 }
@@ -545,11 +541,10 @@ dequeue_input_task(tqueue * tq, enum dequeue_how how)
     if (!tq->first_input)
 	return 0;
     else if (how == (tq->first_input->kind == TASK_OOB)) {
-	pt     = &(tq->first_itail->next);
+	pt = &(tq->first_itail->next);
 	pitail = &(tq->first_itail->t.input.next_itail);
-    }
-    else {
-	pt     = &(tq->first_input);
+    } else {
+	pt = &(tq->first_input);
 	pitail = &(tq->first_itail);
     }
     t = *pt;
@@ -573,8 +568,7 @@ dequeue_input_task(tqueue * tq, enum dequeue_how how)
 
 	tq->total_input_length -= t->t.input.length;
 	if (tq->input_suspended
-	    && tq->connected
-	    && tq->total_input_length < INPUT_LOWAT) {
+	    && tq->connected && tq->total_input_length < INPUT_LOWAT) {
 	    server_resume_input(tq->player);
 	    tq->input_suspended = 0;
 	}
@@ -582,12 +576,12 @@ dequeue_input_task(tqueue * tq, enum dequeue_how how)
 	if (t->kind == TASK_OOB) {
 	    if (tq->disable_oob)
 		t->kind = TASK_INBAND;
-	}
-	else if (t->kind == TASK_QUOTED) {
-	    if (!tq->disable_oob) 
+	} else if (t->kind == TASK_QUOTED) {
+	    if (!tq->disable_oob)
 		memmove(t->t.input.string,
-			t->t.input.string + oob_quote_prefix_length, 
-			1 + strlen(t->t.input.string + oob_quote_prefix_length));
+			t->t.input.string + oob_quote_prefix_length,
+			1 + strlen(t->t.input.string +
+				   oob_quote_prefix_length));
 	    t->kind = TASK_INBAND;
 	}
     }
@@ -662,7 +656,7 @@ struct state {
 static void
 my_error(void *data, const char *msg)
 {
-  struct state *s = (state *) data;
+    struct state *s = (state *) data;
 
     notify(s->player, msg);
     s->nerrors++;
@@ -671,7 +665,7 @@ my_error(void *data, const char *msg)
 static int
 my_getc(void *data)
 {
-  struct state *s = (state *) data;
+    struct state *s = (state *) data;
 
     if (*(s->input) != '\0')
 	return *(s->input++);
@@ -679,8 +673,7 @@ my_getc(void *data)
 	return EOF;
 }
 
-static Parser_Client client =
-{my_error, 0, my_getc};
+static Parser_Client client = { my_error, 0, my_getc };
 
 static void
 end_programming(tqueue * tq)
@@ -760,10 +753,10 @@ static int
 do_intrinsic_command(tqueue * tq, Parsed_Command * pc)
 {
     int icmd = icmd_index(pc->verb);
-    if (!(icmd && (tq->icmds & (1<<icmd))))
+    if (!(icmd && (tq->icmds & (1 << icmd))))
 	return 0;
     switch (icmd) {
-    default: 
+    default:
 	panic("Bad return value from icmd_index()");
 	break;
     case ICMD_PROGRAM:
@@ -771,10 +764,10 @@ do_intrinsic_command(tqueue * tq, Parsed_Command * pc)
 	    return 0;
 	if (pc->args.v.list[0].v.num != 1)
 	    notify(tq->player, "Usage:  .program object:verb");
-	else	
+	else
 	    start_programming(tq, (char *) pc->args.v.list[1].v.str);
 	break;
-    case ICMD_PREFIX:	
+    case ICMD_PREFIX:
     case ICMD_OUTPUTPREFIX:
 	set_delimiter(&(tq->output_prefix), pc->argstr);
 	break;
@@ -798,12 +791,12 @@ do_command_task(tqueue * tq, char *command)
     } else {
 	Parsed_Command *pc = parse_command(command, tq->player);
 
-        {
-            char *s = str_dup("");
-            run_server_task(tq->player, SYSTEM_OBJECT, "do_prompt",
-                            parse_into_wordlist(s), s, 0);
-            free_str(s);
-        }
+	{
+	    char *s = str_dup("");
+	    run_server_task(tq->player, SYSTEM_OBJECT, "do_prompt",
+			    parse_into_wordlist(s), s, 0);
+	    free_str(s);
+	}
 
 	if (!pc)
 	    return 0;
@@ -823,17 +816,17 @@ do_command_task(tqueue * tq, char *command)
 	    args = parse_into_wordlist(command);
 	    if (run_server_task_setting_id(tq->player, tq->handler,
 					   "do_command", args, command,
-				      &result, &(tq->last_input_task_id))
-		!= OUTCOME_DONE
-		|| is_true(result)) {
+					   &result,
+					   &(tq->last_input_task_id))
+		!= OUTCOME_DONE || is_true(result)) {
 		/* Do nothing more; we assume :do_command handled it. */
 	    } else if (find_verb_on(self = tq->player, pc, &vh)
 		       || find_verb_on(self = location, pc, &vh)
 		       || find_verb_on(self = pc->dobj, pc, &vh)
 		       || find_verb_on(self = pc->iobj, pc, &vh)
 		       || (valid(self = location)
-			 && (vh = db_find_callable_verb(location, "huh"),
-			     vh.ptr))) {
+			   && (vh = db_find_callable_verb(location, "huh"),
+			       vh.ptr))) {
 		do_input_task(tq->player, pc, self, vh);
 	    } else {
 		notify(tq->player, "I couldn't understand that.");
@@ -845,12 +838,12 @@ do_command_task(tqueue * tq, char *command)
 
 	    free_var(result);
 
-            {
-                char *s = str_dup("");
-                run_server_task(tq->player, SYSTEM_OBJECT, "do_prompt",
-                                parse_into_wordlist(s), s, 0);
-                free_str(s);
-            }
+	    {
+		char *s = str_dup("");
+		run_server_task(tq->player, SYSTEM_OBJECT, "do_prompt",
+				parse_into_wordlist(s), s, 0);
+		free_str(s);
+	    }
 	}
 
 	free_parsed_command(pc);
@@ -903,7 +896,8 @@ do_login_task(tqueue * tq, char *command)
 	    dead_tq->player = NOTHING;	/* it'll be freed by run_ready_tasks */
 	    dead_tq->num_bg_tasks = 0;
 	}
-	player_connected(old_player, new_player, new_player > old_max_object);
+	player_connected(old_player, new_player,
+			 new_player > old_max_object);
     }
     free_var(result);
     return 1;
@@ -992,106 +986,153 @@ free_task_queue(task_queue q)
 	       if (!icmd_set_flags(tq, value))				\
 		   return 0;						\
 	   })								\
-    /*
+				/*
+				   int
+				   tasks_set_connection_option(task_queue q, const char *option, Var value)
+				   {
+				   CONNECTION_OPTION_SET(TASK_CO_TABLE, (tqueue *)q.ptr, option, value);
+				   }
+
+				   int
+				   tasks_connection_option(task_queue q, const char *option, Var * value)
+				   {
+				   CONNECTION_OPTION_GET(TASK_CO_TABLE, (tqueue *)q.ptr, option, value);
+				   }
+
+				   Var
+				   tasks_connection_options(task_queue q, Var list)
+				   {
+				   CONNECTION_OPTION_LIST(TASK_CO_TABLE, (tqueue *)q.ptr, list);
+				   }
+				 */
+
 int
 tasks_set_connection_option(task_queue q, const char *option, Var value)
 {
-    CONNECTION_OPTION_SET(TASK_CO_TABLE, (tqueue *)q.ptr, option, value);
+    do {
+	if (!mystrcasecmp((option), "flush-command")) { {
+		if (((tqueue *) q.ptr)->flush_cmd)
+		    free_str(((tqueue *) q.ptr)->flush_cmd);
+		if ((value).type == (_TYPE_STR | 0x80)
+		    && (value).v.str[0] != '\0')
+		    ((tqueue *) q.ptr)->flush_cmd = str_ref((value).v.str);
+		else
+		    ((tqueue *) q.ptr)->flush_cmd = 0;
+	};
+	return 1;
+	}
+	if (!mystrcasecmp((option), "hold-input")) { {
+		((tqueue *) q.ptr)->hold_input = is_true((value));
+		if (!((tqueue *) q.ptr)->hold_input
+		    && ((tqueue *) q.ptr)->first_input)
+		    ensure_usage(((tqueue *) q.ptr));
+	};
+	return 1;
+	}
+	if (!mystrcasecmp((option), "disable-oob")) { {
+		((tqueue *) q.ptr)->disable_oob = is_true((value));
+		if (!((tqueue *) q.ptr)->disable_oob
+		    && ((tqueue *) q.ptr)->first_input
+		    && (((tqueue *) q.ptr)->first_itail->next
+			|| ((tqueue *) q.ptr)->first_input->kind ==
+			TASK_OOB))
+		    ensure_usage(((tqueue *) q.ptr));
+	};
+	return 1;
+	}
+	if (!mystrcasecmp((option), "intrinsic-commands")) { {
+		if (!icmd_set_flags(((tqueue *) q.ptr), (value)))
+		    return 0;
+	};
+	return 1;
+	}
+	return 0;
+    } while (0);
+
 }
 
 int
 tasks_connection_option(task_queue q, const char *option, Var * value)
 {
-    CONNECTION_OPTION_GET(TASK_CO_TABLE, (tqueue *)q.ptr, option, value);
-}
-
-Var
-tasks_connection_options(task_queue q, Var list)
-{
-    CONNECTION_OPTION_LIST(TASK_CO_TABLE, (tqueue *)q.ptr, list);
-}
-    */
-
-int
-tasks_set_connection_option(task_queue q, const char *option, Var value)
-{
-  do { if (!mystrcasecmp((option), "flush-command")) { { if (((tqueue *)q.ptr)->flush_cmd) free_str(((tqueue *)q.ptr)->flush_cmd);
-        if ((value).type == (_TYPE_STR | 0x80) && (value).v.str[0] != '\0') ((tqueue *)q.ptr)->flush_cmd = str_ref((value).v.str);
-        else ((tqueue *)q.ptr)->flush_cmd = 0;
-      };
-      return 1;
-    } if (!mystrcasecmp((option), "hold-input")) { { ((tqueue *)q.ptr)->hold_input = is_true((value));
-        if (!((tqueue *)q.ptr)->hold_input && ((tqueue *)q.ptr)->first_input) ensure_usage(((tqueue *)q.ptr));
-      };
-      return 1;
-    } if (!mystrcasecmp((option), "disable-oob")) { { ((tqueue *)q.ptr)->disable_oob = is_true((value));
-        if (!((tqueue *)q.ptr)->disable_oob && ((tqueue *)q.ptr)->first_input && (((tqueue *)q.ptr)->first_itail->next || ((tqueue *)q.ptr)->first_input->kind == TASK_OOB)) ensure_usage(((tqueue *)q.ptr));
-      };
-      return 1;
-    } if (!mystrcasecmp((option), "intrinsic-commands")) { { if (!icmd_set_flags(((tqueue *)q.ptr), (value))) return 0;
-      };
-      return 1;
-    } return 0;
-  } while (0);
-
-}
-
-int
-tasks_connection_option(task_queue q, const char *option, Var * value)
-{
-  do { if (!mystrcasecmp((option), "flush-command")) { (value)->type = (var_type) ((_TYPE_STR | 0x80));
-      (value)->v.str = (((tqueue *)q.ptr)->flush_cmd ? str_ref(((tqueue *)q.ptr)->flush_cmd) : str_dup(""));
-      return 1;
-    } if (!mystrcasecmp((option), "hold-input")) { (value)->type = (TYPE_INT);
-      (value)->v.num = (((tqueue *)q.ptr)->hold_input);
-      return 1;
-    } if (!mystrcasecmp((option), "disable-oob")) { (value)->type = (TYPE_INT);
-      (value)->v.num = (((tqueue *)q.ptr)->disable_oob);
-      return 1;
-    } if (!mystrcasecmp((option), "intrinsic-commands")) { (value)->type = (var_type) ((_TYPE_LIST | 0x80));
-      (value)->v.list = (icmd_list(((tqueue *)q.ptr)->icmds).v.list);
-      return 1;
-    } return 0;
-  } while (0);
+    do {
+	if (!mystrcasecmp((option), "flush-command")) {
+	    (value)->type = (var_type) ((_TYPE_STR | 0x80));
+	    (value)->v.str =
+		(((tqueue *) q.ptr)->
+		 flush_cmd ? str_ref(((tqueue *) q.ptr)->
+				     flush_cmd) : str_dup(""));
+	    return 1;
+	}
+	if (!mystrcasecmp((option), "hold-input")) {
+	    (value)->type = (TYPE_INT);
+	    (value)->v.num = (((tqueue *) q.ptr)->hold_input);
+	    return 1;
+	}
+	if (!mystrcasecmp((option), "disable-oob")) {
+	    (value)->type = (TYPE_INT);
+	    (value)->v.num = (((tqueue *) q.ptr)->disable_oob);
+	    return 1;
+	}
+	if (!mystrcasecmp((option), "intrinsic-commands")) {
+	    (value)->type = (var_type) ((_TYPE_LIST | 0x80));
+	    (value)->v.list =
+		(icmd_list(((tqueue *) q.ptr)->icmds).v.list);
+	    return 1;
+	}
+	return 0;
+    } while (0);
 
 }
 
 Var
 tasks_connection_options(task_queue q, Var list)
 {
-  do { { Var pair = new_list(2);
-      pair.v.list[1].type = (var_type) (_TYPE_STR | 0x80);
-      pair.v.list[1].v.str = str_dup("flush-command");
-      pair.v.list[2].type = (var_type) ((_TYPE_STR | 0x80));
-      pair.v.list[2].v.str = (((tqueue *)q.ptr)->flush_cmd ? str_ref(((tqueue *)q.ptr)->flush_cmd) : str_dup(""));
-      (list) = listappend((list), pair);
-    } { Var pair = new_list(2);
-      pair.v.list[1].type = (var_type) (_TYPE_STR | 0x80);
-      pair.v.list[1].v.str = str_dup("hold-input");
-      pair.v.list[2].type = (TYPE_INT);
-      pair.v.list[2].v.num = (((tqueue *)q.ptr)->hold_input);
-      (list) = listappend((list), pair);
-    } { Var pair = new_list(2);
-      pair.v.list[1].type = (var_type) (_TYPE_STR | 0x80);
-      pair.v.list[1].v.str = str_dup("disable-oob");
-      pair.v.list[2].type = (TYPE_INT);
-      pair.v.list[2].v.num = (((tqueue *)q.ptr)->disable_oob);
-      (list) = listappend((list), pair);
-    } { Var pair = new_list(2);
-      pair.v.list[1].type = (var_type) (_TYPE_STR | 0x80);
-      pair.v.list[1].v.str = str_dup("intrinsic-commands");
-      pair.v.list[2].type = (var_type) ((_TYPE_LIST | 0x80));
-      pair.v.list[2].v.list = (icmd_list(((tqueue *)q.ptr)->icmds).v.list);
-      (list) = listappend((list), pair);
-    } return (list);
-  } while (0);
+    do { {
+	    Var pair = new_list(2);
+	    pair.v.list[1].type = (var_type) (_TYPE_STR | 0x80);
+	    pair.v.list[1].v.str = str_dup("flush-command");
+	    pair.v.list[2].type = (var_type) ((_TYPE_STR | 0x80));
+	    pair.v.list[2].v.str =
+		(((tqueue *) q.ptr)->
+		 flush_cmd ? str_ref(((tqueue *) q.ptr)->
+				     flush_cmd) : str_dup(""));
+	    (list) = listappend((list), pair);
+    }
+    {
+	Var pair = new_list(2);
+	pair.v.list[1].type = (var_type) (_TYPE_STR | 0x80);
+	pair.v.list[1].v.str = str_dup("hold-input");
+	pair.v.list[2].type = (TYPE_INT);
+	pair.v.list[2].v.num = (((tqueue *) q.ptr)->hold_input);
+	(list) = listappend((list), pair);
+    }
+    {
+	Var pair = new_list(2);
+	pair.v.list[1].type = (var_type) (_TYPE_STR | 0x80);
+	pair.v.list[1].v.str = str_dup("disable-oob");
+	pair.v.list[2].type = (TYPE_INT);
+	pair.v.list[2].v.num = (((tqueue *) q.ptr)->disable_oob);
+	(list) = listappend((list), pair);
+    }
+    {
+	Var pair = new_list(2);
+	pair.v.list[1].type = (var_type) (_TYPE_STR | 0x80);
+	pair.v.list[1].v.str = str_dup("intrinsic-commands");
+	pair.v.list[2].type = (var_type) ((_TYPE_LIST | 0x80));
+	pair.v.list[2].v.list =
+	    (icmd_list(((tqueue *) q.ptr)->icmds).v.list);
+	(list) = listappend((list), pair);
+    }
+    return (list);
+    } while (0);
 
 }
 
 #undef TASK_CO_TABLE
 
 static void
-enqueue_input_task(tqueue * tq, const char *input, int at_front, int binary)
+enqueue_input_task(tqueue * tq, const char *input, int at_front,
+		   int binary)
 {
     static char oob_prefix[] = OUT_OF_BAND_PREFIX;
     task *t;
@@ -1100,7 +1141,8 @@ enqueue_input_task(tqueue * tq, const char *input, int at_front, int binary)
     if (binary)
 	t->kind = TASK_BINARY;
     else if (oob_quote_prefix_length > 0
-	     && strncmp(oob_quote_prefix, input, oob_quote_prefix_length) == 0)
+	     && strncmp(oob_quote_prefix, input,
+			oob_quote_prefix_length) == 0)
 	t->kind = TASK_QUOTED;
     else if (sizeof(oob_prefix) > 1
 	     && strncmp(oob_prefix, input, sizeof(oob_prefix) - 1) == 0)
@@ -1121,8 +1163,7 @@ enqueue_input_task(tqueue * tq, const char *input, int at_front, int binary)
 	}
 	t->next = tq->first_input;
 	tq->first_input = t;
-    }
-    else {
+    } else {
 	if (tq->first_input && (((*(tq->last_itail))->kind == TASK_OOB)
 				!= (t->kind == TASK_OOB)))
 	    tq->last_itail = &((*(tq->last_itail))->t.input.next_itail);
@@ -1139,8 +1180,7 @@ enqueue_input_task(tqueue * tq, const char *input, int at_front, int binary)
 	ensure_usage(tq);
 
     if (!tq->input_suspended
-	&& tq->connected
-	&& tq->total_input_length > INPUT_HIWAT) {
+	&& tq->connected && tq->total_input_length > INPUT_HIWAT) {
 	server_suspend_input(tq->player);
 	tq->input_suspended = 1;
     }
@@ -1149,7 +1189,7 @@ enqueue_input_task(tqueue * tq, const char *input, int at_front, int binary)
 void
 task_suspend_input(task_queue q)
 {
-  tqueue *tq = (tqueue *) q.ptr;
+    tqueue *tq = (tqueue *) q.ptr;
 
     if (!tq->input_suspended && tq->connected) {
 	server_suspend_input(tq->player);
@@ -1183,13 +1223,13 @@ flush_input(tqueue * tq, int show_messages)
 void
 new_input_task(task_queue q, const char *input, int binary)
 {
-  tqueue *tq = (tqueue *) q.ptr;
+    tqueue *tq = (tqueue *) q.ptr;
 
     if (tq->flush_cmd && mystrcasecmp(input, tq->flush_cmd) == 0) {
 	flush_input(tq, 1);
 	return;
     }
-    enqueue_input_task(tq, input, 0/*at-rear*/, binary);
+    enqueue_input_task(tq, input, 0 /*at-rear */ , binary);
 }
 
 static void
@@ -1203,7 +1243,8 @@ enqueue_waiting(task * t)
     tqueue *tq = find_tqueue(progr, 1);
 
     tq->num_bg_tasks++;
-    if (!waiting_tasks || timeval_lt(&start_time, &GET_START_TIME(waiting_tasks))) {
+    if (!waiting_tasks
+	|| timeval_lt(&start_time, &GET_START_TIME(waiting_tasks))) {
 	t->next = waiting_tasks;
 	waiting_tasks = t;
     } else {
@@ -1268,7 +1309,8 @@ check_user_task_limit(Objid user)
 }
 
 enum error
-enqueue_forked_task2(activation a, int f_index, unsigned after_seconds, int vid)
+enqueue_forked_task2(activation a, int f_index, unsigned after_seconds,
+		     int vid)
 {
     int id;
     Var *rt_env;
@@ -1309,7 +1351,7 @@ enqueue_suspended_task(vm the_vm, void *data)
 	t = (task *) mymalloc(sizeof(task), M_TASK);
 	t->kind = TASK_SUSPENDED;
 	t->t.suspended.the_vm = the_vm;
-        timeval_add(&t->t.suspended.start_time, &now, &wait);
+	timeval_add(&t->t.suspended.start_time, &now, &wait);
 	t->t.suspended.value = zero;
 
 	enqueue_waiting(t);
@@ -1327,7 +1369,7 @@ resume_task(vm the_vm, Var value)
 
     t->kind = TASK_SUSPENDED;
     t->t.suspended.the_vm = the_vm;
-    double_to_timeval(0.0, &t->t.suspended.start_time);  /* ready now */
+    double_to_timeval(0.0, &t->t.suspended.start_time);	/* ready now */
     t->t.suspended.value = value;
 
     enqueue_bg_task(tq, t);
@@ -1387,28 +1429,28 @@ next_task_start(struct timeval *tv)
     tqueue *tq;
 
     for (tq = active_tqueues; tq; tq = tq->next)
-	if (tq->first_input != 0 || tq->first_bg != 0)
-        {
-            tv->tv_sec  = 0;
-            tv->tv_usec = 0;
+	if (tq->first_input != 0 || tq->first_bg != 0) {
+	    tv->tv_sec = 0;
+	    tv->tv_usec = 0;
 	    return 1;
-        }
+	}
 
     if (waiting_tasks != 0) {
-        struct timeval wait;
-        struct timeval now;
-        struct timeval zero;
+	struct timeval wait;
+	struct timeval now;
+	struct timeval zero;
 
-        zero.tv_sec = 0;
-        zero.tv_usec = 0;
+	zero.tv_sec = 0;
+	zero.tv_usec = 0;
 
-        gettimeofday(&now, NULL);
+	gettimeofday(&now, NULL);
 
 	timeval_sub(&wait, &(waiting_tasks->kind == TASK_FORKED
-		           ? waiting_tasks->t.forked.start_time
-	                   : waiting_tasks->t.suspended.start_time), &now);
+			     ? waiting_tasks->t.forked.start_time
+			     : waiting_tasks->t.suspended.start_time),
+		    &now);
 	*tv = timeval_lt(&wait, &zero) ? zero : wait;
-        return 1;
+	return 1;
     }
 
     return 0;
@@ -1423,10 +1465,13 @@ run_ready_tasks(void)
 
     gettimeofday(&now, NULL);
 
-    for (t = waiting_tasks; t && timeval_lt(&GET_START_TIME(t), &now); t = next_t) {
-	Objid progr = (t->kind == TASK_FORKED
-		       ? t->t.forked.a.progr
-		       : progr_of_cur_verb(t->t.suspended.the_vm));
+    for (t = waiting_tasks; t && timeval_lt(&GET_START_TIME(t), &now);
+	 t = next_t) {
+	Objid progr =
+	    (t->kind ==
+	     TASK_FORKED ? t->t.forked.a.progr : progr_of_cur_verb(t->t.
+								   suspended.
+								   the_vm));
 	tqueue *tq = find_tqueue(progr, 1);
 
 	next_t = t->next;
@@ -1454,9 +1499,9 @@ run_ready_tasks(void)
 		did_one = 1;
 	    }
 	    while (!did_one) {	/* Loop over tasks, looking for runnable one */
-		t = dequeue_input_task(tq, ((tq->hold_input && !tq->reading)
-					    ? DQ_OOB
-					    : DQ_FIRST));
+		t = dequeue_input_task(tq,
+				       ((tq->hold_input && !tq->reading)
+					? DQ_OOB : DQ_FIRST));
 		if (!t)
 		    t = dequeue_bg_task(tq);
 		if (!t)
@@ -1486,10 +1531,14 @@ run_ready_tasks(void)
 			 * couldn't come up with a good reason to keep that
 			 * restriction.
 			 */
-			add_command_to_history(tq->player, t->t.input.string);
-			did_one = (tq->player >= 0
-				   ? do_command_task
-				: do_login_task) (tq, t->t.input.string);
+			add_command_to_history(tq->player,
+					       t->t.input.string);
+			did_one =
+			    (tq->player >=
+			     0 ? do_command_task : do_login_task) (tq,
+								   t->t.
+								   input.
+								   string);
 		    }
 		    break;
 		case TASK_FORKED:
@@ -1541,8 +1590,8 @@ enum outcome
 run_server_task(Objid player, Objid what, const char *verb, Var args,
 		const char *argstr, Var * result)
 {
-    return run_server_task_setting_id(player, what, verb, args, argstr, result,
-				      0);
+    return run_server_task_setting_id(player, what, verb, args, argstr,
+				      result, 0);
 }
 
 enum outcome
@@ -1558,7 +1607,7 @@ run_server_task_setting_id(Objid player, Objid what, const char *verb,
     h = db_find_callable_verb(what, verb);
     if (h.ptr)
 	return do_server_verb_task(what, verb, args, h, player, argstr,
-				   result, 1/*traceback*/);
+				   result, 1 /*traceback */ );
     else {
 	/* simulate an empty verb */
 	if (result) {
@@ -1572,14 +1621,14 @@ run_server_task_setting_id(Objid player, Objid what, const char *verb,
 
 enum outcome
 run_server_program_task(Objid self, const char *verb, Var args, Objid vloc,
-		    const char *verbname, Program * program, Objid progr,
-			int debug, Objid player, const char *argstr,
-			Var * result)
+			const char *verbname, Program * program,
+			Objid progr, int debug, Objid player,
+			const char *argstr, Var * result)
 {
     current_task_id = new_task_id();
-    return do_server_program_task(self, verb, args, vloc, verbname, program,
-				  progr, debug, player, argstr, result,
-				  1/*traceback*/);
+    return do_server_program_task(self, verb, args, vloc, verbname,
+				  program, progr, debug, player, argstr,
+				  result, 1 /*traceback */ );
 }
 
 void
@@ -1597,16 +1646,19 @@ write_forked_task(forked_task ft)
 {
     int lineno = find_line_number(ft.program, ft.f_index, 0);
 
-    dbio_printf("0 %d %lf %d\n", lineno, timeval_to_double(&ft.start_time), ft.id);
+    dbio_printf("0 %d %lf %d\n", lineno, timeval_to_double(&ft.start_time),
+		ft.id);
     write_activ_as_pi(ft.a);
-    write_rt_env(ft.program->var_names, ft.rt_env, ft.program->num_var_names);
+    write_rt_env(ft.program->var_names, ft.rt_env,
+		 ft.program->num_var_names);
     dbio_write_forked_program(ft.program, ft.f_index);
 }
 
 static void
 write_suspended_task(suspended_task st)
 {
-    dbio_printf("%lf %d ", timeval_to_double(&st.start_time), st.the_vm->task_id);
+    dbio_printf("%lf %d ", timeval_to_double(&st.start_time),
+		st.the_vm->task_id);
     dbio_write_var(st.value);
     write_vm(st.the_vm);
 }
@@ -1685,7 +1737,7 @@ read_task_queue(void)
     }
     for (; count > 0; count--) {
 	int first_lineno, id, old_size;
-        double st;
+	double st;
 	char c;
 	struct timeval start_time;
 	Program *program;
@@ -1699,10 +1751,11 @@ read_task_queue(void)
 	    errlog("READ_TASK_QUEUE: Bad numbers, count = %d.\n", count);
 	    return 0;
 	}
-        double_to_timeval(st, &start_time);
+	double_to_timeval(st, &start_time);
 
 	if (!read_activ_as_pi(&a)) {
-	    errlog("READ_TASK_QUEUE: Bad activation, count = %d.\n", count);
+	    errlog("READ_TASK_QUEUE: Bad activation, count = %d.\n",
+		   count);
 	    return 0;
 	}
 	if (!read_rt_env(&old_names, &old_rt_env, &old_size)) {
@@ -1732,23 +1785,25 @@ read_task_queue(void)
     for (; suspended_count > 0; suspended_count--) {
 	task *t = (task *) mymalloc(sizeof(task), M_TASK);
 	int task_id;
-        double st;
+	double st;
 	char c;
 
 	t->kind = TASK_SUSPENDED;
 	if (dbio_scanf("%lf %d%c", &st, &task_id, &c) != 3) {
-	    errlog("READ_TASK_QUEUE: Bad suspended task header, count = %d\n",
-		   suspended_count);
+	    errlog
+		("READ_TASK_QUEUE: Bad suspended task header, count = %d\n",
+		 suspended_count);
 	    return 0;
 	}
-        double_to_timeval(st, &t->t.suspended.start_time);
+	double_to_timeval(st, &t->t.suspended.start_time);
 	if (c == ' ')
 	    t->t.suspended.value = dbio_read_var();
 	else if (c == '\n')
 	    t->t.suspended.value = zero;
 	else {
-	    errlog("READ_TASK_QUEUE: Bad suspended task value, count = %d\n",
-		   suspended_count);
+	    errlog
+		("READ_TASK_QUEUE: Bad suspended task value, count = %d\n",
+		 suspended_count);
 	    return 0;
 	}
 
@@ -2024,7 +2079,7 @@ struct qcl_data {
 static task_enum_action
 counting_closure(vm the_vm, const char *status, void *data)
 {
-  struct qcl_data *qdata = (qcl_data *) data;
+    struct qcl_data *qdata = (qcl_data *) data;
 
     if (qdata->show_all || qdata->progr == progr_of_cur_verb(the_vm))
 	qdata->i++;
@@ -2035,7 +2090,7 @@ counting_closure(vm the_vm, const char *status, void *data)
 static task_enum_action
 listing_closure(vm the_vm, const char *status, void *data)
 {
-  struct qcl_data *qdata = (qcl_data *) data;
+    struct qcl_data *qdata = (qcl_data *) data;
     Var list;
 
     if (qdata->show_all || qdata->progr == progr_of_cur_verb(the_vm)) {
@@ -2105,12 +2160,15 @@ bf_queued_tasks(Var arglist, Byte next, void *vdata, Objid progr)
 
 	for (t = tq->first_bg; t; t = t->next)
 	    if (t->kind == TASK_FORKED && (show_all
-					|| t->t.forked.a.progr == progr))
+					   || t->t.forked.a.progr ==
+					   progr))
 		tasks.v.list[i++] = list_for_forked_task(t->t.forked);
 	    else if (t->kind == TASK_SUSPENDED
 		     && (show_all
-		   || progr_of_cur_verb(t->t.suspended.the_vm) == progr))
-		tasks.v.list[i++] = list_for_suspended_task(t->t.suspended);
+			 || progr_of_cur_verb(t->t.suspended.the_vm) ==
+			 progr))
+		tasks.v.list[i++] =
+		    list_for_suspended_task(t->t.suspended);
     }
 
     for (t = waiting_tasks; t; t = t->next) {
@@ -2140,7 +2198,7 @@ struct fcl_data {
 static task_enum_action
 finding_closure(vm the_vm, const char *status, void *data)
 {
-  struct fcl_data *fdata = (fcl_data *) data;
+    struct fcl_data *fdata = (fcl_data *) data;
 
     if (the_vm->task_id == fdata->id) {
 	fdata->the_vm = the_vm;
@@ -2158,7 +2216,8 @@ find_suspended_task(int id)
     struct fcl_data fdata;
 
     for (t = waiting_tasks; t; t = t->next)
-	if (t->kind == TASK_SUSPENDED && t->t.suspended.the_vm->task_id == id)
+	if (t->kind == TASK_SUSPENDED
+	    && t->t.suspended.the_vm->task_id == id)
 	    return t->t.suspended.the_vm;
 
     for (tq = idle_tqueues; tq; tq = tq->next)
@@ -2199,7 +2258,7 @@ struct kcl_data {
 static task_enum_action
 killing_closure(vm the_vm, const char *status, void *data)
 {
-  struct kcl_data *kdata = (kcl_data *) data;
+    struct kcl_data *kdata = (kcl_data *) data;
 
     if (the_vm->task_id == kdata->id) {
 	if (is_wizard(kdata->owner)
@@ -2326,7 +2385,8 @@ do_resume(int id, Var value, Objid progr)
 	task *t = *tt;
 	Objid owner;
 
-	if (t->kind == TASK_SUSPENDED && t->t.suspended.the_vm->task_id == id)
+	if (t->kind == TASK_SUSPENDED
+	    && t->t.suspended.the_vm->task_id == id)
 	    owner = progr_of_cur_verb(t->t.suspended.the_vm);
 	else
 	    continue;
@@ -2408,7 +2468,7 @@ bf_output_delimiters(Var arglist, Byte next, void *vdata, Objid progr)
 
 	r = new_list(2);
 	r.v.list[1].type = (var_type) TYPE_STR;
-        r.v.list[2].type = (var_type) TYPE_STR;
+	r.v.list[2].type = (var_type) TYPE_STR;
 	r.v.list[1].v.str = str_dup(prefix);
 	r.v.list[2].v.str = str_dup(suffix);
     }
@@ -2429,7 +2489,7 @@ bf_force_input(Var arglist, Byte next, void *vdata, Objid progr)
 	return make_error_pack(E_PERM);
     }
     tq = find_tqueue(conn, 1);
-    enqueue_input_task(tq, line, at_front, 0/*non-binary*/);
+    enqueue_input_task(tq, line, at_front, 0 /*non-binary */ );
     free_var(arglist);
     return no_var_pack();
 }
@@ -2464,7 +2524,8 @@ register_tasks(void)
     register_function("resume", 1, 2, bf_resume, TYPE_INT, TYPE_ANY);
     register_function("force_input", 2, 3, bf_force_input,
 		      TYPE_OBJ, TYPE_STR, TYPE_ANY);
-    register_function("flush_input", 1, 2, bf_flush_input, TYPE_OBJ, TYPE_ANY);
+    register_function("flush_input", 1, 2, bf_flush_input, TYPE_OBJ,
+		      TYPE_ANY);
 }
 
 char rcsid_tasks[] = "$Id: tasks.c,v 1.14 2006-09-07 00:55:02 bjj Exp $";

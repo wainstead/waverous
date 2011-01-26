@@ -42,7 +42,7 @@ struct fixup {
     unsigned pc;
     unsigned value;
     unsigned prev_literals, prev_forks, prev_var_refs, prev_labels,
-     prev_stacks;
+	prev_stacks;
     int next;			/* chain for compiling IF/ELSEIF arms */
 };
 typedef struct fixup Fixup;
@@ -131,14 +131,18 @@ init_state(State * state, GState * gstate)
 
     state->num_fixups = 0;
     state->max_fixups = 10;
-    state->fixups = (Fixup *) mymalloc(sizeof(Fixup) * state->max_fixups, M_CODE_GEN);
+    state->fixups =
+	(Fixup *) mymalloc(sizeof(Fixup) * state->max_fixups, M_CODE_GEN);
 
     state->num_bytes = 0;
     state->max_bytes = 50;
-    state->bytes = (Byte *) mymalloc(sizeof(Byte) * state->max_bytes, M_BYTECODES);
+    state->bytes =
+	(Byte *) mymalloc(sizeof(Byte) * state->max_bytes, M_BYTECODES);
 #ifdef BYTECODE_REDUCE_REF
-    state->pushmap = (Byte *) mymalloc(sizeof(Byte) * state->max_bytes, M_BYTECODES);
-    state->trymap = (Byte *) mymalloc(sizeof(Byte) * state->max_bytes, M_BYTECODES);
+    state->pushmap =
+	(Byte *) mymalloc(sizeof(Byte) * state->max_bytes, M_BYTECODES);
+    state->trymap =
+	(Byte *) mymalloc(sizeof(Byte) * state->max_bytes, M_BYTECODES);
     state->try_depth = 0;
 #endif				/* BYTECODE_REDUCE_REF */
 
@@ -147,7 +151,8 @@ init_state(State * state, GState * gstate)
 
     state->num_loops = 0;
     state->max_loops = 5;
-    state->loops = (Loop *) mymalloc(sizeof(Loop) * state->max_loops, M_CODE_GEN);
+    state->loops =
+	(Loop *) mymalloc(sizeof(Loop) * state->max_loops, M_CODE_GEN);
 
     state->gstate = gstate;
 }
@@ -169,13 +174,16 @@ emit_byte(Byte b, State * state)
 {
     if (state->num_bytes == state->max_bytes) {
 	unsigned new_max = 2 * state->max_bytes;
-	state->bytes = (Byte *) myrealloc(state->bytes, sizeof(Byte) * new_max,
-				 M_BYTECODES);
+	state->bytes =
+	    (Byte *) myrealloc(state->bytes, sizeof(Byte) * new_max,
+			       M_BYTECODES);
 #ifdef BYTECODE_REDUCE_REF
-	state->pushmap = (Byte *) myrealloc(state->pushmap, sizeof(Byte) * new_max,
-				   M_BYTECODES);
-	state->trymap = (Byte *) myrealloc(state->trymap, sizeof(Byte) * new_max,
-				  M_BYTECODES);
+	state->pushmap =
+	    (Byte *) myrealloc(state->pushmap, sizeof(Byte) * new_max,
+			       M_BYTECODES);
+	state->trymap =
+	    (Byte *) myrealloc(state->trymap, sizeof(Byte) * new_max,
+			       M_BYTECODES);
 #endif				/* BYTECODE_REDUCE_REF */
 	state->max_bytes = new_max;
     }
@@ -201,7 +209,7 @@ add_known_fixup(Fixup f, State * state)
     if (state->num_fixups == state->max_fixups) {
 	unsigned new_max = 2 * state->max_fixups;
 	Fixup *new_fixups = (Fixup *) mymalloc(sizeof(Fixup) * new_max,
-				     M_CODE_GEN);
+					       M_CODE_GEN);
 
 	for (i = 0; i < state->num_fixups; i++)
 	    new_fixups[i] = state->fixups[i];
@@ -219,7 +227,8 @@ add_known_fixup(Fixup f, State * state)
 }
 
 static int
-add_linked_fixup(enum fixup_kind kind, unsigned value, int next, State * state)
+add_linked_fixup(enum fixup_kind kind, unsigned value, int next,
+		 State * state)
 {
     Fixup f;
 
@@ -256,9 +265,9 @@ add_literal(Var v, State * state)
 	/* New literal to intern */
 	if (gstate->num_literals == gstate->max_literals) {
 	    unsigned new_max = gstate->max_literals == 0
-	    ? 5 : 2 * gstate->max_literals;
+		? 5 : 2 * gstate->max_literals;
 	    Var *new_literals = (Var *) mymalloc(sizeof(Var) * new_max,
-					 M_CODE_GEN);
+						 M_CODE_GEN);
 
 	    if (gstate->literals) {
 		for (i = 0; i < gstate->num_literals; i++)
@@ -273,7 +282,7 @@ add_literal(Var v, State * state)
 	    /* intern string if we can */
 	    Var nv;
 
-	    nv.type = (var_type)TYPE_STR;
+	    nv.type = (var_type) TYPE_STR;
 	    nv.v.str = str_intern(v.v.str);
 	    gstate->literals[i = gstate->num_literals++] = nv;
 	} else {
@@ -294,9 +303,10 @@ add_fork(Bytecodes b, State * state)
 
     if (gstate->num_fork_vectors == gstate->max_fork_vectors) {
 	unsigned new_max = gstate->max_fork_vectors == 0
-	? 1 : 2 * gstate->max_fork_vectors;
-	Bytecodes *new_fv = (Bytecodes *) mymalloc(sizeof(Bytecodes) * new_max,
-				     M_CODE_GEN);
+	    ? 1 : 2 * gstate->max_fork_vectors;
+	Bytecodes *new_fv =
+	    (Bytecodes *) mymalloc(sizeof(Bytecodes) * new_max,
+				   M_CODE_GEN);
 
 	if (gstate->fork_vectors) {
 	    for (i = 0; i < gstate->num_fork_vectors; i++)
@@ -454,7 +464,7 @@ enter_loop(int id, Fixup top_label, unsigned top_stack,
     if (state->num_loops == state->max_loops) {
 	unsigned new_max = 2 * state->max_loops;
 	Loop *new_loops = (Loop *) mymalloc(sizeof(Loop) * new_max,
-				   M_CODE_GEN);
+					    M_CODE_GEN);
 
 	for (i = 0; i < state->num_loops; i++)
 	    new_loops[i] = state->loops[i];
@@ -519,12 +529,14 @@ generate_arg_list(Arg_List * args, State * state)
 	emit_byte(OP_MAKE_EMPTY_LIST, state);
 	push_stack(1, state);
     } else {
-	Opcode normal_op = OP_MAKE_SINGLETON_LIST, splice_op = OP_CHECK_LIST_FOR_SPLICE;
+	Opcode normal_op = OP_MAKE_SINGLETON_LIST, splice_op =
+	    OP_CHECK_LIST_FOR_SPLICE;
 	unsigned pop = 0;
 
 	for (; args; args = args->next) {
 	    generate_expr(args->expr, state);
-	    emit_byte(args->kind == ARG_NORMAL ? normal_op : splice_op, state);
+	    emit_byte(args->kind == ARG_NORMAL ? normal_op : splice_op,
+		      state);
 	    pop_stack(pop, state);
 	    normal_op = OP_LIST_ADD_TAIL;
 	    splice_op = OP_LIST_APPEND;
@@ -991,7 +1003,8 @@ generate_stmt(Stmt * stmt, State * state)
 		emit_byte(OP_FORK_WITH_ID, state);
 	    else
 		emit_byte(OP_FORK, state);
-	    add_fork(stmt_to_code(stmt->s.fork.body, state->gstate), state);
+	    add_fork(stmt_to_code(stmt->s.fork.body, state->gstate),
+		     state);
 	    if (stmt->s.fork.id >= 0)
 		add_var_ref(stmt->s.fork.id, state);
 	    pop_stack(1, state);
@@ -1093,8 +1106,8 @@ generate_stmt(Stmt * stmt, State * state)
 		    add_known_label(loop->top_label, state);
 		} else {
 		    add_stack_ref(loop->bottom_stack, state);
-		    loop->bottom_label = add_linked_label(loop->bottom_label,
-							  state);
+		    loop->bottom_label =
+			add_linked_label(loop->bottom_label, state);
 		}
 	    }
 	    break;
@@ -1200,7 +1213,8 @@ stmt_to_code(Stmt * stmt, GState * gstate)
     n_bbd = 0;
     bbd[n_bbd++] = 0;
     bbd[n_bbd++] = state.num_bytes;
-    for (fixup = state.fixups, fix_i = 0; fix_i < state.num_fixups; ++fix_i, ++fixup)
+    for (fixup = state.fixups, fix_i = 0; fix_i < state.num_fixups;
+	 ++fix_i, ++fixup)
 	if (fixup->kind == FIXUP_LABEL || fixup->kind == FIXUP_FORK)
 	    bbd[n_bbd++] = fixup->pc;
     qsort(bbd, n_bbd, sizeof(*bbd), bbd_cmp);
@@ -1322,8 +1336,9 @@ generate_code(Stmt * stmt, DB_Version version)
     if (gstate.literals) {
 	unsigned i;
 
-	prog->literals = (Var *) mymalloc(sizeof(Var) * gstate.num_literals,
-				  M_LIT_LIST);
+	prog->literals =
+	    (Var *) mymalloc(sizeof(Var) * gstate.num_literals,
+			     M_LIT_LIST);
 	prog->num_literals = gstate.num_literals;
 	for (i = 0; i < gstate.num_literals; i++)
 	    prog->literals[i] = gstate.literals[i];
@@ -1336,8 +1351,9 @@ generate_code(Stmt * stmt, DB_Version version)
 	unsigned i;
 
 	prog->fork_vectors =
-          (Bytecodes *) mymalloc(sizeof(Bytecodes) * gstate.num_fork_vectors,
-		     M_FORK_VECTORS);
+	    (Bytecodes *) mymalloc(sizeof(Bytecodes) *
+				   gstate.num_fork_vectors,
+				   M_FORK_VECTORS);
 	prog->fork_vectors_size = gstate.num_fork_vectors;
 	for (i = 0; i < gstate.num_fork_vectors; i++)
 	    prog->fork_vectors[i] = gstate.fork_vectors[i];
@@ -1351,7 +1367,8 @@ generate_code(Stmt * stmt, DB_Version version)
     return prog;
 }
 
-char rcsid_code_gen[] = "$Id: code_gen.c,v 1.11 2002-09-15 23:21:01 xplat Exp $";
+char rcsid_code_gen[] =
+    "$Id: code_gen.c,v 1.11 2002-09-15 23:21:01 xplat Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $

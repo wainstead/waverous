@@ -26,7 +26,7 @@
 #include "storage.h"
 
 #if (NETWORK_PROTOCOL != NP_LOCAL) || (NETWORK_STYLE != NS_SYSV)
- #error Configuration Error: this code can only be used with the FIFO protocol
+#error Configuration Error: this code can only be used with the FIFO protocol
 #endif
 
 typedef enum {
@@ -80,7 +80,8 @@ add_common(int fd, Direction dir)
     }
     if (num_ports == max_ports) {	/* Grow ports array */
 	int new_max = max_ports + 10;
-	Port *new_ports = (Port *) mymalloc(new_max * sizeof(Port), M_NETWORK);
+	Port *new_ports =
+	    (Port *) mymalloc(new_max * sizeof(Port), M_NETWORK);
 	int i;
 
 	for (i = 0; i < max_ports; i++)
@@ -158,7 +159,8 @@ mplex_is_writable(int fd)
     return (fd < rw_size) ? writable[fd] : 0;
 }
 
-char rcsid_net_mp_fake[] = "$Id: net_mp_fake.c,v 1.2 1997-03-03 04:19:03 nop Exp $";
+char rcsid_net_mp_fake[] =
+    "$Id: net_mp_fake.c,v 1.2 1997-03-03 04:19:03 nop Exp $";
 
 /* $Log: not supported by cvs2svn $
  * Revision 1.1.1.1  1997/03/03 03:45:02  nop

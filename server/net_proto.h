@@ -103,9 +103,9 @@ enum proto_accept_error {
 };
 
 extern enum proto_accept_error
- proto_accept_connection(int listener_fd,
-			 int *read_fd, int *write_fd,
-			 const char **name);
+
+proto_accept_connection(int listener_fd,
+			int *read_fd, int *write_fd, const char **name);
 				/* Accept a new connection on LISTENER_FD,
 				 * returning PA_OKAY if successful, PA_FULL if
 				 * unsuccessful only because there aren't

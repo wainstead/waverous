@@ -35,7 +35,7 @@
 #include <errno.h>		/* EMFILE */
 #include "my-fcntl.h"		/* O_RDWR */
 #include "my-in.h"		/* struct sockaddr_in, INADDR_ANY, htonl(),
-				   * htons(), ntohl(), struct in_addr */
+				 * htons(), ntohl(), struct in_addr */
 #include "my-ioctl.h"		/* ioctl() */
 #include "my-socket.h"		/* AF_INET */
 #include "my-stdlib.h"		/* strtoul() */
@@ -301,8 +301,7 @@ proto_open_connection(Var arglist, int *read_fd, int *write_fd,
 
     if (bind_local_ip == INADDR_ANY) {
 	p_requested = 0;
-    }
-    else {
+    } else {
 	req_addr.sin_family = AF_INET;
 	req_addr.sin_addr.s_addr = bind_local_ip;
 	req_addr.sin_port = 0;
@@ -361,7 +360,8 @@ proto_open_connection(Var arglist, int *read_fd, int *write_fd,
 }
 #endif				/* OUTBOUND_NETWORK */
 
-char rcsid_net_sysv_tcp[] = "$Id: net_sysv_tcp.c,v 1.3 2004-05-22 01:25:44 wrog Exp $";
+char rcsid_net_sysv_tcp[] =
+    "$Id: net_sysv_tcp.c,v 1.3 2004-05-22 01:25:44 wrog Exp $";
 
 /*
  * $Log: not supported by cvs2svn $

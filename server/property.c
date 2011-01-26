@@ -102,7 +102,8 @@ bf_prop_info(Var arglist, Byte next, void *vdata, Objid progr)
 }
 
 static enum error
-validate_prop_info(Var v, Objid * owner, unsigned *flags, const char **name)
+validate_prop_info(Var v, Objid * owner, unsigned *flags,
+		   const char **name)
 {
     const char *s;
     int len = (v.type == TYPE_LIST ? v.v.list[0].v.num : 0);
@@ -300,7 +301,8 @@ bf_is_clear_prop(Var arglist, Byte next, void *vdata, Objid progr)
 	    e = E_PERM;
 	else {
 	    r.type = TYPE_INT;
-	    r.v.num = (!h.built_in && db_property_value(h).type == TYPE_CLEAR);
+	    r.v.num = (!h.built_in
+		       && db_property_value(h).type == TYPE_CLEAR);
 	    e = E_NONE;
 	}
     }
@@ -330,7 +332,8 @@ register_property(void)
 			     TYPE_OBJ, TYPE_STR);
 }
 
-char rcsid_property[] = "$Id: property.c,v 1.4 2008-08-20 04:25:23 bjj Exp $";
+char rcsid_property[] =
+    "$Id: property.c,v 1.4 2008-08-20 04:25:23 bjj Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $

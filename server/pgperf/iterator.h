@@ -32,16 +32,16 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define _iterator_h
 #include "prototype.h"
 
-typedef struct iterator 
-{
-  char *str;                    /* A pointer to the string provided by the user. */
-  int   end;                    /* Value returned after last key is processed. */
-  int   end_word;               /* A value marking the abstract ``end of word'' ( usually '$'). */
-  int   error_value;            /* Error value returned when input is syntactically erroneous. */
-  int   hi_bound;               /* Greatest possible value, inclusive. */
-  int   lo_bound;               /* Smallest possible value, inclusive. */
+typedef struct iterator {
+    char *str;			/* A pointer to the string provided by the user. */
+    int end;			/* Value returned after last key is processed. */
+    int end_word;		/* A value marking the abstract ``end of word'' ( usually '$'). */
+    int error_value;		/* Error value returned when input is syntactically erroneous. */
+    int hi_bound;		/* Greatest possible value, inclusive. */
+    int lo_bound;		/* Smallest possible value, inclusive. */
 } ITERATOR;
 
-extern void iterator_init P ((char *s, int lo, int hi, int word_end, int bad_val, int key_end));
-extern int  next P ((void));
-#endif /* _iterator_h */
+extern void iterator_init
+P((char *s, int lo, int hi, int word_end, int bad_val, int key_end));
+extern int next P((void));
+#endif				/* _iterator_h */

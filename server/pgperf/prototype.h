@@ -12,4 +12,4 @@ typedef char bool;
 
 #define ODD(X) ((X) & 1)
 #define EVEN(X) (!((X) & 1))
-#endif /* _prototype_h */
+#endif				/* _prototype_h */

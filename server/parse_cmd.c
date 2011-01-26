@@ -40,7 +40,8 @@ parse_into_words(char *input, int *nwords)
 
     if (!words) {
 	max_words = 50;
-	words = (char **) mymalloc(max_words * sizeof(char *), M_STRING_PTRS);
+	words =
+	    (char **) mymalloc(max_words * sizeof(char *), M_STRING_PTRS);
     }
     while (*input == ' ')
 	input++;
@@ -48,7 +49,9 @@ parse_into_words(char *input, int *nwords)
     for (*nwords = 0; *input != '\0'; (*nwords)++) {
 	if (*nwords == max_words) {
 	    int new_max = max_words * 2;
-	    char **_new = (char **) mymalloc(new_max * sizeof(char *), M_STRING_PTRS);
+	    char **_new =
+		(char **) mymalloc(new_max * sizeof(char *),
+				   M_STRING_PTRS);
 	    int i;
 
 	    for (i = 0; i < max_words; i++)
@@ -116,7 +119,7 @@ parse_into_wordlist(const char *command)
     argv = parse_into_words(s, &argc);
     args = new_list(argc);
     for (i = 1; i <= argc; i++) {
-      args.v.list[i].type = (var_type) TYPE_STR;
+	args.v.list[i].type = (var_type) TYPE_STR;
 	args.v.list[i].v.str = str_dup(argv[i - 1]);
     }
     free_str(s);
@@ -187,7 +190,7 @@ parse_command(const char *command, Objid user)
 
     pc.args = new_list(argc - 1);
     for (i = 1; i < argc; i++) {
-        pc.args.v.list[i].type = (var_type) TYPE_STR;
+	pc.args.v.list[i].type = (var_type) TYPE_STR;
 	pc.args.v.list[i].v.str = str_dup(argv[i]);
     }
 
@@ -249,7 +252,8 @@ free_parsed_command(Parsed_Command * pc)
 }
 
 
-char rcsid_parse_cmd[] = "$Id: parse_cmd.c,v 1.4 1998-12-14 13:18:42 nop Exp $";
+char rcsid_parse_cmd[] =
+    "$Id: parse_cmd.c,v 1.4 1998-12-14 13:18:42 nop Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $

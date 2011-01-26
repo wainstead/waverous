@@ -43,7 +43,7 @@
 static char *input_db_name, *dump_db_name;
 static int dump_generation = 0;
 static const char *header_format_string
-= "** LambdaMOO Database, Format Version %u **\n";
+    = "** LambdaMOO Database, Format Version %u **\n";
 
 DB_Version dbio_input_version;
 
@@ -150,7 +150,8 @@ read_object(void)
     o->propdefs.max_length = 0;
     o->propdefs.l = 0;
     if ((i = dbio_read_num()) != 0) {
-	o->propdefs.l = (Propdef *) mymalloc(i * sizeof(Propdef), M_PROPDEF);
+	o->propdefs.l =
+	    (Propdef *) mymalloc(i * sizeof(Propdef), M_PROPDEF);
 	o->propdefs.cur_length = i;
 	o->propdefs.max_length = i;
 	for (i = 0; i < o->propdefs.cur_length; i++)
@@ -304,7 +305,7 @@ validate_hierarchies()
 #	    undef CHECK
 
 	    /* setup for phase 3:  set two temp flags on every object */
-	    o->flags |= (3<<FLAG_FIRST_TEMP);
+	    o->flags |= (3 << FLAG_FIRST_TEMP);
 	}
     }
 
@@ -340,8 +341,9 @@ validate_hierarchies()
 		}						\
 	    }
 
-	    CHECK(parent,   child,    "child",    sibling, FLAG_FIRST_TEMP);
-	    CHECK(location, contents, "contents", next,    FLAG_FIRST_TEMP+1);
+	    CHECK(parent, child, "child", sibling, FLAG_FIRST_TEMP);
+	    CHECK(location, contents, "contents", next,
+		  FLAG_FIRST_TEMP + 1);
 
 #	    undef CHECK
 	}
@@ -363,11 +365,11 @@ validate_hierarchies()
 		}							\
 	    }
 
-	    CHECK(parent,   "parent",   "child",    FLAG_FIRST_TEMP);
-	    CHECK(location, "location", "contents", FLAG_FIRST_TEMP+1);
+	    CHECK(parent, "parent", "child", FLAG_FIRST_TEMP);
+	    CHECK(location, "location", "contents", FLAG_FIRST_TEMP + 1);
 
 	    /* clear temp flags */
-	    o->flags &= ~(3<<FLAG_FIRST_TEMP);
+	    o->flags &= ~(3 << FLAG_FIRST_TEMP);
 
 #	    undef CHECK
 	}
@@ -380,7 +382,7 @@ validate_hierarchies()
 static const char *
 fmt_verb_name(void *data)
 {
-  db_verb_handle *h = (db_verb_handle *) data;
+    db_verb_handle *h = (db_verb_handle *) data;
     static Stream *s = 0;
 
     if (!s)
@@ -453,12 +455,14 @@ read_db_file(void)
 	}
 	h = db_find_indexed_verb(oid, vnum + 1);	/* DB file is 0-based. */
 	if (!h.ptr) {
-	    errlog("READ_DB_FILE: Unknown verb index: #%d:%d.\n", oid, vnum);
+	    errlog("READ_DB_FILE: Unknown verb index: #%d:%d.\n", oid,
+		   vnum);
 	    return 0;
 	}
 	program = dbio_read_program(dbio_input_version, fmt_verb_name, &h);
 	if (!program) {
-	    errlog("READ_DB_FILE: Unparsable program #%d:%d.\n", oid, vnum);
+	    errlog("READ_DB_FILE: Unparsable program #%d:%d.\n", oid,
+		   vnum);
 	    return 0;
 	}
 	db_set_verb_program(h, program);
@@ -485,120 +489,131 @@ read_db_file(void)
 static int
 write_db_file(const char *reason)
 {
-  Objid oid;
-  Objid max_oid = db_last_used_objid();
-  Verbdef *v;
-  Var user_list;
-  int i;
-  volatile int nprogs = 0;
-  volatile int success = 1;
+    Objid oid;
+    Objid max_oid = db_last_used_objid();
+    Verbdef *v;
+    Var user_list;
+    int i;
+    volatile int nprogs = 0;
+    volatile int success = 1;
 
-  for (oid = 0; oid <= max_oid; oid++) {
-    if (valid(oid))
-      for (v = dbpriv_find_object(oid)->verbdefs; v; v = v->next)
-        if (v->program)
-          nprogs++;
-  }
+    for (oid = 0; oid <= max_oid; oid++) {
+	if (valid(oid))
+	    for (v = dbpriv_find_object(oid)->verbdefs; v; v = v->next)
+		if (v->program)
+		    nprogs++;
+    }
 
-  user_list = db_all_users();
+    user_list = db_all_users();
 
 
-  // removed the TRY macro here, to get around a void * error. The
-  // macros TRY, CATCH, ENDTRY are only used in this file in this instance,
-  // so it seemed safe to remove them. The macro FINALLY was never used.
-  // I copied the macro bodies into the below block verbatim, though
-  // the resulting structure is kinda... nonobvious.
-  // --sw june 2009
+    // removed the TRY macro here, to get around a void * error. The
+    // macros TRY, CATCH, ENDTRY are only used in this file in this instance,
+    // so it seemed safe to remove them. The macro FINALLY was never used.
+    // I copied the macro bodies into the below block verbatim, though
+    // the resulting structure is kinda... nonobvious.
+    // --sw june 2009
 
-  //TRY {						
-  {						
-    ES_CtxBlock		ES_ctx;			
-    volatile ES_Value	ES_es = ES_Initialize;  
-							
-    ES_ctx.nx = 0;				
-    ES_ctx._finally = 0;			
-    ES_ctx.link = ES_exceptionStack;		
-    ES_exceptionStack = &ES_ctx;		
-	    						
-    if (setjmp(ES_ctx.jmp) != 0)	
-      ES_es = ES_Exception;			
-		    					
-    while (1) {					
-      if (ES_es == ES_EvalBody) {		
-        /* TRY body goes here */
+    //TRY {                                               
+    {
+	ES_CtxBlock ES_ctx;
+	volatile ES_Value ES_es = ES_Initialize;
 
-        {
-          dbio_printf(header_format_string, current_version);
-          dbio_printf("%d\n%d\n%d\n%d\n",
-                      max_oid + 1, nprogs, 0, user_list.v.list[0].v.num);
-          for (i = 1; i <= user_list.v.list[0].v.num; i++)
-	    dbio_write_objid(user_list.v.list[i].v.obj);
-          oklog("%s: Writing %d objects...\n", reason, max_oid + 1);
-          for (oid = 0; oid <= max_oid; oid++) {
-	    write_object(oid);
-	    if (oid == max_oid || log_report_progress())
-              oklog("%s: Done writing %d objects...\n", reason, oid + 1);
-          }
-          oklog("%s: Writing %d MOO verb programs...\n", reason, nprogs);
-          for (i = 0, oid = 0; oid <= max_oid; oid++)
-	    if (valid(oid)) {
-              int vcount = 0;
+	ES_ctx.nx = 0;
+	ES_ctx._finally = 0;
+	ES_ctx.link = ES_exceptionStack;
+	ES_exceptionStack = &ES_ctx;
 
-              for (v = dbpriv_find_object(oid)->verbdefs; v; v = v->next) {
-                if (v->program) {
-                  dbio_printf("#%d:%d\n", oid, vcount);
-                  dbio_write_program(v->program);
-                  if (++i == nprogs || log_report_progress())
-                    oklog("%s: Done writing %d verb programs...\n",
-                          reason, i);
-                }
-                vcount++;
-              }
+	if (setjmp(ES_ctx.jmp) != 0)
+	    ES_es = ES_Exception;
+
+	while (1) {
+	    if (ES_es == ES_EvalBody) {
+		/* TRY body goes here */
+
+		{
+		    dbio_printf(header_format_string, current_version);
+		    dbio_printf("%d\n%d\n%d\n%d\n",
+				max_oid + 1, nprogs, 0,
+				user_list.v.list[0].v.num);
+		    for (i = 1; i <= user_list.v.list[0].v.num; i++)
+			dbio_write_objid(user_list.v.list[i].v.obj);
+		    oklog("%s: Writing %d objects...\n", reason,
+			  max_oid + 1);
+		    for (oid = 0; oid <= max_oid; oid++) {
+			write_object(oid);
+			if (oid == max_oid || log_report_progress())
+			    oklog("%s: Done writing %d objects...\n",
+				  reason, oid + 1);
+		    }
+		    oklog("%s: Writing %d MOO verb programs...\n", reason,
+			  nprogs);
+		    for (i = 0, oid = 0; oid <= max_oid; oid++)
+			if (valid(oid)) {
+			    int vcount = 0;
+
+			    for (v = dbpriv_find_object(oid)->verbdefs; v;
+				 v = v->next) {
+				if (v->program) {
+				    dbio_printf("#%d:%d\n", oid, vcount);
+				    dbio_write_program(v->program);
+				    if (++i == nprogs
+					|| log_report_progress())
+					oklog
+					    ("%s: Done writing %d verb programs...\n",
+					     reason, i);
+				}
+				vcount++;
+			    }
+			}
+		    oklog("%s: Writing forked and suspended tasks...\n",
+			  reason);
+		    write_task_queue();
+		    oklog
+			("%s: Writing list of formerly active connections...\n",
+			 reason);
+		    write_active_connections();
+		}
+		//EXCEPT(dbpriv_dbio_failed)
+		/* TRY body or handler goes here */
+		if (ES_es == ES_EvalBody)
+		    ES_exceptionStack = ES_ctx.link;
+		break;
 	    }
-          oklog("%s: Writing forked and suspended tasks...\n", reason);
-          write_task_queue();
-          oklog("%s: Writing list of formerly active connections...\n", reason);
-          write_active_connections();
-        }
-        //EXCEPT(dbpriv_dbio_failed)
-        /* TRY body or handler goes here */                                         
-        if (ES_es == ES_EvalBody)                                                   
-          ES_exceptionStack = ES_ctx.link;                                        
-        break;                                                                      
-      }                                                                               
-      if (ES_es == ES_Initialize) {                                                   
-        if (ES_ctx.nx >= ES_MaxExceptionsPerScope)                                  
-          panic("Too many EXCEPT clauses!");                                      
-        ES_ctx.array[ES_ctx.nx++] = &dbpriv_dbio_failed;                            
-      } else if (ES_ctx.id == &dbpriv_dbio_failed  ||  &dbpriv_dbio_failed == &ANY) {	
-        int	exception_value = ES_ctx.value;                                         
-                                                                                                
-        ES_exceptionStack = ES_ctx.link;                                            
-        exception_value = exception_value;                                          
-        /* avoid warnings */                                                    
-        /* handler goes here */
+	    if (ES_es == ES_Initialize) {
+		if (ES_ctx.nx >= ES_MaxExceptionsPerScope)
+		    panic("Too many EXCEPT clauses!");
+		ES_ctx.array[ES_ctx.nx++] = &dbpriv_dbio_failed;
+	    } else if (ES_ctx.id == &dbpriv_dbio_failed
+		       || &dbpriv_dbio_failed == &ANY) {
+		int exception_value = ES_ctx.value;
 
-	success = 0;
-        //ENDTRY;
-        /* FINALLY body or handler goes here */		
-        if (ES_ctx._finally  &&  ES_es == ES_Exception)  	
-          ES_RaiseException((Exception *) ES_ctx.id,	
-                            (int) ES_ctx.value);		
-        break;						
-      }							
-      ES_es = ES_EvalBody;					
-    }								
-  }
+		ES_exceptionStack = ES_ctx.link;
+		exception_value = exception_value;
+		/* avoid warnings */
+		/* handler goes here */
+
+		success = 0;
+		//ENDTRY;
+		/* FINALLY body or handler goes here */
+		if (ES_ctx._finally && ES_es == ES_Exception)
+		    ES_RaiseException((Exception *) ES_ctx.id,
+				      (int) ES_ctx.value);
+		break;
+	    }
+	    ES_es = ES_EvalBody;
+	}
+    }
 
 
-  return success;
+    return success;
 }
 
 typedef enum {
     DUMP_SHUTDOWN, DUMP_CHECKPOINT, DUMP_PANIC
 } Dump_Reason;
 const char *reason_names[] =
-{"DUMPING", "CHECKPOINTING", "PANIC-DUMPING"};
+    { "DUMPING", "CHECKPOINTING", "PANIC-DUMPING" };
 
 static int
 dump_database(Dump_Reason reason)
@@ -628,7 +643,7 @@ dump_database(Dump_Reason reason)
 #else
     if (reason == DUMP_CHECKPOINT) {
 /* bg_name_lookup */
-        switch (fork_server("checkpointer", &checkpoint_pid)) {
+	switch (fork_server("checkpointer", &checkpoint_pid)) {
 /* !bg_name_lookup */
 	case FORK_PARENT:
 	    reset_command_history();
@@ -788,7 +803,8 @@ db_shutdown()
     dump_database(DUMP_SHUTDOWN);
 }
 
-char rcsid_db_file[] = "$Id: db_file.c,v 1.6 2007-11-12 11:17:03 wrog Exp $";
+char rcsid_db_file[] =
+    "$Id: db_file.c,v 1.6 2007-11-12 11:17:03 wrog Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $

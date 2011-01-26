@@ -32,7 +32,8 @@ new_names(unsigned max_size)
 {
     Names *names = (Names *) mymalloc(sizeof(Names), M_NAMES);
 
-    names->names = (const char **) mymalloc(sizeof(char *) * max_size, M_NAMES);
+    names->names =
+	(const char **) mymalloc(sizeof(char *) * max_size, M_NAMES);
     names->max_size = max_size;
     names->size = 0;
 
@@ -126,7 +127,7 @@ find_or_add_name(Names ** names, const char *str)
 
 	for (i = 0; i < old_max; i++) {
 	    _new->names[i] = (*names)->names[i];
-        }
+	}
 	_new->size = old_max;
 	myfree((*names)->names, M_NAMES);
 	myfree(*names, M_NAMES);
@@ -147,7 +148,8 @@ free_names(Names * names)
     myfree(names, M_NAMES);
 }
 
-char rcsid_sym_table[] = "$Id: sym_table.c,v 1.3 1998-12-14 13:19:05 nop Exp $";
+char rcsid_sym_table[] =
+    "$Id: sym_table.c,v 1.3 1998-12-14 13:19:05 nop Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $

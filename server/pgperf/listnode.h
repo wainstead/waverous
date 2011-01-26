@@ -25,19 +25,18 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define ALPHABET_SIZE 128
 
-typedef struct list_node 
-{ 
-  struct list_node *link;       /* TRUE if key has an identical KEY_SET as another key. */
-  struct list_node *next;       /* Points to next element on the list. */  
-  int        length;            /* Length of the key. */
-  int        hash_value;        /* Hash value for the key. */
-  int        occurrence;        /* A metric for frequency of key set occurrences. */
-  int        index;             /* Position of this node relative to other nodes. */
-  char      *key;               /* Key string. */
-  char      *rest;              /* Additional information for building hash function. */
-  char       char_set[1];       /* Set of characters to hash, specified by user. */
+typedef struct list_node {
+    struct list_node *link;	/* TRUE if key has an identical KEY_SET as another key. */
+    struct list_node *next;	/* Points to next element on the list. */
+    int length;			/* Length of the key. */
+    int hash_value;		/* Hash value for the key. */
+    int occurrence;		/* A metric for frequency of key set occurrences. */
+    int index;			/* Position of this node relative to other nodes. */
+    char *key;			/* Key string. */
+    char *rest;			/* Additional information for building hash function. */
+    char char_set[1];		/* Set of characters to hash, specified by user. */
 } LIST_NODE;
 
-extern LIST_NODE *make_list_node P ((char *k, int len));
+extern LIST_NODE *make_list_node P((char *k, int len));
 
-#endif _listnode_h
+#endif	/* _listnode_h */

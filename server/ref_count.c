@@ -185,7 +185,8 @@ addref(const void *p)
 	reftab_entry **new_table;
 	table_power++;
 	table_size *= 2;
-	new_table = mymalloc(table_size * sizeof(reftab_entry *), M_REF_TABLE);
+	new_table =
+	    mymalloc(table_size * sizeof(reftab_entry *), M_REF_TABLE);
 	for (index = 0; index < table_size; index++)
 	    new_table[index] = 0;
 	ref_table = rehash(ref_table, new_table);	/* frees old table */
@@ -208,7 +209,8 @@ delref(const void *p)
 }
 #endif
 
-char rcsid_ref_count[] = "$Id: ref_count.c,v 1.4 1998-12-14 13:18:54 nop Exp $";
+char rcsid_ref_count[] =
+    "$Id: ref_count.c,v 1.4 1998-12-14 13:18:54 nop Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $

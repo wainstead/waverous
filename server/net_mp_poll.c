@@ -47,7 +47,8 @@ add_common(int fd, unsigned dir)
 {
     if (fd >= num_ports) {	/* Grow ports array */
 	int new_num = (fd + 9) / 10 * 10 + 1;
-	Port *new_ports = (Port *) mymalloc(new_num * sizeof(Port), M_NETWORK);
+	Port *new_ports =
+	    (Port *) mymalloc(new_num * sizeof(Port), M_NETWORK);
 	int i;
 
 	for (i = 0; i < num_ports; i++)
@@ -102,7 +103,8 @@ mplex_is_writable(int fd)
     return fd <= max_fd && (ports[fd].revents & POLLOUT) != 0;
 }
 
-char rcsid_net_mp_poll[] = "$Id: net_mp_poll.c,v 1.2 1997-03-03 04:19:04 nop Exp $";
+char rcsid_net_mp_poll[] =
+    "$Id: net_mp_poll.c,v 1.2 1997-03-03 04:19:04 nop Exp $";
 
 /* $Log: not supported by cvs2svn $
  * Revision 1.1.1.1  1997/03/03 03:45:02  nop

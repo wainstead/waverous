@@ -38,7 +38,6 @@ typedef enum Memory_Type {
     M_XML_DATA,
 
     Sizeof_Memory_Type
-
 } Memory_Type;
 
 extern char *str_dup(const char *);
@@ -65,7 +64,7 @@ free_str(const char *s)
 #else
 #define memo_strlen(X)		strlen(X)
 
-#endif /* MEMO_STRLEN */
+#endif				/* MEMO_STRLEN */
 
 #endif				/* Storage_h */
 

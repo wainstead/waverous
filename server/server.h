@@ -27,7 +27,7 @@
 #define Server_H 1
 
 /* bg_name_lookup */
-#include <sys/types.h> /* pid_t */
+#include <sys/types.h>		/* pid_t */
 /* !bg_name_lookup */
 
 #include "my-stdio.h"
@@ -47,7 +47,7 @@ typedef struct {		/* Server's handle on a listening point */
 extern server_listener null_server_listener;
 
 extern server_handle server_new_connection(server_listener l,
-					 network_handle h, int outbound);
+					   network_handle h, int outbound);
 				/* Called by the network whenever a new player
 				 * connection is created.  If `outbound' is
 				 * true, then the connection is being made from
@@ -60,8 +60,7 @@ extern server_handle server_new_connection(server_listener l,
 				 * calls on each other.
 				 */
 
-extern void server_refuse_connection(server_listener l,
-				     network_handle h);
+extern void server_refuse_connection(server_listener l, network_handle h);
 				/* Called by the network whenever it has
 				 * temporarily accepted a connection just to
 				 * explain to the user that the server is too
@@ -155,7 +154,8 @@ enum Fork_Result {
 
 /* bg_name_lookup */
 extern pid_t checkpoint_pid;
-extern enum Fork_Result fork_server(const char *subtask_name, pid_t *child_pid);
+extern enum Fork_Result fork_server(const char *subtask_name,
+				    pid_t * child_pid);
 /* !bg_name_lookup */
 
 extern void player_connected(Objid old_id, Objid new_id,

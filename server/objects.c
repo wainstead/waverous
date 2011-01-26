@@ -145,11 +145,11 @@ do_move(Var arglist, Byte next, struct bf_move_data *data, Objid progr)
 static package
 bf_move(Var arglist, Byte next, void *vdata, Objid progr)
 {
-  struct bf_move_data *data = (bf_move_data *)vdata;
+    struct bf_move_data *data = (bf_move_data *) vdata;
     package p;
 
     if (next == 1) {
-        data = (bf_move_data *) alloc_data(sizeof(*data));
+	data = (bf_move_data *) alloc_data(sizeof(*data));
 	data->what = arglist.v.list[1].v.obj;
 	data->where = arglist.v.list[2].v.obj;
     }
@@ -165,7 +165,7 @@ bf_move(Var arglist, Byte next, void *vdata, Objid progr)
 static void
 bf_move_write(void *vdata)
 {
-  struct bf_move_data *data = (bf_move_data *) vdata;
+    struct bf_move_data *data = (bf_move_data *) vdata;
 
     dbio_printf("bf_move data: what = %d, where = %d\n",
 		data->what, data->where);
@@ -244,8 +244,7 @@ bf_create(Var arglist, Byte next, void *vdata, Objid progr)
 
 	parent = arglist.v.list[1].v.obj;
 	owner = (arglist.v.list[0].v.num == 2
-		 ? arglist.v.list[2].v.obj
-		 : progr);
+		 ? arglist.v.list[2].v.obj : progr);
 	free_var(arglist);
 
 	if ((valid(parent) ? !db_object_allows(parent, progr, FLAG_FERTILE)
@@ -361,7 +360,7 @@ struct children_data {
 static int
 add_to_list(void *data, Objid child)
 {
-  struct children_data *d = (children_data *) data;
+    struct children_data *d = (children_data *) data;
 
     d->i++;
     d->r.v.list[d->i].type = TYPE_OBJ;
@@ -420,7 +419,8 @@ first_proc(void *data, Objid oid)
 }
 
 static Objid
-get_first(Objid oid, int (*for_all) (Objid, int (*)(void *, Objid), void *))
+get_first(Objid oid,
+	  int (*for_all) (Objid, int (*)(void *, Objid), void *))
 {
     Objid result = NOTHING;
 
@@ -472,8 +472,7 @@ bf_recycle(Var arglist, Byte func_pc, void *vdata, Objid progr)
 	    if (move_to_nothing(c))
 		return make_call_pack(2, data);
 
-	if (db_object_location(oid) != NOTHING
-	    && move_to_nothing(oid))
+	if (db_object_location(oid) != NOTHING && move_to_nothing(oid))
 	    /* Return to same case because this :exitfunc might add new */
 	    /* contents to OID or even move OID right back in. */
 	    return make_call_pack(2, data);
@@ -618,7 +617,8 @@ register_objects(void)
 				      TYPE_OBJ, TYPE_OBJ);
 }
 
-char rcsid_objects[] = "$Id: objects.c,v 1.4 1998-12-14 13:18:39 nop Exp $";
+char rcsid_objects[] =
+    "$Id: objects.c,v 1.4 1998-12-14 13:18:39 nop Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $

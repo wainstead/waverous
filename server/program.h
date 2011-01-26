@@ -24,8 +24,8 @@
 typedef unsigned char Byte;
 
 typedef struct {
-    Byte numbytes_label, numbytes_literal, numbytes_fork, numbytes_var_name,
-     numbytes_stack;
+    Byte numbytes_label, numbytes_literal, numbytes_fork,
+	numbytes_var_name, numbytes_stack;
     Byte *vector;
     unsigned size;
     unsigned max_stack;

@@ -29,26 +29,25 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <stdio.h>
 #include "listnode.h"
 
-typedef struct key_list
-{
-  LIST_NODE *head;                  /* Points to the head of the linked list. */
-  char      *array_type;            /* Pointer to the type for word list. */
-  char      *return_type;           /* Pointer to return type for lookup function. */
-  char      *struct_tag;            /* Shorthand for user-defined struct tag type. */
-  char      *include_src;           /* C source code to be included verbatim. */
-  int        list_len;              /* Length of head's Key_List, not counting duplicates. */
-  int        total_keys;            /* Total number of keys, counting duplicates. */
-  int        max_key_len;           /* Maximum length of the longest keyword. */
-  int        min_key_len;           /* Minimum length of the shortest keyword. */
-  bool       occurrence_sort;       /* True if sorting by occurrence. */
-  bool       hash_sort;             /* True if sorting by hash value. */
-  bool       additional_code;       /* True if any additional C code is included. */
+typedef struct key_list {
+    LIST_NODE *head;		/* Points to the head of the linked list. */
+    char *array_type;		/* Pointer to the type for word list. */
+    char *return_type;		/* Pointer to return type for lookup function. */
+    char *struct_tag;		/* Shorthand for user-defined struct tag type. */
+    char *include_src;		/* C source code to be included verbatim. */
+    int list_len;		/* Length of head's Key_List, not counting duplicates. */
+    int total_keys;		/* Total number of keys, counting duplicates. */
+    int max_key_len;		/* Maximum length of the longest keyword. */
+    int min_key_len;		/* Minimum length of the shortest keyword. */
+    bool occurrence_sort;	/* True if sorting by occurrence. */
+    bool hash_sort;		/* True if sorting by hash value. */
+    bool additional_code;	/* True if any additional C code is included. */
 } KEY_LIST;
 
-extern void       key_list_init P ((void));
-extern void       key_list_destroy P ((void));
-extern void       print_output P ((void));
-extern int        keyword_list_length P ((void));
-extern int        max_key_length P ((void));
-extern KEY_LIST   key_list;
-#endif /* _keylist_h */
+extern void key_list_init P((void));
+extern void key_list_destroy P((void));
+extern void print_output P((void));
+extern int keyword_list_length P((void));
+extern int max_key_length P((void));
+extern KEY_LIST key_list;
+#endif				/* _keylist_h */

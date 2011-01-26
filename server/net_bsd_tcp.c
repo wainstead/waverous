@@ -19,13 +19,13 @@
 
 #include "my-inet.h"		/* inet_addr() */
 #include <errno.h>		/* EMFILE, EADDRNOTAVAIL, ECONNREFUSED,
-				   * ENETUNREACH, ETIMEOUT */
+				 * ENETUNREACH, ETIMEOUT */
 #include "my-in.h"		/* struct sockaddr_in, INADDR_ANY, htons(),
-				   * htonl(), ntohl(), struct in_addr */
+				 * htonl(), ntohl(), struct in_addr */
 #include "my-socket.h"		/* socket(), AF_INET, SOCK_STREAM,
-				   * setsockopt(), SOL_SOCKET, SO_REUSEADDR,
-				   * bind(), struct sockaddr, accept(),
-				   * connect() */
+				 * setsockopt(), SOL_SOCKET, SO_REUSEADDR,
+				 * bind(), struct sockaddr, accept(),
+				 * connect() */
 #include "my-stdlib.h"		/* strtoul() */
 #include "my-string.h"		/* memcpy() */
 #include "my-unistd.h"		/* close() */
@@ -81,7 +81,7 @@ proto_make_listener(Var desc, int *fd, Var * canon, const char **name)
 	st = new_stream(20);
 
     if (desc.type != TYPE_INT && desc.type != TYPE_LIST)
-        return E_TYPE;
+	return E_TYPE;
 
     port = desc.v.num;
     s = socket(AF_INET, SOCK_STREAM, 0);
@@ -98,22 +98,22 @@ proto_make_listener(Var desc, int *fd, Var * canon, const char **name)
     memset((char *) &address, 0, sizeof(address));
     address.sin_family = AF_INET;
     if (desc.type == TYPE_INT) {
-      port = desc.v.num;
-      address.sin_addr.s_addr = bind_local_ip;
+	port = desc.v.num;
+	address.sin_addr.s_addr = bind_local_ip;
     } else {
-      unsigned long inaddr;
-      inaddr = inet_addr(desc.v.list[1].v.str);
-      if (inaddr != INADDR_NONE) {
-        memcpy(&address.sin_addr, &inaddr, sizeof(inaddr));
-      } else {
-        struct hostent *hp;
-        hp=gethostbyname(desc.v.list[1].v.str);
-        if (hp == NULL)
-          return E_INVARG;
+	unsigned long inaddr;
+	inaddr = inet_addr(desc.v.list[1].v.str);
+	if (inaddr != INADDR_NONE) {
+	    memcpy(&address.sin_addr, &inaddr, sizeof(inaddr));
+	} else {
+	    struct hostent *hp;
+	    hp = gethostbyname(desc.v.list[1].v.str);
+	    if (hp == NULL)
+		return E_INVARG;
 
-        memcpy(&address.sin_addr,hp->h_addr,hp->h_length);
-      }
-      port = desc.v.list[2].v.num;
+	    memcpy(&address.sin_addr, hp->h_addr, hp->h_length);
+	}
+	port = desc.v.list[2].v.num;
     }
     address.sin_port = htons(port);
     if (bind(s, (struct sockaddr *) &address, sizeof(address)) < 0) {
@@ -139,9 +139,10 @@ proto_make_listener(Var desc, int *fd, Var * canon, const char **name)
 	*canon = var_ref(desc);
 
     if (desc.type == TYPE_INT) {
-      stream_printf(st, "port %d", canon->v.num);
+	stream_printf(st, "port %d", canon->v.num);
     } else {
-      stream_printf(st, "%s port %d", canon->v.list[1].v.str, canon->v.list[2].v.num);
+	stream_printf(st, "%s port %d", canon->v.list[1].v.str,
+		      canon->v.list[2].v.num);
     }
     *name = reset_stream(st);
 
@@ -168,7 +169,7 @@ proto_accept_connection(int listener_fd, int *read_fd, int *write_fd,
     if (!s)
 	s = new_stream(100);
 
-    fd = accept(listener_fd, (struct sockaddr *) &address,  &addr_length);
+    fd = accept(listener_fd, (struct sockaddr *) &address, &addr_length);
     if (fd < 0) {
 	if (errno == EMFILE)
 	    return PA_FULL;
@@ -180,7 +181,7 @@ proto_accept_connection(int listener_fd, int *read_fd, int *write_fd,
     *read_fd = *write_fd = fd;
     stream_printf(s, "%s, port %d",
 /* bg_name_lookup */
-                  inet_ntoa(address. sin_addr),
+		  inet_ntoa(address.sin_addr),
 /* !bg_name_lookup */
 		  (int) ntohs(address.sin_port));
     *name = reset_stream(s);
@@ -258,7 +259,7 @@ proto_open_connection(Var arglist, int *read_fd, int *write_fd,
 	    log_perror("Making socket in proto_open_connection");
 	return E_QUOTA;
     }
-    
+
     if (bind_local_ip != INADDR_ANY) {
 	static struct sockaddr_in local_addr;
 
@@ -267,7 +268,8 @@ proto_open_connection(Var arglist, int *read_fd, int *write_fd,
 	local_addr.sin_port = 0;
 	/* In theory, if the original listen() succeeded,
 	 * then this should too, but who knows, really? */
-	if (bind(s, (struct sockaddr *) &local_addr, sizeof(local_addr)) < 0) {
+	if (bind(s, (struct sockaddr *) &local_addr, sizeof(local_addr)) <
+	    0) {
 	    enum error e = E_QUOTA;
 
 	    log_perror("Binding local address in proto_open_connection");
@@ -276,63 +278,66 @@ proto_open_connection(Var arglist, int *read_fd, int *write_fd,
 	    close(s);
 	    return e;
 	}
-    }	 
+    }
 
     {
-        ES_CtxBlock         ES_ctx;
-        volatile ES_Value   ES_es = ES_Initialize;
+	ES_CtxBlock ES_ctx;
+	volatile ES_Value ES_es = ES_Initialize;
 
-        ES_ctx.nx = 0;
-        ES_ctx._finally = 0;
-        ES_ctx.link = ES_exceptionStack;
-        ES_exceptionStack = &ES_ctx;
+	ES_ctx.nx = 0;
+	ES_ctx._finally = 0;
+	ES_ctx.link = ES_exceptionStack;
+	ES_exceptionStack = &ES_ctx;
 
-        if (setjmp(ES_ctx.jmp) != 0)
-            ES_es = ES_Exception;
+	if (setjmp(ES_ctx.jmp) != 0)
+	    ES_es = ES_Exception;
 
-        while (1) {
-            if (ES_es == ES_EvalBody) {
-                            /* TRY body goes here */
-                            {
-                                id = set_timer(server_int_option("outbound_connect_timeout", 5),
-                                               timeout_proc, 0);
-                                result = connect(s, (struct sockaddr *) &addr, sizeof(addr));
-                                cancel_timer(id);
-                            }
-                /* TRY body or handler goes here */
-                if (ES_es == ES_EvalBody)
-                    ES_exceptionStack = ES_ctx.link;
-                break;
-            }
-            if (ES_es == ES_Initialize) {
-                if (ES_ctx.nx >= ES_MaxExceptionsPerScope)
-                    panic("Too many EXCEPT clauses!");
-                ES_ctx.array[ES_ctx.nx++] = &timeout_exception;
-            } else if (ES_ctx.id == &timeout_exception  ||  &timeout_exception == &ANY) {
-                int exception_value = ES_ctx.value;
+	while (1) {
+	    if (ES_es == ES_EvalBody) {
+		/* TRY body goes here */
+		{
+		    id = set_timer(server_int_option
+				   ("outbound_connect_timeout", 5),
+				   timeout_proc, 0);
+		    result =
+			connect(s, (struct sockaddr *) &addr,
+				sizeof(addr));
+		    cancel_timer(id);
+		}
+		/* TRY body or handler goes here */
+		if (ES_es == ES_EvalBody)
+		    ES_exceptionStack = ES_ctx.link;
+		break;
+	    }
+	    if (ES_es == ES_Initialize) {
+		if (ES_ctx.nx >= ES_MaxExceptionsPerScope)
+		    panic("Too many EXCEPT clauses!");
+		ES_ctx.array[ES_ctx.nx++] = &timeout_exception;
+	    } else if (ES_ctx.id == &timeout_exception
+		       || &timeout_exception == &ANY) {
+		int exception_value = ES_ctx.value;
 
-                ES_exceptionStack = ES_ctx.link;
-                exception_value = exception_value;
-                    /* avoid warnings */
-                            /* handler goes here */
+		ES_exceptionStack = ES_ctx.link;
+		exception_value = exception_value;
+		/* avoid warnings */
+		/* handler goes here */
 
-                            {
-                                result = -1;
-                                errno = ETIMEDOUT;
-                                reenable_timers();
-                            }
-                break;
-            }
-            ES_es = ES_EvalBody;
-        }
+		{
+		    result = -1;
+		    errno = ETIMEDOUT;
+		    reenable_timers();
+		}
+		break;
+	    }
+	    ES_es = ES_EvalBody;
+	}
     }
 
     if (result < 0) {
 	close(s);
 	if (errno == EADDRNOTAVAIL ||
 	    errno == ECONNREFUSED ||
-	    errno == ENETUNREACH ||
-	    errno == ETIMEDOUT)
+	    errno == ENETUNREACH || errno == ETIMEDOUT)
 	    return E_INVARG;
 	log_perror("Connecting in proto_open_connection");
 	return E_QUOTA;
@@ -355,7 +360,8 @@ proto_open_connection(Var arglist, int *read_fd, int *write_fd,
 }
 #endif				/* OUTBOUND_NETWORK */
 
-char rcsid_net_bsd_tcp[] = "$Id: net_bsd_tcp.c,v 1.5 2007-11-12 11:00:18 wrog Exp $";
+char rcsid_net_bsd_tcp[] =
+    "$Id: net_bsd_tcp.c,v 1.5 2007-11-12 11:00:18 wrog Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $

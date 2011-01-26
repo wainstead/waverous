@@ -264,7 +264,8 @@ proto_accept_connection(int listener_fd, int *read_fd, int *write_fd,
 		    l->ptr = 0;
 		    got_one = 1;
 		} else if (c == ' ' || l->ptr == 1000) {
-		    errlog("Overlong or malformed line on listening FIFO\n");
+		    errlog
+			("Overlong or malformed line on listening FIFO\n");
 		    l->state = RejectLine;
 		} else
 		    l->s2c[l->ptr++] = c;
@@ -306,8 +307,7 @@ proto_accept_connection(int listener_fd, int *read_fd, int *write_fd,
 	return PA_OTHER;
     }
     if (st1.st_mode & S_IFMT != S_IFIFO
-	|| st2.st_mode & S_IFMT != S_IFIFO
-	|| st1.st_uid != st2.st_uid) {
+	|| st2.st_mode & S_IFMT != S_IFIFO || st1.st_uid != st2.st_uid) {
 	close(*read_fd);
 	close(*write_fd);
 	errlog("Bogus FIFO names: \"%s\" and \"%s\"\n", l->c2s, l->s2c);
@@ -354,7 +354,8 @@ proto_close_listener(int fd)
     errlog("Can't find fd in PROTO_CLOSE_LISTENER!\n");
 }
 
-char rcsid_net_sysv_lcl[] = "$Id: net_sysv_lcl.c,v 1.2 1997-03-03 04:19:08 nop Exp $";
+char rcsid_net_sysv_lcl[] =
+    "$Id: net_sysv_lcl.c,v 1.2 1997-03-03 04:19:08 nop Exp $";
 
 /* $Log: not supported by cvs2svn $
  * Revision 1.1.1.1  1997/03/03 03:45:02  nop

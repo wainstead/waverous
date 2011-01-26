@@ -731,6 +731,7 @@ malloc_stats(size)
 
     return v;
 }
+
 int
 malloc_mem_used()
 {
@@ -882,7 +883,8 @@ sys_sbrk(incr)
 }
 #endif				/* VMS */
 
-char rcsid_gnu_malloc[] = "$Id: gnu-malloc.c,v 1.2 1997-03-03 04:18:44 nop Exp $";
+char rcsid_gnu_malloc[] =
+    "$Id: gnu-malloc.c,v 1.2 1997-03-03 04:18:44 nop Exp $";
 
 /* $Log: not supported by cvs2svn $
  * Revision 1.1.1.1  1997/03/03 03:45:02  nop

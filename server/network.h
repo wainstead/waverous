@@ -51,8 +51,7 @@ extern const char *network_usage_string(void);
 				 * such as a port number, etc.
 				 */
 
-extern int network_initialize(int argc, char **argv,
-			      Var * desc);
+extern int network_initialize(int argc, char **argv, Var * desc);
 				/* ARGC and ARGV refer to just the network-
 				 * specific arguments, if any, which always
 				 * come after any network-independent args.
@@ -166,8 +165,7 @@ extern const char *network_connection_name(network_handle nh);
 				 * into the phrase 'Connection accepted: %s'.
 				 */
 
-extern Var network_connection_options(network_handle nh,
-				      Var list);
+extern Var network_connection_options(network_handle nh, Var list);
 				/* Add the current option settings for the
 				 * given connection onto the end of LIST and
 				 * return the new list.  Each entry on LIST
@@ -175,16 +173,14 @@ extern Var network_connection_options(network_handle nh,
 				 */
 
 extern int network_connection_option(network_handle nh,
-				     const char *option,
-				     Var * value);
+				     const char *option, Var * value);
 				/* Return true iff the given option name
 				 * is valid for the given connection, storing
 				 * the current setting into *VALUE if valid.
 				 */
 
 extern int network_set_connection_option(network_handle nh,
-					 const char *option,
-					 Var value);
+					 const char *option, Var value);
 				/* Return true iff the given option/value pair
 				 * is valid for the given connection, applying
 				 * the given setting if valid.

@@ -25,26 +25,26 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "stderr.h"
 
 /* See comments in perfect.cc. */
-extern int occurrences[ALPHABET_SIZE]; 
+extern int occurrences[ALPHABET_SIZE];
 
 /* Sorts the key set alphabetically to speed up subsequent operations.
    Uses insertion sort since the set is probably quite small. */
 
-static void 
-set_sort (base, len)
-     char *base;
-     int len;
+static void
+set_sort(base, len)
+    char *base;
+    int len;
 {
-  int i, j;
+    int i, j;
 
-  for (i = 0, j = len - 1; i < j; i++)
-    {
-      char curr, tmp;
-      
-      for (curr = i + 1, tmp = base[curr]; curr > 0 && tmp < base[curr-1]; curr--)
-        base[curr] = base[curr - 1];
+    for (i = 0, j = len - 1; i < j; i++) {
+	char curr, tmp;
 
-      base[curr] = tmp;
+	for (curr = i + 1, tmp = base[curr];
+	     curr > 0 && tmp < base[curr - 1]; curr--)
+	    base[curr] = base[curr - 1];
+
+	base[curr] = tmp;
 
     }
 }
@@ -60,57 +60,60 @@ set_sort (base, len)
    rather than just an array of keys. */
 
 LIST_NODE *
-make_list_node (k, len)
-     char *k;
-     int len;
+make_list_node(k, len)
+    char *k;
+    int len;
 {
-	LIST_NODE *buffered_malloc ();
-  int char_set_size = OPTION_ENABLED (option, ALLCHARS) ? len : GET_CHARSET_SIZE (option) + 1;
-  LIST_NODE *temp = buffered_malloc (sizeof (LIST_NODE) + char_set_size);
-  char *ptr;
+    LIST_NODE *buffered_malloc();
+    int char_set_size =
+	OPTION_ENABLED(option,
+		       ALLCHARS) ? len : GET_CHARSET_SIZE(option) + 1;
+    LIST_NODE *temp = buffered_malloc(sizeof(LIST_NODE) + char_set_size);
+    char *ptr;
 
-  k[len]       = '\0';        /* Null terminate KEY to separate it from REST. */
-  if (OPTION_ENABLED (option, NOCASE)) /* Downcase the key */
-    for (ptr = k; *ptr; ptr++)
-	*ptr = tolower(*ptr);
-  temp->key    = k;
-  temp->next   = 0;
-  temp->index  = 0;
-  temp->length = len;
-  temp->link   = 0;
-  temp->rest   = OPTION_ENABLED (option, TYPE) ? k + len + 1 : "";
+    k[len] = '\0';		/* Null terminate KEY to separate it from REST. */
+    if (OPTION_ENABLED(option, NOCASE))	/* Downcase the key */
+	for (ptr = k; *ptr; ptr++)
+	    *ptr = tolower(*ptr);
+    temp->key = k;
+    temp->next = 0;
+    temp->index = 0;
+    temp->length = len;
+    temp->link = 0;
+    temp->rest = OPTION_ENABLED(option, TYPE) ? k + len + 1 : "";
 
-  ptr = temp->char_set;
-  if (OPTION_ENABLED (option, ALLCHARS)) /* Use all the character position in the KEY. */
+    ptr = temp->char_set;
+    if (OPTION_ENABLED(option, ALLCHARS))
+	/* Use all the character position in the KEY. */
+	for (; *k; k++, ptr++)
+	    ++occurrences[*ptr = *k];
 
-    for (; *k; k++, ptr++)
-      ++occurrences[*ptr = *k];
+    else {			/* Only use those character positions specified by the user. */
 
-  else                          /* Only use those character positions specified by the user. */
-    {                           
-      int i;
+	int i;
 
-      /* Iterate thru the list of key_positions, initializing occurrences table
-         and temp->char_set (via char * pointer ptr). */
+	/* Iterate thru the list of key_positions, initializing occurrences table
+	   and temp->char_set (via char * pointer ptr). */
 
-      for(RESET (option); (i = GET (option)) != EOS; )
-        {
-          if (i == WORD_END)    /* Special notation for last KEY position, i.e. '$'. */
-            *ptr = temp->key[len - 1];
-          else if (i <= len)    /* Within range of KEY length, so we'll keep it. */
-            *ptr = temp->key[i - 1];
-          else                  /* Out of range of KEY length, so we'll just skip it. */
-            continue;
-          ++occurrences[*ptr++];
-        }
+	for (RESET(option); (i = GET(option)) != EOS;) {
+	    if (i == WORD_END)	/* Special notation for last KEY position, i.e. '$'. */
+		*ptr = temp->key[len - 1];
+	    else if (i <= len)	/* Within range of KEY length, so we'll keep it. */
+		*ptr = temp->key[i - 1];
+	    else		/* Out of range of KEY length, so we'll just skip it. */
+		continue;
+	    ++occurrences[*ptr++];
+	}
 
-      if (ptr == temp->char_set) /* Didn't get any hits, i.e., no usable positions. */
-        report_error ("can't hash keyword %s with chosen key positions\n%a", temp->key);
+	if (ptr == temp->char_set)	/* Didn't get any hits, i.e., no usable positions. */
+	    report_error
+		("can't hash keyword %s with chosen key positions\n%a",
+		 temp->key);
     }
 
-  *ptr = '\0';                  /* Terminate this bastard.... */
-  /* Sort the KEY_SET items alphabetically. */
-  set_sort (temp->char_set, ptr - temp->char_set); 
+    *ptr = '\0';		/* Terminate this bastard.... */
+    /* Sort the KEY_SET items alphabetically. */
+    set_sort(temp->char_set, ptr - temp->char_set);
 
-  return temp;
+    return temp;
 }

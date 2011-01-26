@@ -30,7 +30,7 @@
 #include "my-unistd.h"
 #include "my-inet.h"		/* inet_addr() */
 #include "my-in.h"		/* struct sockaddr_in, INADDR_ANY, htons(),
-				   * htonl(), ntohl(), struct in_addr */
+				 * htonl(), ntohl(), struct in_addr */
 #include <netdb.h>		/* struct hostent, gethostbyaddr() */
 #include "my-socket.h"		/* AF_INET */
 #include "my-wait.h"
@@ -76,9 +76,9 @@ spawn_pipe(void (*child_proc) (int to_parent, int from_parent),
 
 	/* Cast to (void *) to avoid warnings on systems that misdeclare the
 	 * argument.
-         * june 2009: removing cast to satisfy g++. --sw
+	 * june 2009: removing cast to satisfy g++. --sw
 	 */
-	wait( &status );	/* wait for middleman to die */
+	wait(&status);		/* wait for middleman to die */
 	if (status != 0) {
 	    errlog("SPAWNING: Middleman died with status %d!\n", status);
 	    close(pipe_to_child[1]);
@@ -136,7 +136,7 @@ robust_read(int fd, void *buffer, int len)
  *****************************************************************************/
 
 enum Req_Kind {
-  REQ_NAME_FROM_ADDR, REQ_ADDR_FROM_NAME
+    REQ_NAME_FROM_ADDR, REQ_ADDR_FROM_NAME
 };
 
 struct request {
@@ -172,7 +172,8 @@ lookup(int to_intermediary, int from_intermediary)
        expires, we exit (in timeout_proc, above).  The intermediary will
        restart us in that event. */
     for (;;) {
-	if (robust_read(from_intermediary, &req, sizeof(req)) != sizeof(req))
+	if (robust_read(from_intermediary, &req, sizeof(req)) !=
+	    sizeof(req))
 	    _exit(1);
 	if (req.kind == REQ_ADDR_FROM_NAME) {
 	    ensure_buffer(&buffer, &buflen, req.u.length + 1);
@@ -183,8 +184,8 @@ lookup(int to_intermediary, int from_intermediary)
 	    id = set_timer(req.timeout, timeout_proc, 0);
 	    /* This cast is to work around systems like NeXT that declare
 	     * gethostbyname() to take a non-const string pointer.
-             *
-             * disabled june 2009. --sw
+	     *
+	     * disabled june 2009. --sw
 	     */
 	    e = gethostbyname(buffer);
 	    cancel_timer(id);
@@ -194,7 +195,7 @@ lookup(int to_intermediary, int from_intermediary)
 		unsigned32 addr;
 
 		/* This cast is for the same reason as the one above... */
-                // also disabled june 2009. --sw
+		// also disabled june 2009. --sw
 		addr = inet_addr(buffer);
 		write(to_intermediary, &addr, sizeof(addr));
 	    }
@@ -203,8 +204,7 @@ lookup(int to_intermediary, int from_intermediary)
 	    int length;
 	    id = set_timer(req.timeout, timeout_proc, 0);
 	    e = gethostbyaddr((void *) &req.u.address.sin_addr,
-			      sizeof(req.u.address.sin_addr),
-			      AF_INET);
+			      sizeof(req.u.address.sin_addr), AF_INET);
 	    cancel_timer(id);
 	    host_name = e ? e->h_name : "";
 	    length = strlen(host_name);
@@ -255,7 +255,8 @@ intermediary(int to_server, int from_server)
 	    _exit(1);
 	if (req.kind == REQ_ADDR_FROM_NAME) {
 	    ensure_buffer(&buffer, &buflen, req.u.length);
-	    if (robust_read(from_server, buffer, req.u.length) != req.u.length)
+	    if (robust_read(from_server, buffer, req.u.length) !=
+		req.u.length)
 		_exit(1);
 	}
 	if (!lookup_pid)	/* Restart lookup if it's died */
@@ -332,15 +333,17 @@ lookup_name_from_addr(struct sockaddr_in *addr, unsigned timeout)
 	req.timeout = timeout;
 	req.u.address = *addr;
 	if (write(to_intermediary, &req, sizeof(req)) != sizeof(req))
-	    abandon_intermediary("LOOKUP_NAME: Write to intermediary failed");
+	    abandon_intermediary
+		("LOOKUP_NAME: Write to intermediary failed");
 	else if (robust_read(from_intermediary, &len, sizeof(len))
 		 != sizeof(len))
-	    abandon_intermediary("LOOKUP_NAME: Read from intermediary failed");
+	    abandon_intermediary
+		("LOOKUP_NAME: Read from intermediary failed");
 	else if (len != 0) {
 	    ensure_buffer(&buffer, &buflen, len + 1);
 	    if (robust_read(from_intermediary, buffer, len) != len)
 		abandon_intermediary("LOOKUP_NAME: "
-				   "Data-read from intermediary failed");
+				     "Data-read from intermediary failed");
 	    else {
 		buffer[len] = '\0';
 		return buffer;
@@ -371,7 +374,7 @@ lookup_addr_from_name(const char *name, unsigned timeout)
 
     if (dead_intermediary) {
 	/* Numeric addresses should always work... */
-        // june 2009: removed void pointer cast. --sw
+	// june 2009: removed void pointer cast. --sw
 	addr = inet_addr(name);
     } else {
 	req.kind = REQ_ADDR_FROM_NAME;
@@ -379,10 +382,12 @@ lookup_addr_from_name(const char *name, unsigned timeout)
 	req.u.length = strlen(name);
 	if (write(to_intermediary, &req, sizeof(req)) != sizeof(req)
 	    || write(to_intermediary, name, req.u.length) != req.u.length)
-	    abandon_intermediary("LOOKUP_ADDR: Write to intermediary failed");
+	    abandon_intermediary
+		("LOOKUP_ADDR: Write to intermediary failed");
 	else if (robust_read(from_intermediary, &addr, sizeof(addr))
 		 != sizeof(addr))
-	    abandon_intermediary("LOOKUP_ADDR: Read from intermediary failed");
+	    abandon_intermediary
+		("LOOKUP_ADDR: Read from intermediary failed");
     }
 
     return addr == 0xffffffff ? 0 : addr;
@@ -390,7 +395,8 @@ lookup_addr_from_name(const char *name, unsigned timeout)
 
 #endif				/* NETWORK_PROTOCOL == NP_TCP */
 
-char rcsid_name_lookup[] = "$Id: name_lookup.c,v 1.3 1998-12-14 13:18:25 nop Exp $";
+char rcsid_name_lookup[] =
+    "$Id: name_lookup.c,v 1.3 1998-12-14 13:18:25 nop Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $

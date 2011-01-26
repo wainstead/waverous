@@ -98,7 +98,8 @@ extern enum outcome do_input_task(Objid user, Parsed_Command * pc,
 extern enum outcome do_server_verb_task(Objid self, const char *verb,
 					Var args, db_verb_handle h,
 					Objid player, const char *argstr,
-					Var * result, int do_db_tracebacks);
+					Var * result,
+					int do_db_tracebacks);
 extern enum outcome do_server_program_task(Objid self, const char *verb,
 					   Var args, Objid vloc,
 					   const char *verbname,
@@ -117,10 +118,8 @@ extern Objid caller();
 
 extern void write_activ_as_pi(activation);
 extern int read_activ_as_pi(activation *);
-void write_rt_env(const char **var_names, Var * rt_env,
-		  unsigned size);
-int read_rt_env(const char ***old_names, Var ** rt_env,
-		int *old_size);
+void write_rt_env(const char **var_names, Var * rt_env, unsigned size);
+int read_rt_env(const char ***old_names, Var ** rt_env, int *old_size);
 Var *reorder_rt_env(Var * old_rt_env, const char **old_names,
 		    int old_size, Program * prog);
 extern void write_activ(activation a);

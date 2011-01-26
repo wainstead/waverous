@@ -63,7 +63,8 @@ ES_RaiseException(Exception * exception, int value)
     longjmp(cb->jmp, 1);
 }
 
-char rcsid_exceptions[] = "$Id: exceptions.c,v 1.3 1998-12-14 13:17:48 nop Exp $";
+char rcsid_exceptions[] =
+    "$Id: exceptions.c,v 1.3 1998-12-14 13:17:48 nop Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $

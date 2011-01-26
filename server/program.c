@@ -112,7 +112,8 @@ free_program(Program * p)
     }
 }
 
-char rcsid_program[] = "$Id: program.c,v 1.6 2006-09-07 00:55:02 bjj Exp $";
+char rcsid_program[] =
+    "$Id: program.c,v 1.6 2006-09-07 00:55:02 bjj Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $

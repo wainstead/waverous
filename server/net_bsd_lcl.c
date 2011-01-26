@@ -20,8 +20,8 @@
 
 #include <errno.h>		/* EMFILE */
 #include "my-socket.h"		/* socket(), AF_UNIX, SOCK_STREAM,
-				   * bind(), struct sockaddr, accept(),
-				   * shutdown(), connect() */
+				 * bind(), struct sockaddr, accept(),
+				 * shutdown(), connect() */
 #include "my-stdio.h"		/* remove() */
 #include "my-string.h"		/* strcpy() */
 #include <sys/un.h>		/* struct sockaddr_un */
@@ -169,7 +169,8 @@ proto_close_listener(int fd)
     errlog("Can't find fd in PROTO_CLOSE_LISTENER!\n");
 }
 
-char rcsid_net_bsd_lcl[] = "$Id: net_bsd_lcl.c,v 1.2 1997-03-03 04:19:02 nop Exp $";
+char rcsid_net_bsd_lcl[] =
+    "$Id: net_bsd_lcl.c,v 1.2 1997-03-03 04:19:02 nop Exp $";
 
 /* $Log: not supported by cvs2svn $
  * Revision 1.1.1.1  1997/03/03 03:45:02  nop

@@ -27,19 +27,16 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "keylist.h"
 #include "boolarray.h"
 
-typedef struct perfect
-{
-  KEY_LIST   list;              /* List of key words provided by the user. */
-  BOOL_ARRAY duplicate;         /* Speeds up check for redundant hash values. */
-  int        max_hash_value;    /* Maximum possible hash value. */
-  int        fewest_collisions; /* Records fewest # of collisions for asso value. */
-  int        num_done;          /* Number of keywords processed without a collision. */
+typedef struct perfect {
+    KEY_LIST list;		/* List of key words provided by the user. */
+    BOOL_ARRAY duplicate;	/* Speeds up check for redundant hash values. */
+    int max_hash_value;		/* Maximum possible hash value. */
+    int fewest_collisions;	/* Records fewest # of collisions for asso value. */
+    int num_done;		/* Number of keywords processed without a collision. */
 } PERFECT;
 
-extern void perfect_init P ((void));
-extern void perfect_destroy P ((void));
-extern int  perfect_generate P ((void));
-extern void perfect_print P ((void));
-#endif /* _perfect_h */
-
-
+extern void perfect_init P((void));
+extern void perfect_destroy P((void));
+extern int perfect_generate P((void));
+extern void perfect_print P((void));
+#endif				/* _perfect_h */

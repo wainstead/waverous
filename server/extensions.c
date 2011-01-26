@@ -59,10 +59,10 @@
 extern void register_files(void);
 
 /* utime - andy */
-#include <sys/time.h>    /* these two for gettimeofday() */
+#include <sys/time.h>		/* these two for gettimeofday() */
 #include <unistd.h>
-#include "numbers.h"     /* for new_float() */
-#include "exceptions.h"  /* for panic() */
+#include "numbers.h"		/* for new_float() */
+#include "exceptions.h"		/* for panic() */
 /* utime - andy */
 
 #if EXAMPLE
@@ -82,8 +82,7 @@ stdin_enumerator(task_closure closure, void *data)
     for (ww = &waiters; *ww; ww = &((*ww)->next)) {
 	stdin_waiter *w = *ww;
 	const char *status = (w->the_vm->task_id & 1
-			      ? "stdin-waiting"
-			      : "stdin-weighting");
+			      ? "stdin-waiting" : "stdin-weighting");
 	task_enum_action tea = (*closure) (w->the_vm, status, data);
 
 	if (tea == TEA_KILL) {
@@ -154,7 +153,8 @@ stdin_suspender(vm the_vm, void *data)
 static package
 bf_read_stdin(Var arglist, Byte next, void *vdata, Objid progr)
 {
-    stdin_waiter *w = (stdin_waiter *) mymalloc(sizeof(stdin_waiter), M_TASK);
+    stdin_waiter *w =
+	(stdin_waiter *) mymalloc(sizeof(stdin_waiter), M_TASK);
 
     return make_suspend_pack(stdin_suspender, w);
 }
@@ -196,27 +196,25 @@ bf_log_cache_stats(Var arglist, Byte next, void *vdata, Objid progr)
 static package
 bf_isa(Var arglist, Byte next, void *vdata, Objid progr)
 {
-  Objid what = arglist.v.list[1].v.obj;
-  Objid targ = arglist.v.list[2].v.obj;
-  Var   r;
+    Objid what = arglist.v.list[1].v.obj;
+    Objid targ = arglist.v.list[2].v.obj;
+    Var r;
 
-  free_var(arglist);
+    free_var(arglist);
 
-  r.type = TYPE_INT;
+    r.type = TYPE_INT;
 
-  while (valid(what))
-  {
-    if (what == targ)
-    {
-      r.v.num = 1;
-      return make_var_pack(r);
+    while (valid(what)) {
+	if (what == targ) {
+	    r.v.num = 1;
+	    return make_var_pack(r);
+	}
+
+	what = db_object_parent(what);
     }
 
-    what = db_object_parent(what);
-  }
-
-  r.v.num = 0;
-  return make_var_pack(r);
+    r.v.num = 0;
+    return make_var_pack(r);
 }
 
 // Begin VERYRANDOM code from tiresias
@@ -224,12 +222,18 @@ bf_isa(Var arglist, Byte next, void *vdata, Objid progr)
 static unsigned long regA, regB, regC;
 
 //int VERYRANDOM(unsigned long &regA, unsigned long &regB, unsigned long &regC) {
-int VERYRANDOM() {
-  regA=((((regA>>31)^(regA>>6)^(regA>>4)^(regA>>2)^(regA<<1)^regA) & 0x00000001)<<31) | (regA>>1);
-  regB=((((regB>>30)^(regB>>2)) & 0x00000001)<<30) | (regB>>1);
-  regC=((((regC>>28)^(regC>>1)) & 0x00000001)<<28) | (regC>>1);
+int
+VERYRANDOM()
+{
+    regA =
+	((((regA >> 31) ^ (regA >> 6) ^ (regA >> 4) ^ (regA >> 2) ^
+	   (regA << 1) ^ regA) & 0x00000001) << 31) | (regA >> 1);
+    regB =
+	((((regB >> 30) ^ (regB >> 2)) & 0x00000001) << 30) | (regB >> 1);
+    regC =
+	((((regC >> 28) ^ (regC >> 1)) & 0x00000001) << 28) | (regC >> 1);
 
-  return ((regA ^ regB ^ regC) & 0x00000001);
+    return ((regA ^ regB ^ regC) & 0x00000001);
 //  return ((regA & regB) | (!regA & regC)) & 0x00000001;
 }
 
@@ -243,18 +247,23 @@ bf_vrandomseed(Var arglist, Byte next, void *vdata, Objid progr)
 
     if (nargs != 0) {
 	if (nargs != 1 || arglist.v.list[1].v.list[0].v.num != 3) {
-            return make_error_pack(E_INVARG);
-	} else if (arglist.v.list[1].v.list[1].type != TYPE_FLOAT || arglist.v.list[1].v.list[2].type != TYPE_FLOAT || arglist.v.list[1].v.list[3].type != TYPE_FLOAT) {
-            return make_error_pack(E_INVARG);
-        } else {
-            unsigned long newRegA = (unsigned long) *arglist.v.list[1].v.list[1].v.fnum;
-            unsigned long newRegB = (unsigned long) *arglist.v.list[1].v.list[2].v.fnum;
-            unsigned long newRegC = (unsigned long) *arglist.v.list[1].v.list[3].v.fnum;
+	    return make_error_pack(E_INVARG);
+	} else if (arglist.v.list[1].v.list[1].type != TYPE_FLOAT
+		   || arglist.v.list[1].v.list[2].type != TYPE_FLOAT
+		   || arglist.v.list[1].v.list[3].type != TYPE_FLOAT) {
+	    return make_error_pack(E_INVARG);
+	} else {
+	    unsigned long newRegA =
+		(unsigned long) *arglist.v.list[1].v.list[1].v.fnum;
+	    unsigned long newRegB =
+		(unsigned long) *arglist.v.list[1].v.list[2].v.fnum;
+	    unsigned long newRegC =
+		(unsigned long) *arglist.v.list[1].v.list[3].v.fnum;
 
-            regA = newRegA;
-            regB = newRegB;
-            regC = newRegC;
-        }
+	    regA = newRegA;
+	    regB = newRegB;
+	    regC = newRegC;
+	}
     }
 
     r = new_list(3);
@@ -282,34 +291,35 @@ bf_vrandom(Var arglist, Byte next, void *vdata, Objid progr)
     free_var(arglist);
 
     if (num <= 0)
-        return make_error_pack(E_INVARG);
+	return make_error_pack(E_INVARG);
     else {
-        Var r;
-        int bits = 0;
-        int result = -1;
+	Var r;
+	int bits = 0;
+	int result = -1;
 
-        r.type = TYPE_INT;
-        if (nargs == 0)
-            bits = 31;
-        else {
-            double x = pow(num, .5);
-            bits=(int)((double)abs((int)x)==x?x:abs((int)x+1));
-        }
+	r.type = TYPE_INT;
+	if (nargs == 0)
+	    bits = 31;
+	else {
+	    double x = pow(num, .5);
+	    bits =
+		(int) ((double) abs((int) x) == x ? x : abs((int) x + 1));
+	}
 
-        while (result < 1 || result > num) {
-            int x = 0;
-            result = 1;
-            for (x=0; x<bits; x++) {
-                int rbit, powwow;
-                powwow = (int) pow(2, x);
+	while (result < 1 || result > num) {
+	    int x = 0;
+	    result = 1;
+	    for (x = 0; x < bits; x++) {
+		int rbit, powwow;
+		powwow = (int) pow(2, x);
 //              rbit = VERYRANDOM(regA, regB, regC);
-                rbit = VERYRANDOM();
-                result = result + (rbit*powwow);
-            }
-        }
+		rbit = VERYRANDOM();
+		result = result + (rbit * powwow);
+	    }
+	}
 
-        r.v.num = result;
-        return make_var_pack(r);
+	r.v.num = result;
+	return make_var_pack(r);
     }
 }
 
@@ -325,12 +335,13 @@ bf_utime(Var arglist, Byte next, void *vdata, Objid progr)
     free_var(arglist);
 
     if (gettimeofday(&tv, NULL))
-      panic("BF_UTIME: gettimeofday() failed");
+	panic("BF_UTIME: gettimeofday() failed");
 
-    t = tv.tv_sec + (tv.tv_usec / (double)1000000.0);
+    t = tv.tv_sec + (tv.tv_usec / (double) 1000000.0);
 
     return make_var_pack(new_float(t));
 }
+
 // end utime - andy
 
 #ifdef EXPAT_XML
@@ -340,7 +351,7 @@ extern void register_xml(void);
 void
 register_extensions()
 {
-  oklog("          LOADING: extensions ...\n");
+    oklog("          LOADING: extensions ...\n");
 #if EXAMPLE
     register_task_queue(stdin_enumerator);
     register_function("read_stdin", 0, 0, bf_read_stdin);
@@ -358,11 +369,12 @@ register_extensions()
 // begin utime - andy
     register_function("utime", 0, 0, bf_utime);
 // end utime - andy
-  register_files();
-  oklog("          LOADING: extensions ... finished\n");
+    register_files();
+    oklog("          LOADING: extensions ... finished\n");
 }
 
-char rcsid_extensions[] = "$Id: extensions.c,v 1.4 1998-12-14 13:17:52 nop Exp $";
+char rcsid_extensions[] =
+    "$Id: extensions.c,v 1.4 1998-12-14 13:17:52 nop Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $

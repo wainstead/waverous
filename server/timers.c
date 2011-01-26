@@ -294,7 +294,7 @@ reenable_timers(void)
 #if HAVE_SIGRELSE
     sigrelse(SIGALRM);		/* restore previous signal action */
 #else
-          #error I need some way to stop blocking SIGALRM!
+#error I need some way to stop blocking SIGALRM!
 #endif
 #endif
 #endif

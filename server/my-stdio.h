@@ -30,10 +30,10 @@ extern int fflush(FILE *);
 extern int fileno(FILE *);
 extern size_t fwrite(const void *, size_t, size_t, FILE *);
 extern int fgetc(FILE *);
-extern int fprintf(FILE *, const char *,...);
-extern int fscanf(FILE *, const char *,...);
-extern int sscanf(const char *, const char *,...);
-extern int printf(const char *,...);
+extern int fprintf(FILE *, const char *, ...);
+extern int fscanf(FILE *, const char *, ...);
+extern int sscanf(const char *, const char *, ...);
+extern int printf(const char *, ...);
 extern int ungetc(int, FILE *);
 #endif
 

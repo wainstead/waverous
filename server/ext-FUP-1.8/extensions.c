@@ -61,20 +61,19 @@ stdin_enumerator(task_closure closure, void *data)
     stdin_waiter **ww;
 
     for (ww = &waiters; *ww; ww = &((*ww)->next)) {
-        stdin_waiter *w = *ww;
-        const char *status = (w->the_vm->task_id & 1
-                              ? "stdin-waiting"
-                              : "stdin-weighting");
-        task_enum_action tea = (*closure) (w->the_vm, status, data);
+	stdin_waiter *w = *ww;
+	const char *status = (w->the_vm->task_id & 1
+			      ? "stdin-waiting" : "stdin-weighting");
+	task_enum_action tea = (*closure) (w->the_vm, status, data);
 
-        if (tea == TEA_KILL) {
-            *ww = w->next;
-            myfree(w, M_TASK);
-            if (!waiters)
-                network_unregister_fd(0);
-        }
-        if (tea != TEA_CONTINUE)
-            return tea;
+	if (tea == TEA_KILL) {
+	    *ww = w->next;
+	    myfree(w, M_TASK);
+	    if (!waiters)
+		network_unregister_fd(0);
+	}
+	if (tea != TEA_CONTINUE)
+	    return tea;
     }
 
     return TEA_CONTINUE;
@@ -89,24 +88,24 @@ stdin_readable(int fd, void *data)
     stdin_waiter *w;
 
     if (data != &waiters)
-        panic("STDIN_READABLE: Bad data!");
+	panic("STDIN_READABLE: Bad data!");
 
     if (!waiters) {
-        errlog("STDIN_READABLE: Nobody cares!\n");
-        return;
+	errlog("STDIN_READABLE: Nobody cares!\n");
+	return;
     }
     n = read(0, buffer, sizeof(buffer));
     buffer[n] = '\0';
     while (n)
-        if (buffer[--n] == '\n')
-            buffer[n] = 'X';
+	if (buffer[--n] == '\n')
+	    buffer[n] = 'X';
 
     if (buffer[0] == 'a') {
-        v.type = TYPE_ERR;
-        v.v.err = E_NACC;
+	v.type = TYPE_ERR;
+	v.v.err = E_NACC;
     } else {
-        v.type = TYPE_STR;
-        v.v.str = str_dup(buffer);
+	v.type = TYPE_STR;
+	v.v.str = str_dup(buffer);
     }
 
     resume_task(waiters->the_vm, v);
@@ -114,7 +113,7 @@ stdin_readable(int fd, void *data)
     myfree(waiters, M_TASK);
     waiters = w;
     if (!waiters)
-        network_unregister_fd(0);
+	network_unregister_fd(0);
 }
 
 static enum error
@@ -123,7 +122,7 @@ stdin_suspender(vm the_vm, void *data)
     stdin_waiter *w = data;
 
     if (!waiters)
-        network_register_fd(0, stdin_readable, 0, &waiters);
+	network_register_fd(0, stdin_readable, 0, &waiters);
 
     w->the_vm = the_vm;
     w->next = waiters;
@@ -139,7 +138,7 @@ bf_read_stdin(Var arglist, Byte next, void *vdata, Objid progr)
 
     return make_suspend_pack(stdin_suspender, w);
 }
-#endif                          /* EXAMPLE */
+#endif				/* EXAMPLE */
 
 #define STUPID_VERB_CACHE 1
 #ifdef STUPID_VERB_CACHE
@@ -153,7 +152,7 @@ bf_verb_cache_stats(Var arglist, Byte next, void *vdata, Objid progr)
     free_var(arglist);
 
     if (!is_wizard(progr)) {
-        return make_error_pack(E_PERM);
+	return make_error_pack(E_PERM);
     }
     r = db_verb_cache_stats();
 
@@ -166,7 +165,7 @@ bf_log_cache_stats(Var arglist, Byte next, void *vdata, Objid progr)
     free_var(arglist);
 
     if (!is_wizard(progr)) {
-        return make_error_pack(E_PERM);
+	return make_error_pack(E_PERM);
     }
     db_log_cache_stats();
 
@@ -182,15 +181,16 @@ register_extensions()
     register_task_queue(stdin_enumerator);
     register_function("read_stdin", 0, 0, bf_read_stdin);
 #endif
-oklog("          LOADING: extension FUP ...\n");
-  register_files();
+    oklog("          LOADING: extension FUP ...\n");
+    register_files();
 #ifdef STUPID_VERB_CACHE
     register_function("log_cache_stats", 0, 0, bf_log_cache_stats);
     register_function("verb_cache_stats", 0, 0, bf_verb_cache_stats);
 #endif
 }
 
-char rcsid_extensions[] = "$Id: extensions.c,v 1.3 1997/07/07 03:24:54 nop Exp
+char rcsid_extensions[] =
+    "$Id: extensions.c,v 1.3 1997/07/07 03:24:54 nop Exp
 $";
 
 /* $Log: extensions.c,v $
@@ -222,4 +222,3 @@ $";
  * Revision 1.1  1995/11/30  04:26:21  pavel
  * Initial revision
  */
-

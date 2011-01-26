@@ -35,28 +35,27 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Enumerate the potential debugging Options. */
 
-enum option_type 
-{
-  DEBUG        = 01,            /* Enable debugging (prints diagnostics to Std_Err). */
-  ORDER        = 02,            /* Apply ordering heuristic to speed-up search time. */
-  ANSI         = 04,            /* Generate ANSI prototypes. */
-  ALLCHARS     = 010,           /* Use all characters in hash function. */
-  GNU          = 020,           /* Assume GNU extensions (primarily function inline). */
-  TYPE         = 040,           /* Handle user-defined type structured keyword input. */
-  RANDOM       = 0100,          /* Randomly initialize the associated values table. */
-  DEFAULTCHARS = 0200,          /* Make default char positions be 1,$ (end of keyword). */
-  SWITCH       = 0400,          /* Generate switch output to save space. */
-  POINTER      = 01000,         /* Have in_word_set function return pointer, not boolean. */
-  NOLENGTH     = 02000,         /* Don't include keyword length in hash computations. */
-  LENTABLE     = 04000,         /* Generate a length table for string comparison. */
-  DUP          = 010000,        /* Handle duplicate hash values for keywords. */
-  FAST         = 020000,        /* Generate the hash function ``fast.'' */
-  NOTYPE       = 040000,	      /* Don't include user-defined type definition
-                                   in output -- it's already defined elsewhere. */
-  COMP         = 0100000,       /* Generate strncmp rather than strcmp. */
-  GLOBAL       = 0200000,       /* Make the keyword table a global variable. */
-  CONST        = 0400000,       /* Make the generated tables readonly (const). */
-  NOCASE       = 01000000,	/* Make the keyword lookup case-insensitive. */
+enum option_type {
+    DEBUG = 01,			/* Enable debugging (prints diagnostics to Std_Err). */
+    ORDER = 02,			/* Apply ordering heuristic to speed-up search time. */
+    ANSI = 04,			/* Generate ANSI prototypes. */
+    ALLCHARS = 010,		/* Use all characters in hash function. */
+    GNU = 020,			/* Assume GNU extensions (primarily function inline). */
+    TYPE = 040,			/* Handle user-defined type structured keyword input. */
+    RANDOM = 0100,		/* Randomly initialize the associated values table. */
+    DEFAULTCHARS = 0200,	/* Make default char positions be 1,$ (end of keyword). */
+    SWITCH = 0400,		/* Generate switch output to save space. */
+    POINTER = 01000,		/* Have in_word_set function return pointer, not boolean. */
+    NOLENGTH = 02000,		/* Don't include keyword length in hash computations. */
+    LENTABLE = 04000,		/* Generate a length table for string comparison. */
+    DUP = 010000,		/* Handle duplicate hash values for keywords. */
+    FAST = 020000,		/* Generate the hash function ``fast.'' */
+    NOTYPE = 040000,		/* Don't include user-defined type definition
+				   in output -- it's already defined elsewhere. */
+    COMP = 0100000,		/* Generate strncmp rather than strcmp. */
+    GLOBAL = 0200000,		/* Make the keyword table a global variable. */
+    CONST = 0400000,		/* Make the generated tables readonly (const). */
+    NOCASE = 01000000,		/* Make the keyword lookup case-insensitive. */
 };
 
 /* Define some useful constants. */
@@ -65,13 +64,13 @@ enum option_type
 #define MAX_KEY_POS (128 - 1)
 
 /* Signals the start of a word. */
-#define WORD_START 1           
+#define WORD_START 1
 
 /* Signals the end of a word. */
-#define WORD_END 0             
+#define WORD_END 0
 
 /* Signals end of the key list. */
-#define EOS MAX_KEY_POS        
+#define EOS MAX_KEY_POS
 
 /* Returns TRUE if option O is enabled. */
 #define OPTION_ENABLED(OW,O) (OW.option_word & (int)O)
@@ -129,26 +128,25 @@ enum option_type
 
 /* Class manager for gperf program options. */
 
-typedef struct options
-{
-  int    option_word;           /* Holds the user-specified Options. */
-  int    total_charset_size;   /* Total number of distinct key_positions. */
-  int    size;                  /* Range of the hash table. */
-  int    key_pos;               /* Tracks current key position for Iterator. */
-  int    jump;                  /* Jump length when trying alternative values. */
-  int    initial_asso_value;    /* Initial value for asso_values table. */
-  int    argument_count;        /* Records count of command-line arguments. */
-  int    iterations;            /* Amount to iterate when a collision occurs. */
-  int    total_switches;        /* Number of switch statements to generate. */     
-  char **argument_vector;       /* Stores a pointer to command-line vector. */
-  char  *function_name;         /* Name used for generated lookup function. */
-  char  *key_name;              /* Name used for keyword key. */
-  char  *hash_name;             /* Name used for generated hash function. */
-  char  *delimiters;            /* Separates keywords from other attributes. */
-  char   key_positions[MAX_KEY_POS]; /* Contains user-specified key choices. */
+typedef struct options {
+    int option_word;		/* Holds the user-specified Options. */
+    int total_charset_size;	/* Total number of distinct key_positions. */
+    int size;			/* Range of the hash table. */
+    int key_pos;		/* Tracks current key position for Iterator. */
+    int jump;			/* Jump length when trying alternative values. */
+    int initial_asso_value;	/* Initial value for asso_values table. */
+    int argument_count;		/* Records count of command-line arguments. */
+    int iterations;		/* Amount to iterate when a collision occurs. */
+    int total_switches;		/* Number of switch statements to generate. */
+    char **argument_vector;	/* Stores a pointer to command-line vector. */
+    char *function_name;	/* Name used for generated lookup function. */
+    char *key_name;		/* Name used for keyword key. */
+    char *hash_name;		/* Name used for generated hash function. */
+    char *delimiters;		/* Separates keywords from other attributes. */
+    char key_positions[MAX_KEY_POS];	/* Contains user-specified key choices. */
 } OPTIONS;
 
-extern void    options_init P ((int argc, char *argv[]));
-extern void    options_destroy P ((void));
-extern OPTIONS option;       
-#endif /* _options_h */
+extern void options_init P((int argc, char *argv[]));
+extern void options_destroy P((void));
+extern OPTIONS option;
+#endif				/* _options_h */

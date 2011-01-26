@@ -20,7 +20,7 @@
 #include <sys/ioctl.h>
 
 #if NDECL_IOCTL
-extern int ioctl(int, int,...);
+extern int ioctl(int, int, ...);
 #endif
 
 /* 

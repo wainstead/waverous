@@ -41,8 +41,7 @@
 
 typedef void (*registry) ();
 
-static registry bi_function_registries[] =
-{
+static registry bi_function_registries[] = {
     register_disassemble,
     register_extensions,
     register_execute,
@@ -56,7 +55,7 @@ static registry bi_function_registries[] =
     register_tasks,
     register_verbs
 /* bg_name_lookup */
-    ,register_name_lookup
+	, register_name_lookup
 /* !bg_name_lookup */
 };
 
@@ -64,7 +63,7 @@ void
 register_bi_functions()
 {
     int loop, num_registries =
-    sizeof(bi_function_registries) / sizeof(bi_function_registries[0]);
+	sizeof(bi_function_registries) / sizeof(bi_function_registries[0]);
 
     for (loop = 0; loop < num_registries; loop++)
 	(void) (*(bi_function_registries[loop])) ();
@@ -90,12 +89,10 @@ static unsigned top_bf_table = 0;
 
 static unsigned
 register_common(const char *name,
-                int minargs,
-                int maxargs,
-                bf_type func,
-		bf_read_type read,
-                bf_write_type write,
-                va_list args)
+		int minargs,
+		int maxargs,
+		bf_type func,
+		bf_read_type read, bf_write_type write, va_list args)
 {
     int va_index;
     int num_arg_types = maxargs == -1 ? minargs : maxargs;
@@ -108,21 +105,22 @@ register_common(const char *name,
 	errlog("too many functions.  %s cannot be registered.\n", name);
 	return 0;
     }
-    bf_table[top_bf_table].name        = str_dup(name);
+    bf_table[top_bf_table].name = str_dup(name);
     stream_printf(s, "protect_%s", name);
     bf_table[top_bf_table].protect_str = str_dup(reset_stream(s));
     stream_printf(s, "bf_%s", name);
-    bf_table[top_bf_table].verb_str    = str_dup(reset_stream(s));
-    bf_table[top_bf_table].minargs     = minargs;
-    bf_table[top_bf_table].maxargs     = maxargs;
-    bf_table[top_bf_table].func        = func;
-    bf_table[top_bf_table].read        = read;
-    bf_table[top_bf_table].write       = write;
-    bf_table[top_bf_table]._protected  = 0;
-    
+    bf_table[top_bf_table].verb_str = str_dup(reset_stream(s));
+    bf_table[top_bf_table].minargs = minargs;
+    bf_table[top_bf_table].maxargs = maxargs;
+    bf_table[top_bf_table].func = func;
+    bf_table[top_bf_table].read = read;
+    bf_table[top_bf_table].write = write;
+    bf_table[top_bf_table]._protected = 0;
+
     if (num_arg_types > 0)
 	bf_table[top_bf_table].prototype =
-          (var_type *) mymalloc(num_arg_types * sizeof(var_type), M_PROTOTYPE);
+	    (var_type *) mymalloc(num_arg_types * sizeof(var_type),
+				  M_PROTOTYPE);
     else
 	bf_table[top_bf_table].prototype = 0;
 
@@ -135,7 +133,7 @@ register_common(const char *name,
 
 unsigned
 register_function(const char *name, int minargs, int maxargs,
-		  bf_type func,...)
+		  bf_type func, ...)
 {
     va_list args;
     unsigned ans;
@@ -147,9 +145,10 @@ register_function(const char *name, int minargs, int maxargs,
 }
 
 unsigned
-register_function_with_read_write(const char *name, int minargs, int maxargs,
-				  bf_type func, bf_read_type read,
-				  bf_write_type write,...)
+register_function_with_read_write(const char *name, int minargs,
+				  int maxargs, bf_type func,
+				  bf_read_type read, bf_write_type write,
+				  ...)
 {
     va_list args;
     unsigned ans;
@@ -212,7 +211,8 @@ call_bi_func(unsigned n, Var arglist, Byte func_pc,
 	/* if (caller() != SYSTEM_OBJECT && server_flag_option(f->protect_str)) { */
 	if (caller() != SYSTEM_OBJECT && f->_protected) {
 	    /* Try calling #0:bf_FUNCNAME(@ARGS) instead */
-	    enum error e = call_verb2(SYSTEM_OBJECT, f->verb_str, arglist, 0);
+	    enum error e =
+		call_verb2(SYSTEM_OBJECT, f->verb_str, arglist, 0);
 
 	    if (e == E_NONE)
 		return tail_call_pack();
@@ -303,7 +303,8 @@ read_bi_func_data(Byte f_id, void **bi_func_state, Byte * bi_func_pc)
 	    && strcmp(bf_table[f_id].name, "eval") != 0) {
 	    oklog("LOADING: Warning: patching bogus return to `%s()'\n",
 		  bf_table[f_id].name);
-	    oklog("         (See 1.8.0p4 ChangeLog.txt entry for details.)\n");
+	    oklog
+		("         (See 1.8.0p4 ChangeLog.txt entry for details.)\n");
 	    *bi_func_pc = 0;
 	}
     }
@@ -397,7 +398,7 @@ function_description(int i)
 
     entry = bf_table[i];
     v = new_list(4);
-    v.v.list[1].type = (var_type)TYPE_STR;
+    v.v.list[1].type = (var_type) TYPE_STR;
     v.v.list[1].v.str = str_ref(entry.name);
     v.v.list[2].type = TYPE_INT;
     v.v.list[2].v.num = entry.minargs;
@@ -408,7 +409,8 @@ function_description(int i)
     for (j = 0; j < nargs; j++) {
 	int proto = entry.prototype[j];
 	vv.v.list[j + 1].type = TYPE_INT;
-	vv.v.list[j + 1].v.num = proto < 0 ? proto : (proto & TYPE_DB_MASK);
+	vv.v.list[j + 1].v.num =
+	    proto < 0 ? proto : (proto & TYPE_DB_MASK);
     }
 
     return v;
@@ -443,7 +445,8 @@ load_server_protect_flags(void)
     int i;
 
     for (i = 0; i < top_bf_table; i++) {
-	bf_table[i]._protected = server_flag_option(bf_table[i].protect_str);
+	bf_table[i]._protected =
+	    server_flag_option(bf_table[i].protect_str);
     }
     oklog("Loaded protect cache for %d builtins\n", i);
 }
@@ -474,7 +477,8 @@ register_functions(void)
     register_function("load_server_options", 0, 0, bf_load_server_options);
 }
 
-char rcsid_functions[] = "$Id: functions.c,v 1.7 2001-03-12 05:10:54 bjj Exp $";
+char rcsid_functions[] =
+    "$Id: functions.c,v 1.7 2001-03-12 05:10:54 bjj Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $

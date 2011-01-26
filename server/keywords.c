@@ -42,8 +42,7 @@
 static int
 hash(register const char *str, register int len)
 {
-    static const unsigned char hash_table[] =
-    {
+    static const unsigned char hash_table[] = {
 	106, 106, 106, 106, 106, 106, 106, 106, 106, 106,
 	106, 106, 106, 106, 106, 106, 106, 106, 106, 106,
 	106, 106, 106, 106, 106, 106, 106, 106, 106, 106,
@@ -86,8 +85,7 @@ const struct keyword *
 in_word_set(register const char *str, register int len)
 {
 
-    static const struct keyword wordlist[] =
-    {
+    static const struct keyword wordlist[] = {
 	{"",},
 	{"",},
 	{"",},
@@ -216,7 +214,8 @@ find_keyword(const char *word)
     return in_word_set(word, strlen(word));
 }
 
-char rcsid_keywords[] = "$Id: keywords.c,v 1.3 1998-12-14 13:17:55 nop Exp $";
+char rcsid_keywords[] =
+    "$Id: keywords.c,v 1.3 1998-12-14 13:17:55 nop Exp $";
 
 /* 
  * $Log: not supported by cvs2svn $

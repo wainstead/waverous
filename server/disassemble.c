@@ -37,8 +37,7 @@ struct mapping {
     const char *name;
 };
 
-struct mapping mappings[] =
-{
+struct mapping mappings[] = {
     {OP_IF, "IF"},
     {OP_WHILE, "WHILE"},
     {OP_EIF, "ELSEIF"},
@@ -77,7 +76,7 @@ struct mapping mappings[] =
     {OP_G_PUSH, "PUSH"},
 #ifdef BYTECODE_REDUCE_REF
     {OP_G_PUSH_CLEAR, "PUSH_CLEAR"},
-#endif /* BYTECODE_REDUCE_REF */
+#endif				/* BYTECODE_REDUCE_REF */
     {OP_IMM, "PUSH_LITERAL"},
     {OP_MAKE_EMPTY_LIST, "MAKE_EMPTY_LIST"},
     {OP_LIST_ADD_TAIL, "LIST_ADD_TAIL"},
@@ -89,10 +88,10 @@ struct mapping mappings[] =
     {OP_RETURN, "RETURN"},
     {OP_RETURN0, "RETURN 0"},
     {OP_DONE, "DONE"},
-    {OP_POP, "POP"}};
+    {OP_POP, "POP"}
+};
 
-struct mapping ext_mappings[] =
-{
+struct mapping ext_mappings[] = {
     {EOP_RANGESET, "RANGESET"},
     {EOP_LENGTH, "LENGTH"},
     {EOP_PUSH_LABEL, "PUSH_LABEL"},
@@ -107,7 +106,8 @@ struct mapping ext_mappings[] =
     {EOP_CONTINUE, "CONTINUE"},
     {EOP_WHILE_ID, "WHILE_ID"},
     {EOP_EXIT, "EXIT"},
-    {EOP_EXIT_ID, "EXIT_ID"}};
+    {EOP_EXIT_ID, "EXIT_ID"}
+};
 
 static void
 initialize_tables(void)
@@ -248,8 +248,9 @@ disassemble(Program * prog, Printer p, void *data)
 		stream_printf(insn, "NUM %d", OPCODE_TO_OPTIM_NUM(b));
 #ifdef BYTECODE_REDUCE_REF
 	    else if (IS_PUSH_CLEAR_n(b))
-		stream_printf(insn, "PUSH_CLEAR %s", NAMES(PUSH_CLEAR_n_INDEX(b)));
-#endif /* BYTECODE_REDUCE_REF */
+		stream_printf(insn, "PUSH_CLEAR %s",
+			      NAMES(PUSH_CLEAR_n_INDEX(b)));
+#endif				/* BYTECODE_REDUCE_REF */
 	    else if (IS_PUSH_n(b))
 		stream_printf(insn, "PUSH %s", NAMES(PUSH_n_INDEX(b)));
 	    else if (IS_PUT_n(b))
@@ -277,13 +278,15 @@ disassemble(Program * prog, Printer p, void *data)
 		case EOP_END_CATCH:
 		case EOP_END_EXCEPT:
 		case EOP_TRY_FINALLY:
-		    stream_printf(insn, " %d", ADD_BYTES(bc.numbytes_label));
+		    stream_printf(insn, " %d",
+				  ADD_BYTES(bc.numbytes_label));
 		    break;
 		case EOP_TRY_EXCEPT:
 		    stream_printf(insn, " %d", ADD_BYTES(1));
 		    break;
 		case EOP_LENGTH:
-		    stream_printf(insn, " %d", ADD_BYTES(bc.numbytes_stack));
+		    stream_printf(insn, " %d",
+				  ADD_BYTES(bc.numbytes_stack));
 		    break;
 		case EOP_SCATTER:
 		    {
@@ -314,10 +317,12 @@ disassemble(Program * prog, Printer p, void *data)
 		case OP_OR:
 		case OP_JUMP:
 		case OP_WHILE:
-		    stream_printf(insn, " %d", ADD_BYTES(bc.numbytes_label));
+		    stream_printf(insn, " %d",
+				  ADD_BYTES(bc.numbytes_label));
 		    break;
 		case OP_FORK:
-		    stream_printf(insn, " %d", ADD_BYTES(bc.numbytes_fork));
+		    stream_printf(insn, " %d",
+				  ADD_BYTES(bc.numbytes_fork));
 		    break;
 		case OP_FORK_WITH_ID:
 		    a1 = ADD_BYTES(bc.numbytes_fork);
@@ -333,7 +338,7 @@ disassemble(Program * prog, Printer p, void *data)
 		case OP_G_PUSH:
 #ifdef BYTECODE_REDUCE_REF
 		case OP_G_PUSH_CLEAR:
-#endif /* BYTECODE_REDUCE_REF */
+#endif				/* BYTECODE_REDUCE_REF */
 		case OP_G_PUT:
 		    stream_printf(insn, " %s",
 				  NAMES(ADD_BYTES(bc.numbytes_var_name)));
@@ -360,7 +365,8 @@ disassemble(Program * prog, Printer p, void *data)
 			    stream_add_char(insn, '"');
 			    break;
 			case TYPE_ERR:
-			    stream_printf(insn, " %s", error_name(v.v.err));
+			    stream_printf(insn, " %s",
+					  error_name(v.v.err));
 			    break;
 			default:
 			    stream_printf(insn, " <literal type = %d>",
@@ -370,7 +376,8 @@ disassemble(Program * prog, Printer p, void *data)
 		    }
 		    break;
 		case OP_BI_FUNC_CALL:
-		    stream_printf(insn, " %s", name_func_by_num(ADD_BYTES(1)));
+		    stream_printf(insn, " %s",
+				  name_func_by_num(ADD_BYTES(1)));
 		default:
 		    break;
 		}
@@ -387,7 +394,7 @@ disassemble(Program * prog, Printer p, void *data)
 static void
 print_line(const char *line, void *data)
 {
-  FILE *f = (FILE *)data;
+    FILE *f = (FILE *) data;
 
     fprintf(f, "%s\n", line);
 }
@@ -412,11 +419,12 @@ struct data {
 static void
 add_line(const char *line, void *passed_in_data)
 {
-  struct data *d = (data *)passed_in_data;
+    struct data *d = (data *) passed_in_data;
 
     if (d->used >= d->max) {
 	int new_max = (d->max == 0 ? 20 : d->max * 2);
-	char **_new = (char **) mymalloc(sizeof(char **) * new_max, M_DISASSEMBLE);
+	char **_new =
+	    (char **) mymalloc(sizeof(char **) * new_max, M_DISASSEMBLE);
 	int i;
 
 	for (i = 0; i < d->used; i++)
@@ -458,7 +466,7 @@ bf_disassemble(Var arglist, Byte next, void *vdata, Objid progr)
     disassemble(db_verb_program(h), add_line, &data);
     r = new_list(data.used);
     for (i = 1; i <= data.used; i++) {
-      r.v.list[i].type = (var_type)TYPE_STR;
+	r.v.list[i].type = (var_type) TYPE_STR;
 	r.v.list[i].v.str = data.lines[i - 1];
     }
     if (data.lines)
@@ -469,7 +477,8 @@ bf_disassemble(Var arglist, Byte next, void *vdata, Objid progr)
 void
 register_disassemble(void)
 {
-    register_function("disassemble", 2, 2, bf_disassemble, TYPE_OBJ, TYPE_ANY);
+    register_function("disassemble", 2, 2, bf_disassemble, TYPE_OBJ,
+		      TYPE_ANY);
 }
 
 char rcsid_disassemble[] = "$Id";

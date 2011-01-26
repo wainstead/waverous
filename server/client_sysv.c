@@ -175,7 +175,8 @@ main(int argc, char **argv)
     exit(1);
 }
 
-char rcsid_client_sysv[] = "$Id: client_sysv.c,v 1.2 1997-03-03 04:18:23 nop Exp $";
+char rcsid_client_sysv[] =
+    "$Id: client_sysv.c,v 1.2 1997-03-03 04:18:23 nop Exp $";
 
 /* $Log: not supported by cvs2svn $
  * Revision 1.1.1.1  1997/03/03 03:45:02  nop

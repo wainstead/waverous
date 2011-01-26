@@ -39,7 +39,8 @@ typedef int32 Objid;
  */
 enum error {
     E_NONE, E_TYPE, E_DIV, E_PERM, E_PROPNF, E_VERBNF, E_VARNF, E_INVIND,
-    E_RECMOVE, E_MAXREC, E_RANGE, E_ARGS, E_NACC, E_INVARG, E_QUOTA, E_FLOAT
+    E_RECMOVE, E_MAXREC, E_RANGE, E_ARGS, E_NACC, E_INVARG, E_QUOTA,
+	E_FLOAT
 };
 
 /* Do not reorder or otherwise modify this list, except to add new elements at
@@ -50,25 +51,25 @@ enum error {
  */
 //typedef enum {
 //    TYPE_INT, TYPE_OBJ, _TYPE_STR, TYPE_ERR, _TYPE_LIST, /* user-visible */
-//    TYPE_CLEAR,			/* in clear properties' value slot */
-//    TYPE_NONE,			/* in uninitialized MOO variables */
-//    TYPE_CATCH,			/* on-stack marker for an exception handler */
-//    TYPE_FINALLY,		/* on-stack marker for a TRY-FINALLY clause */
-//    _TYPE_FLOAT			/* floating-point number; user-visible */
+//    TYPE_CLEAR,                       /* in clear properties' value slot */
+//    TYPE_NONE,                        /* in uninitialized MOO variables */
+//    TYPE_CATCH,                       /* on-stack marker for an exception handler */
+//    TYPE_FINALLY,             /* on-stack marker for a TRY-FINALLY clause */
+//    _TYPE_FLOAT                       /* floating-point number; user-visible */
 //} var_type;
 
 // the following replace the above typdef enum var_type
 typedef int var_type;
-const var_type TYPE_INT     =  0 ;
-const var_type TYPE_OBJ     =  1 ;
-const var_type _TYPE_STR    =  2 ;
-const var_type TYPE_ERR     =  3 ;
-const var_type _TYPE_LIST   =  4 ;
-const var_type TYPE_CLEAR   =  5 ;
-const var_type TYPE_NONE    =  6 ;
-const var_type TYPE_CATCH   =  7 ;
-const var_type TYPE_FINALLY =  8 ;
-const var_type _TYPE_FLOAT  =  9 ;
+const var_type TYPE_INT = 0;
+const var_type TYPE_OBJ = 1;
+const var_type _TYPE_STR = 2;
+const var_type TYPE_ERR = 3;
+const var_type _TYPE_LIST = 4;
+const var_type TYPE_CLEAR = 5;
+const var_type TYPE_NONE = 6;
+const var_type TYPE_CATCH = 7;
+const var_type TYPE_FINALLY = 8;
+const var_type _TYPE_FLOAT = 9;
 
 /* Types which have external data should be marked with the TYPE_COMPLEX_FLAG
  * so that free_var/var_ref/var_dup can recognize them easily.  This flag is
