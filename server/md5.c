@@ -320,16 +320,3 @@ md5_Final(md5ctx_t * context, uint8 digest[16])
     /* Zeroize sensitive information */
     memset((char *) context, 0, sizeof(*context));
 }
-
-/* 
- * $Log: not supported by cvs2svn $
- * Revision 1.2  1997/03/03 04:18:51  nop
- * GNU Indent normalization
- *
- * Revision 1.1.1.1  1997/03/03 03:45:00  nop
- * LambdaMOO 1.8.0p5
- *
- * Revision 1.1  1996/02/18  23:19:18  pavel
- * Initial revision
- *
- */
