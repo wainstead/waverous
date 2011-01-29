@@ -36,29 +36,3 @@ extern int mknod(const char *file, int mode, int dev);
 #define mkfifo(path, mode)	mknod(path, S_IFIFO | (mode), 0)
 #endif
 
-/* 
- * $Log: not supported by cvs2svn $
- * Revision 1.2  1997/03/03 04:18:55  nop
- * GNU Indent normalization
- *
- * Revision 1.1.1.1  1997/03/03 03:45:05  nop
- * LambdaMOO 1.8.0p5
- *
- * Revision 2.3  1996/02/08  06:02:22  pavel
- * Updated copyright notice for 1996.  Release 1.8.0beta1.
- *
- * Revision 2.2  1995/12/31  03:25:59  pavel
- * Added test for <sys/stat.h> needing help.  Release 1.8.0alpha4.
- *
- * Revision 2.1  1995/12/28  00:36:26  pavel
- * Added declaration of stat().  Release 1.8.0alpha3.
- *
- * Revision 2.0  1995/11/30  04:58:21  pavel
- * New baseline version, corresponding to release 1.8.0alpha1.
- *
- * Revision 1.2  1992/10/23  23:03:47  pavel
- * Added copyright notice.
- *
- * Revision 1.1  1992/10/23  22:25:00  pavel
- * Initial RCS-controlled version.
- */

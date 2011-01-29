@@ -21,20 +21,3 @@
 extern Stmt *decompile_program(Program * program, int vector);
 extern int find_line_number(Program * program, int vector, int pc);
 
-/* 
- * $Log: not supported by cvs2svn $
- * Revision 1.2  1997/03/03 04:18:33  nop
- * GNU Indent normalization
- *
- * Revision 1.1.1.1  1997/03/03 03:45:02  nop
- * LambdaMOO 1.8.0p5
- *
- * Revision 2.1  1996/02/08  06:27:19  pavel
- * Updated copyright notice for 1996.  Release 1.8.0beta1.
- *
- * Revision 2.0  1995/11/30  05:06:15  pavel
- * New baseline version, corresponding to release 1.8.0alpha1.
- *
- * Revision 1.1  1995/11/30  05:06:05  pavel
- * Initial revision
- */

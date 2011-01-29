@@ -114,13 +114,3 @@ int re_exec(char *s);
 
 #endif				/* REGEXPR_H */
 
-/* RCS stuff added for LambdaMOO
-
- * $Log: not supported by cvs2svn $
- * Revision 1.1.1.1  1997/03/03 03:45:04  nop
- * LambdaMOO 1.8.0p5
- *
- * Revision 2.0  1995/11/30  05:39:25  pavel
- * New baseline version, corresponding to release 1.8.0alpha1.
- *
- */

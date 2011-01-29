@@ -57,35 +57,3 @@ extern int check_version(DB_Version);
 
 #endif				/* !Version_H */
 
-/* 
- * $Log: not supported by cvs2svn $
- * Revision 1.2  1997/03/03 04:19:39  nop
- * GNU Indent normalization
- *
- * Revision 1.1.1.1  1997/03/03 03:45:04  nop
- * LambdaMOO 1.8.0p5
- *
- * Revision 2.3  1996/04/19  01:25:21  pavel
- * Added somewhat bogus DBV_BFBugFixed version.  Release 1.8.0p4.
- *
- * Revision 2.2  1996/02/08  06:07:10  pavel
- * Added DBV_BreakCont and DBV_Float versions, check_version().  Moved
- * db_in_version to db_io.h and renamed db_out_version to current_version.
- * Updated copyright notice for 1996.  Release 1.8.0beta1.
- *
- * Revision 2.1  1995/12/28  00:48:42  pavel
- * Fixed list of new keywords in comment to remove transient `raise' keyword.
- * Release 1.8.0alpha3.
- *
- * Revision 2.0  1995/11/30  04:56:42  pavel
- * New baseline version, corresponding to release 1.8.0alpha1.
- *
- * Revision 1.3  1992/10/23  23:03:47  pavel
- * Added copyright notice.
- *
- * Revision 1.2  1992/10/21  03:02:35  pavel
- * Converted to use new automatic configuration system.
- *
- * Revision 1.1  1992/07/20  23:23:12  pavel
- * Initial RCS-controlled version.
- */
