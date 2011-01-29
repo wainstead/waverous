@@ -73,7 +73,7 @@ typedef struct shandle {
     time_t last_activity_time;
     Objid player;
     Objid listener;
-    task_queue tasks;
+    TaskQueue tasks;
     int disconnect_me;
     int outbound, binary;
     int print_messages;

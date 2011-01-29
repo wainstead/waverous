@@ -920,10 +920,10 @@ is_out_of_input(tqueue * tq)
  * Exported interface
  */
 
-task_queue
+TaskQueue
 new_task_queue(Objid player, Objid handler)
 {
-    task_queue result;
+    TaskQueue result;
     result.ptr = (tqueue *) find_tqueue(player, 1);
     tqueue *tq = (tqueue *) result.ptr;
 
@@ -934,7 +934,7 @@ new_task_queue(Objid player, Objid handler)
 }
 
 void
-free_task_queue(task_queue q)
+free_task_queue(TaskQueue q)
 {
     tqueue *tq = (tqueue *) q.ptr;
 
@@ -1007,7 +1007,7 @@ free_task_queue(task_queue q)
 				 */
 
 int
-tasks_set_connection_option(task_queue q, const char *option, Var value)
+tasks_set_connection_option(TaskQueue q, const char *option, Var value)
 {
     do {
 	if (!mystrcasecmp((option), "flush-command")) { {
@@ -1052,7 +1052,7 @@ tasks_set_connection_option(task_queue q, const char *option, Var value)
 }
 
 int
-tasks_connection_option(task_queue q, const char *option, Var * value)
+tasks_connection_option(TaskQueue q, const char *option, Var * value)
 {
     do {
 	if (!mystrcasecmp((option), "flush-command")) {
@@ -1085,7 +1085,7 @@ tasks_connection_option(task_queue q, const char *option, Var * value)
 }
 
 Var
-tasks_connection_options(task_queue q, Var list)
+tasks_connection_options(TaskQueue q, Var list)
 {
     do { {
 	    Var pair = new_list(2);
@@ -1187,7 +1187,7 @@ enqueue_input_task(tqueue * tq, const char *input, int at_front,
 }
 
 void
-task_suspend_input(task_queue q)
+task_suspend_input(TaskQueue q)
 {
     tqueue *tq = (tqueue *) q.ptr;
 
@@ -1221,7 +1221,7 @@ flush_input(tqueue * tq, int show_messages)
 }
 
 void
-new_input_task(task_queue q, const char *input, int binary)
+new_input_task(TaskQueue q, const char *input, int binary)
 {
     tqueue *tq = (tqueue *) q.ptr;
 
