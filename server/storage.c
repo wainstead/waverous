@@ -28,6 +28,15 @@
 
 static unsigned alloc_num[Sizeof_Memory_Type];
 
+
+/**
+ * explanation of static inline functions:
+ * "If you wanted to keep your inline function entirely private to one
+ * translation unit, you make it static inline."
+ *
+ * C's 'inline' does pretty much what C++'s does.
+ */
+
 static inline int
 refcount_overhead(Memory_Type type)
 {
