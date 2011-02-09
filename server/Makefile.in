@@ -9,10 +9,10 @@
 
 # @configure_input@
 
-CC = @CXX@
-
-LIBRARIES = @LIBS@
-YACC = @YACC@
+CC	= @CXX@
+DEFS	= @DEFS@
+LIBS	= @LIBS@
+YACC	= @YACC@
 
 # for debugging you might prefer:
 # CFLAGS='-g -m32 -O0 -Wall
@@ -23,7 +23,7 @@ INSTALL         = @INSTALL@
 INSTALL_DATA	= @INSTALL_DATA@
 
 YFLAGS = -d
-COMPILE.c = $(CC) $(CFLAGS) $(CPPFLAGS) -c
+COMPILE.c = $(CC) $(CFLAGS) $(DEFS)$(CPPFLAGS) -c
 
 CSRCS = ast.c code_gen.c db_file.c db_io.c db_objects.c db_properties.c \
 	db_verbs.c decompile.c disassemble.c eval_env.c eval_vm.c \
@@ -73,17 +73,17 @@ YOBJS = $(YSRCS:.y=.o)
 OBJS = $(COBJS) $(YOBJS)
 
 moo:	$(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) $(LIBRARIES) -o $@
+	$(CC) $(CFLAGS) $(DEFS) $(OBJS) $(LIBS) -o $@
 
 # 'purify' is a memory leak checker, now IBM Rational Purify. --sw
 pure_moo: moo
-	purify $(CC) $(CFLAGS) $(OBJS) $(LIBRARIES) -o $@
+	purify $(CC) $(CFLAGS) $(DEFS) $(OBJS) $(LIBS) -o $@
 
 client_bsd: client_bsd.o
-	$(CC) $(CFLAGS) client_bsd.o $(LIBRARIES) -o $@
+	$(CC) $(CFLAGS) $(DEFS) client_bsd.o $(LIBS) -o $@
 
 client_sysv: client_sysv.o
-	$(CC) $(CFLAGS) client_sysv.o $(LIBRARIES) -o $@
+	$(CC) $(CFLAGS) $(DEFS) client_sysv.o $(LIBS) -o $@
 
 # This rule gets around some "make"s' desire to `derive' it from `restart.sh'.
 restart:
