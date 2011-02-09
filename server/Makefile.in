@@ -15,9 +15,9 @@ LIBRARIES = @LIBS@
 YACC = @YACC@
 
 # for debugging you might prefer:
-# CFLAGS='-g -m32 -O0 -Wall -DEXPAT_XML
+# CFLAGS='-g -m32 -O0 -Wall
 
-CFLAGS		= -m32 -O -DEXPAT_XML 
+CFLAGS		= -m32 -O
 CPPFLAGS	= @CPPFLAGS@
 INSTALL         = @INSTALL@
 INSTALL_DATA	= @INSTALL_DATA@

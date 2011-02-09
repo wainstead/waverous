@@ -344,7 +344,7 @@ bf_utime(Var arglist, Byte next, void *vdata, Objid progr)
 
 // end utime - andy
 
-#ifdef EXPAT_XML
+#if HAVE_EXPAT_H
 extern void register_xml(void);
 #endif
 
@@ -360,9 +360,11 @@ register_extensions()
     register_function("log_cache_stats", 0, 0, bf_log_cache_stats);
     register_function("verb_cache_stats", 0, 0, bf_verb_cache_stats);
 #endif
-#ifdef EXPAT_XML
+
+#if HAVE_EXPAT_H
     register_xml();
 #endif
+
     register_function("isa", 2, 2, bf_isa, TYPE_OBJ, TYPE_OBJ);
     register_function("vrandomseed", 0, 3, bf_vrandomseed, TYPE_LIST);
     register_function("vrandom", 0, 1, bf_vrandom, TYPE_INT);
