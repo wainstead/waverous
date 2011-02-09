@@ -3,6 +3,7 @@
  */
 
 
+#if HAVE_EXPAT_H
 
 #include "bf_register.h"
 #include "functions.h"
@@ -289,3 +290,5 @@ register_xml()
     register_function("xml_parse_document", 1, 2, bf_parse_xml_document,
 		      TYPE_STR, TYPE_ANY);
 }
+
+#endif
