@@ -23,7 +23,7 @@ INSTALL         = @INSTALL@
 INSTALL_DATA	= @INSTALL_DATA@
 
 YFLAGS = -d
-COMPILE.c = $(CC) $(CFLAGS) $(DEFS)$(CPPFLAGS) -c
+COMPILE.c = $(CC) $(CFLAGS) $(DEFS) $(CPPFLAGS) -c
 
 CSRCS = ast.c code_gen.c db_file.c db_io.c db_objects.c db_properties.c \
 	db_verbs.c decompile.c disassemble.c eval_env.c eval_vm.c \
