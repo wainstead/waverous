@@ -285,6 +285,7 @@ dnl ***************************************************************************
 
 AC_PROG_YACC
 AC_PROG_CXX
+AC_PROG_INSTALL
 AC_GCC_TRADITIONAL
 AC_PROGRAM_EGREP(yes, [
 #if __GNUC__==2

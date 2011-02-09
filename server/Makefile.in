@@ -31,8 +31,10 @@ YACC = @YACC@
 # for debugging you might prefer:
 # CFLAGS='-g -m32 -O0 -Wall -DEXPAT_XML
 
-CFLAGS   = -m32 -O -DEXPAT_XML 
-CPPFLAGS = @CPPFLAGS@
+CFLAGS		= -m32 -O -DEXPAT_XML 
+CPPFLAGS	= @CPPFLAGS@
+INSTALL         = @INSTALL@
+INSTALL_DATA	= @INSTALL_DATA@
 
 YFLAGS = -d
 COMPILE.c = $(CC) $(CFLAGS) $(CPPFLAGS) -c
