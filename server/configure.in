@@ -317,9 +317,6 @@ AC_SIZE_T
 AC_STRUCT_TM
 AC_TIMEZONE
 
-have_expat=no
-AC_SEARCH_LIBS([XML_ParserCreate], [expat], [have_expat=yes])
-
 MOO_HAVE_FUNC_LIBS(sqrt, -lm /lib/libm.a "-static -lm")
 MOO_HAVE_FUNC_LIBS(mkfifo waitpid sigemptyset, -lposix /lib/libposix.a)
 MOO_HAVE_FUNC_LIBS(accept, "-lsocket -lnsl" -lsocket -linet)
@@ -522,17 +519,35 @@ yes
 
 AC_CHECK_HEADERS([arpa/inet.h fcntl.h float.h limits.h malloc.h memory.h netdb.h netinet/in.h stdlib.h string.h sys/ioctl.h sys/param.h sys/socket.h sys/time.h unistd.h])
 
-if test "x${have_expat}" = xyes; then
-    AC_CHECK_HEADERS([expat.h], [], [have_expat=no])
-fi
 
-if test "x${have_expat}" = xno; then
-    AC_MSG_WARN([
+# Expat support: search for the library, then expat.h.
+# Let the user choose to enable expat or not
+AC_ARG_ENABLE([expat],
+        [  --enable-expat	enable XML parsing via the Expat library],
+        [expat=${enableval}],
+        [expat=yes])
+
+if test "x${expat}" = xyes; then
+
+   have_expat=no
+   AC_SEARCH_LIBS([XML_ParserCreate], [expat], [have_expat=yes])
+
+   if test "x${have_expat}" = xyes; then
+
+      AC_CHECK_HEADERS([expat.h], [], [have_expat=no])
+
+      fi
+
+      if test "x${have_expat}" = xno; then
+      AC_MSG_WARN([
   ----------------------------------------------------
   Unable to find the Expat XML library on this system.
   Building a moo server without XML support.
   ----------------------------------------------------])
+  fi
 fi
+
+
 
 AC_C_INLINE
 AC_FUNC_ALLOCA
