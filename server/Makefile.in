@@ -90,7 +90,7 @@ client_sysv: client_sysv.o
 restart:
 	touch restart
 
-configure: configure.in
+configure: configure.ac
 	# autoconf
 	@echo "Not running autoconf; you must do this by hand."
 	touch configure
