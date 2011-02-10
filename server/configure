@@ -659,6 +659,8 @@ SHELL'
 ac_subst_files=''
 ac_user_opts='
 enable_option_checking
+enable_expat
+enable_fup
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1280,6 +1282,15 @@ if test -n "$ac_init_help"; then
      short | recursive ) echo "Configuration of Waverous LambdaMOO beta1:";;
    esac
   cat <<\_ACEOF
+
+Optional Features:
+  --disable-option-checking  ignore unrecognized --enable/--with options
+  --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
+  --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
+  --enable-expat          enable XML parsing via the Expat library [default:
+                          yes]
+  --enable-fup            Include the ext-FUP extension for manipulating
+                          external files
 
 Some influential environment variables:
   YACC        The `Yet Another C Compiler' implementation to use. Defaults to
@@ -4768,63 +4779,6 @@ $as_echo "#define HAVE_TZNAME 1" >>confdefs.h
 fi
 
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing XML_ParserCreate" >&5
-$as_echo_n "checking for library containing XML_ParserCreate... " >&6; }
-if test "${ac_cv_search_XML_ParserCreate+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_func_search_save_LIBS=$LIBS
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char XML_ParserCreate ();
-int
-main ()
-{
-return XML_ParserCreate ();
-  ;
-  return 0;
-}
-_ACEOF
-for ac_lib in '' expat; do
-  if test -z "$ac_lib"; then
-    ac_res="none required"
-  else
-    ac_res=-l$ac_lib
-    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
-  fi
-  if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_search_XML_ParserCreate=$ac_res
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext
-  if test "${ac_cv_search_XML_ParserCreate+set}" = set; then :
-  break
-fi
-done
-if test "${ac_cv_search_XML_ParserCreate+set}" = set; then :
-
-else
-  ac_cv_search_XML_ParserCreate=no
-fi
-rm conftest.$ac_ext
-LIBS=$ac_func_search_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_XML_ParserCreate" >&5
-$as_echo "$ac_cv_search_XML_ParserCreate" >&6; }
-ac_res=$ac_cv_search_XML_ParserCreate
-if test "$ac_res" != no; then :
-  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
-
-fi
-
-
 
 for func in sqrt
 do
@@ -6194,6 +6148,131 @@ fi
 
 done
 
+
+
+
+# Check whether --enable-expat was given.
+if test "${enable_expat+set}" = set; then :
+  enableval=$enable_expat; expat=${enableval}
+else
+  expat=yes
+fi
+
+
+if test "x${expat}" = xyes; then
+
+   have_expat=no
+   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing XML_ParserCreate" >&5
+$as_echo_n "checking for library containing XML_ParserCreate... " >&6; }
+if test "${ac_cv_search_XML_ParserCreate+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char XML_ParserCreate ();
+int
+main ()
+{
+return XML_ParserCreate ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' expat; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_search_XML_ParserCreate=$ac_res
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+  if test "${ac_cv_search_XML_ParserCreate+set}" = set; then :
+  break
+fi
+done
+if test "${ac_cv_search_XML_ParserCreate+set}" = set; then :
+
+else
+  ac_cv_search_XML_ParserCreate=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_XML_ParserCreate" >&5
+$as_echo "$ac_cv_search_XML_ParserCreate" >&6; }
+ac_res=$ac_cv_search_XML_ParserCreate
+if test "$ac_res" != no; then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+  have_expat=yes
+fi
+
+
+   if test "x${have_expat}" = xyes; then
+
+      for ac_header in expat.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "expat.h" "ac_cv_header_expat_h" "$ac_includes_default"
+if test "x$ac_cv_header_expat_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_EXPAT_H 1
+_ACEOF
+
+else
+  have_expat=no
+fi
+
+done
+
+
+   fi
+
+   if test "x${have_expat}" = xno; then
+      as_fn_error $? "
+  ----------------------------------------------------
+  Unable to find the Expat XML library on this system.
+  ----------------------------------------------------" "$LINENO" 5
+   fi
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: The Expat XML library will not be included in this build" >&5
+$as_echo "$as_me: The Expat XML library will not be included in this build" >&6;}
+fi
+
+# Check whether --enable-fup was given.
+if test "${enable_fup+set}" = set; then :
+  enableval=$enable_fup; fup=${enableval}
+else
+  fup=no
+fi
+
+
+if test "x${fup}" = xyes; then
+   { $as_echo "$as_me:${as_lineno-$LINENO}: ext-FUP file manipulation package enabled" >&5
+$as_echo "$as_me: ext-FUP file manipulation package enabled" >&6;}
+
+$as_echo "#define USE_EXT_FUP 1" >>confdefs.h
+
+else
+   { $as_echo "$as_me:${as_lineno-$LINENO}: The ext-FUP file manipulation extension will not be included in this build" >&5
+$as_echo "$as_me: The ext-FUP file manipulation extension will not be included in this build" >&6;}
+fi
+
+
+
+
+
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for inline" >&5
 $as_echo_n "checking for inline... " >&6; }
 if test "${ac_cv_c_inline+set}" = set; then :
@@ -7130,46 +7209,6 @@ fi
 done
 
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lexpat" >&5
-$as_echo_n "checking for main in -lexpat... " >&6; }
-if test "${ac_cv_lib_expat_main+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lexpat  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-
-int
-main ()
-{
-return main ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_expat_main=yes
-else
-  ac_cv_lib_expat_main=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_expat_main" >&5
-$as_echo "$ac_cv_lib_expat_main" >&6; }
-if test "x$ac_cv_lib_expat_main" = x""yes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBEXPAT 1
-_ACEOF
-
-  LIBS="-lexpat $LIBS"
-
-fi
-
-
 echo "----------------------------------------------------------------------"
 echo "| The following networking configurations will probably work on your"
 echo "| system; any configuration *not* listed here almost certainly will"
@@ -7177,6 +7216,7 @@ echo "| *not* work on your system:"
 echo "|"
 echo "|   $NETWORK_CONFIGURATIONS"
 echo "----------------------------------------------------------------------"
+
 
 ac_config_files="$ac_config_files Makefile"
 
