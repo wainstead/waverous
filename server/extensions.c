@@ -32,6 +32,7 @@
 
 #define EXAMPLE 0
 
+#include "config.h"
 #include "bf_register.h"
 #include "functions.h"
 #include "db_tune.h"
@@ -56,7 +57,6 @@
 #include <math.h>
 #include <stdlib.h>
 
-extern void register_files(void);
 
 /* utime - andy */
 #include <sys/time.h>		/* these two for gettimeofday() */
@@ -344,9 +344,15 @@ bf_utime(Var arglist, Byte next, void *vdata, Objid progr)
 
 // end utime - andy
 
-#if HAVE_EXPAT_H
+#ifdef HAVE_EXPAT_H
 extern void register_xml(void);
 #endif
+
+
+#ifdef USE_EXT_FUP
+extern void register_files(void);
+#endif
+
 
 void
 register_extensions()
@@ -361,7 +367,7 @@ register_extensions()
     register_function("verb_cache_stats", 0, 0, bf_verb_cache_stats);
 #endif
 
-#if HAVE_EXPAT_H
+#ifdef HAVE_EXPAT_H
     register_xml();
 #endif
 
@@ -371,7 +377,11 @@ register_extensions()
 // begin utime - andy
     register_function("utime", 0, 0, bf_utime);
 // end utime - andy
+
+#ifdef USE_EXT_FUP
     register_files();
+#endif
+
     oklog("          LOADING: extensions ... finished\n");
 }
 
