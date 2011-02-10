@@ -661,6 +661,7 @@ ac_user_opts='
 enable_option_checking
 enable_expat
 enable_fup
+enable_openssl
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1291,6 +1292,7 @@ Optional Features:
                           yes]
   --enable-fup            Include the ext-FUP extension for manipulating
                           external files
+  --enable-openssl        enable openssl (Secure Socket Layers) (experimental)
 
 Some influential environment variables:
   YACC        The `Yet Another C Compiler' implementation to use. Defaults to
@@ -6269,8 +6271,112 @@ $as_echo "$as_me: The ext-FUP file manipulation extension will not be included i
 fi
 
 
+# Check whether --enable-openssl was given.
+if test "${enable_openssl+set}" = set; then :
+  enableval=$enable_openssl; openssl=${enableval}
+else
+  openssl=no
+fi
 
 
+
+if test "x${openssl}" = xyes; then
+   have_openssl=no
+   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing SSL_CTX_ctrl" >&5
+$as_echo_n "checking for library containing SSL_CTX_ctrl... " >&6; }
+if test "${ac_cv_search_SSL_CTX_ctrl+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char SSL_CTX_ctrl ();
+int
+main ()
+{
+return SSL_CTX_ctrl ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' ssl; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_search_SSL_CTX_ctrl=$ac_res
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+  if test "${ac_cv_search_SSL_CTX_ctrl+set}" = set; then :
+  break
+fi
+done
+if test "${ac_cv_search_SSL_CTX_ctrl+set}" = set; then :
+
+else
+  ac_cv_search_SSL_CTX_ctrl=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_SSL_CTX_ctrl" >&5
+$as_echo "$ac_cv_search_SSL_CTX_ctrl" >&6; }
+ac_res=$ac_cv_search_SSL_CTX_ctrl
+if test "$ac_res" != no; then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+  have_openssl=yes
+fi
+
+
+   if test "x${have_openssl}" = xyes; then
+      for ac_header in openssl/ssl.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "openssl/ssl.h" "ac_cv_header_openssl_ssl_h" "$ac_includes_default"
+if test "x$ac_cv_header_openssl_ssl_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_OPENSSL_SSL_H 1
+_ACEOF
+
+fi
+
+done
+
+      for ac_header in openssl/err.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "openssl/err.h" "ac_cv_header_openssl_err_h" "$ac_includes_default"
+if test "x$ac_cv_header_openssl_err_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_OPENSSL_ERR_H 1
+_ACEOF
+
+fi
+
+done
+
+   fi
+
+   if test "x${have_openssl}" = xno; then
+   as_fn_error $? "
+  ----------------------------------------------------
+  Unable to find the openssl library on this system.
+  ----------------------------------------------------" "$LINENO" 5
+   else
+
+$as_echo "#define USE_OPENSSL 1" >>confdefs.h
+
+   fi
+fi
 
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for inline" >&5

@@ -279,6 +279,8 @@
 /* Expat is the XML parsing library by James Clark. */
 #undef HAVE_EXPAT_H
 
+/* OpenSSL */
+#undef USE_OPENSSL
 
 #endif /* !Config_H */
 

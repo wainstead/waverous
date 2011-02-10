@@ -562,30 +562,32 @@ else
    AC_MSG_NOTICE([The ext-FUP file manipulation extension will not be included in this build])
 fi
 
-dnl currently this block is no bueno. --sw
+
 dnl # let the user choose to enable ssl or not
-dnl AC_ARG_ENABLE([ssl],
-dnl         [  --enable-ssl	enable ssl (Secure Socket Layers) (experimental)],
-dnl         [ssl=${enableval}],
-dnl         [ssl=no])
+AC_ARG_ENABLE([openssl],
+        [AS_HELP_STRING([--enable-openssl], [enable openssl (Secure Socket Layers) (experimental)])],
+        [openssl=${enableval}],
+        [openssl=no])
 
 
-dnl if test "x${ssl}" = xyes; then
-dnl    have_openssl=no
-dnl    AC_CHECK_LIB([openssl], [have_openssl=yes])
+if test "x${openssl}" = xyes; then
+   have_openssl=no
+   AC_SEARCH_LIBS([SSL_CTX_ctrl], [ssl], [have_openssl=yes])
 
-dnl    if test "x${have_openssl}" = xyes; then
-dnl       AC_CHECK_HEADERS([openssl/ssl.h])
-dnl       AC_CHECK_HEADERS([openssl/err.h])
-dnl    fi
-dnl       if test "x${have_openssl}" = xno; then
-dnl       AC_MSG_WARN([
-dnl   ----------------------------------------------------
-dnl   Unable to find the openssl library on this system.
-dnl   Building a moo server without SSL support.
-dnl   ----------------------------------------------------])
-dnl       fi
-dnl fi
+   if test "x${have_openssl}" = xyes; then
+      AC_CHECK_HEADERS([openssl/ssl.h])
+      AC_CHECK_HEADERS([openssl/err.h])
+   fi
+
+   if test "x${have_openssl}" = xno; then
+   AC_MSG_ERROR([
+  ----------------------------------------------------
+  Unable to find the openssl library on this system.
+  ----------------------------------------------------])
+   else
+   AC_DEFINE([USE_OPENSSL], 1, [use openssl for Secure Sockets Layer])
+   fi
+fi
 
 
 AC_C_INLINE
