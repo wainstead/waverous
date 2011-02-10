@@ -1,6 +1,6 @@
 
 package = waverous
-version = beta1
+version = beta2
 tarname = $(package)
 distdir = $(tarname)-$(version)
 
