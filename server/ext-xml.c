@@ -2,8 +2,9 @@
  * XML for the MOO Server using the expat library
  */
 
+#include "config.h"
 
-#if HAVE_EXPAT_H
+#ifdef HAVE_EXPAT_H
 
 #include "bf_register.h"
 #include "functions.h"
@@ -291,4 +292,5 @@ register_xml()
 		      TYPE_STR, TYPE_ANY);
 }
 
-#endif
+
+#endif /* HAVE_EXPAT_H */

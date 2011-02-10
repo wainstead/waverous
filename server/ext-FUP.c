@@ -15,10 +15,15 @@
   filemkdir and filermdir in collaboration with Jeremy Cooper <jeremy@crl.com>
   Thanks to Alex Stewart for valuable suggestions for improvements.
  *****************************************************************************/
+
+#include "config.h"
+
+#ifdef USE_EXT_FUP
+
+
 #include <ctype.h>
 #include "my-time.h"
 #include "my-string.h"
-#include "config.h"
 #include "functions.h"
 #include "log.h"
 #include "random.h"
@@ -1170,3 +1175,6 @@ register_files(void)
 			     TYPE_STR, TYPE_LIST, TYPE_INT, TYPE_INT);
 
 }
+
+
+#endif /* USE_EXT_FUP */
