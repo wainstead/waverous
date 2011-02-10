@@ -271,5 +271,14 @@
 #  endif
 #endif
 
+/* ext-FUP is an external package for manipulating files (one of two
+ * such packages, in fact).
+ */
+#undef USE_EXT_FUP
+
+/* Expat is the XML parsing library by James Clark. */
+#undef HAVE_EXPAT_H
+
+
 #endif /* !Config_H */
 
