@@ -264,7 +264,7 @@ for opt in "" -Aa -Xa -ansi
 do
 SAVECC="$CC"
 CC="$CC $opt"
-AC_RUN_IFELSE([
+AC_TEST_PROGRAM([
 int main(int argc, char *argv) { void *ptr; exit(0); }
 ],
 [have_ansi=1
@@ -388,7 +388,7 @@ AC_TEST_CPP([
 
 dnl ***************************************************************************
 echo "checking whether or not fstat() can tell how much data is in a FIFO"
-AC_RUN_IFELSE([#include <sys/types.h>
+AC_TEST_PROGRAM([#include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 main()
@@ -412,7 +412,7 @@ main()
 
 dnl ***************************************************************************
 echo "checking whether or not select() can be used on FIFOs"
-AC_RUN_IFELSE([#include <sys/types.h>
+AC_TEST_PROGRAM([#include <sys/types.h>
 #include <sys/time.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -444,11 +444,11 @@ main()
   unlink("/tmp/conftest-fifo");
   exit(result);
 }
-], AC_DEFINE(SELECT_WORKS_ON_FIFOS), AC_MSG_NOTICE([select() cannot be used on FIFOs]))
+], AC_DEFINE(SELECT_WORKS_ON_FIFOS))
 
 dnl ***************************************************************************
 echo "checking whether or not poll() can be used on FIFOs"
-AC_RUN_IFELSE([#include <sys/types.h>
+AC_TEST_PROGRAM([#include <sys/types.h>
 #include <poll.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -465,11 +465,11 @@ main()
   unlink("/tmp/conftest-fifo");
   exit(result);
 }
-], AC_DEFINE(POLL_WORKS_ON_FIFOS), AC_MSG_NOTICE([poll() cannot be used on FIFOs]))
+], AC_DEFINE(POLL_WORKS_ON_FIFOS))
 
 dnl ***************************************************************************
 echo checking whether POSIX-style non-blocking I/O works
-AC_RUN_IFELSE([#include <sys/types.h>
+AC_TEST_PROGRAM([#include <sys/types.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -493,7 +493,7 @@ main ()
   unlink("/tmp/conftest-fifo");
   exit(result);
 }
-], AC_DEFINE(POSIX_NONBLOCKING_WORKS), AC_MSG_NOTICE([POSIX-style non-blocking I/O does not work]))
+], AC_DEFINE(POSIX_NONBLOCKING_WORKS))
 
 dnl ***************************************************************************
 echo checking which MOO networking configurations are likely to work...
