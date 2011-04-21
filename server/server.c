@@ -55,7 +55,7 @@ pid_t checkpoint_pid = 0;
 static pid_t parent_pid;
 int in_child = 0;
 
-static const char *shutdown_message = 0;	/* shut down if non-zero */
+const char *shutdown_message = 0;	/* shut down if non-zero */
 static int in_emergency_mode = 0;
 static Var checkpointed_connections;
 
