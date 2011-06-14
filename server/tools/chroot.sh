@@ -40,5 +40,3 @@ cp /usr/lib/libstdc++.so.6 usr/lib/
 # running the server; but running it via restart.sh would be better,
 # because your changes are lost otherwise
 #chroot $CHROOTDIR /sbin/moo -l /logs/my.log /databases/LambdaCore-12Apr99.db /databases/LambdaCore-12Apr99.mine.db
-# on slim:
-# /usr/sbin/chroot /waverous/chroot /sbin/moo -l /logs/my.log /databases/LambdaCore-12Apr99.db /databases/LambdaCore-12Apr99.mine.db
