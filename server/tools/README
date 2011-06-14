@@ -1,0 +1,15 @@
+This directory ('tools') contains scripts found around the internet by
+different authors, or written for the Waverous project.
+
+chroot.sh: This shows the basics on how to create a chroot environment
+(http://en.wikipedia.org/wiki/Chroot) to run your server, for security
+reasons
+
+moo2xml.py: convert your MOO database file to XML
+
+moobrowser.c: given different command line arguments, this tool will
+display data from your MOO database
+
+test.exp: an experimental script to use Expect
+(http://www.nist.gov/el/msid/expect.cfm) to test a running server
+
