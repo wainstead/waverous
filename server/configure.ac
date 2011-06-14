@@ -15,7 +15,7 @@ dnl   3333 Coyote Hill Rd.
 dnl   Palo Alto, CA 94304
 dnl   Pavel@Xerox.Com
 dnl
-AC_PREREQ([2.66])
+AC_PREREQ([2.61])
 AC_INIT([Waverous LambdaMOO], [beta1], [wainstead@gmail.com], [waverous-lambdamoo], [http://code.google.com/p/waverous/])
 AC_CONFIG_SRCDIR([functions.c])
 AC_CONFIG_HEADERS([config.h])
@@ -523,9 +523,9 @@ AC_CHECK_HEADERS([arpa/inet.h fcntl.h float.h limits.h malloc.h memory.h netdb.h
 
 dnl Let the user choose to enable expat or not.
 dnl Expat support: search for the library, then expat.h.
-AC_ARG_ENABLE([expat],
-        [AS_HELP_STRING([--enable-expat], [enable XML parsing via the Expat library @<:@default: yes@:>@])],
-        [expat=${enableval}],
+AC_ARG_WITH([expat],
+        [AS_HELP_STRING([--with-expat], [enable XML parsing via the Expat library @<:@default: yes@:>@])],
+        [expat=${withval}],
         [expat=yes])
 
 if test "x${expat}" = xyes; then
@@ -549,24 +549,27 @@ else
   AC_MSG_NOTICE([The Expat XML library will not be included in this build])
 fi
 
+
+
 dnl Include (or don't) the ext-FUP extension for manipulating external files
-AC_ARG_ENABLE([fup],
-        [AS_HELP_STRING([--enable-fup],	[Include the ext-FUP extension for manipulating external files])],
-        [fup=${enableval}],
+AC_ARG_WITH([fup],
+        [AS_HELP_STRING([--with-fup],	[Include the ext-FUP extension for manipulating external files @<:@default: no@:>@])],
+        [fup=${withval}],
         [fup=no])
 
 if test "x${fup}" = xyes; then
-   AC_MSG_NOTICE([ext-FUP file manipulation package enabled])
-   AC_DEFINE([USE_EXT_FUP], 1, [ext-FUP external file manipulation enabled])
+   AC_MSG_NOTICE([ext-FUP file manipulation package included])
+   AC_DEFINE([USE_EXT_FUP], 1, [ext-FUP external file manipulation included])
 else
    AC_MSG_NOTICE([The ext-FUP file manipulation extension will not be included in this build])
 fi
 
 
+
 dnl # let the user choose to enable ssl or not
-AC_ARG_ENABLE([openssl],
-        [AS_HELP_STRING([--enable-openssl], [enable openssl (Secure Socket Layers) (experimental)])],
-        [openssl=${enableval}],
+AC_ARG_WITH([openssl],
+        [AS_HELP_STRING([--with-openssl], [include openssl (Secure Socket Layers) (experimental) @<:@default: no@:>@])],
+        [openssl=${withval}],
         [openssl=no])
 
 
@@ -585,8 +588,10 @@ if test "x${openssl}" = xyes; then
   Unable to find the openssl library on this system.
   ----------------------------------------------------])
    else
-   AC_DEFINE([USE_OPENSSL], 1, [use openssl for Secure Sockets Layer])
+   AC_DEFINE([USE_OPENSSL], 1, [Using openssl for Secure Sockets Layer])
    fi
+else
+   AC_MSG_NOTICE([openssl will not be included in this build])
 fi
 
 
