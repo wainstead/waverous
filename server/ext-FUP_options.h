@@ -1,3 +1,20 @@
+/******************************************************************************
+  Copyright (c) 1994,1995,1996 Weizmann Institute. All rights reserved.
+  This is version 1.8 of the File Utilities Package (FUP), suitable for use
+  with all versions of MOO1.8.0, up to beta2 inclusive.
+  This file includes routines for file management and direct file access
+  developed and written by Jaime Prilusky and Gustavo Glusman, Weizmann
+  Institute of Science, Israel.
+  This software is intended to work with the MOO server written by
+  Pavel Curtis, Xerox PARC (Pavel@Xerox.Com), depending on routines
+  and code from the MOO server itself.
+  For questions, suggestions  and comments, please  send email to
+  lsprilus@weizmann.weizmann.ac.il (Jaime Prilusky)
+  Gustavo@bioinformatics.weizmann.ac.il (Gustavo Glusman)
+
+  filemkdir and filermdir in collaboration with Jeremy Cooper <jeremy@crl.com>
+  Thanks to Alex Stewart for valuable suggestions for improvements.
+ *****************************************************************************/
 
 
 /*************************************************************************
