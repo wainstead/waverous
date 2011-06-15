@@ -7,6 +7,19 @@
  *
  */
 
+/**
+This file appears to have been added by wrog in a branch in CVS:
+
+http://lambdamoo.cvs.sourceforge.net/viewvc/lambdamoo/server/net_tcp.c?view=log
+Revision 1.1
+Sun Jun 1 12:42:30 2003 UTC (8 years ago) by wrog
+file net_tcp.c was initially added on branch SRCIP.
+
+Since it appears to be extracted from the two files mentioned above
+(net_bsd_tcp.c and net_sysv_tcp.c) it would fall under the Xerox
+license of other files.
+*/
+
 #ifdef OUTBOUND_NETWORK
 static char outbound_network_enabled = OUTBOUND_NETWORK;
 #endif
