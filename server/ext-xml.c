@@ -1,3 +1,48 @@
+/***********************************************************************
+
+This file (ext-xml.c) was originally obtained from this URL:
+http://www.xythian.com/moo/expat-binding/
+
+The copyright notice for this file is given by the URL:
+http://www.xythian.com/moo/expat-binding/docs/ext-xml.README
+
+and it reads:
+
+
+  This is a binding of expat to MOO providing two functions for
+  parsing XML.
+  
+  It was written by Ken Fox <fox@mars.org>.
+  
+  This patch's "home page" (for now) is
+     http://www.xythian.com/moo/expat-binding/
+  
+  expat is an XML Parser Toolkit available at 
+     http://www.jclark.com/xml/expat.html
+  
+  The binding is covered under the following license:
+  
+  --- 
+  
+  
+  Copyright 2000 by Ken Fox.
+  
+  Permission to use, copy, modify, and distribute this software and
+  its documentation for any purpose and without fee is hereby granted,
+  provided that the above copyright notice appear in all copies and
+  that both that copyright notice and this permission notice appear in
+  supporting documentation.
+  
+  KEN FOX DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
+  INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN
+  NO EVENT SHALL KEN FOX BE LIABLE FOR ANY SPECIAL, INDIRECT OR
+  CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
+  OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+  NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION
+  WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+  
+***********************************************************************/
+
 /*
  * XML for the MOO Server using the expat library
  */
