@@ -1,3 +1,31 @@
+/*****************************************************************
+  Copyright (c) 1996 Andrew Wendt <andy@wendt.ca>.  All rights
+  reserved.  Permission to use, copy, modify, and distribute this
+  software and its documentation for any purpose and without fee
+  is hereby granted, provided that the above copyright notice
+  appear in all copies and that both that copyright notice and
+  this permission notice appear in supporting documentation.
+
+  Andrew Wendt disclaims all warranties with regard to this
+  software, including all implied warranties of merchantability
+  and fitness, in no event shall Andrew Wendt be liable for any
+  special, indirect or consequential damages or any damages
+  whatsoever resulting from loss of use, data or profits, whether
+  in an action of contract, negligence or other tortious action,
+  arising out of or in connection with the use or performance of
+  this software.
+*****************************************************************/
+
+/**
+This code allows you more control of DNS lookups, and for the DNS
+lookups to use forked processes instead of blocking the entire MOO.
+
+Some people think that the MOO does name lookups in the background by
+default, since it uses two subprocesses for them. But actually it's
+just sandboxing the gethostbyname() call so that it can kill it with a
+timeout without leaving the resolver library in an inconsistent state.
+*/
+
 #include <errno.h>
 #include <signal.h>
 #include <netdb.h>		/* gethostby{name,addr}() */
