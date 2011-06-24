@@ -6,7 +6,7 @@ extern char *optarg;
 extern int optind;
 extern int optopt;   // when an invalid arg is found, it's put in this global variable
 extern int opterr;   
-extern int optreset;
+
 
 void display_usage() { printf("usage: [-b --buffy] [-f --fluoride <val>] [-w --wheezy <val>]\n"); }
 
@@ -44,7 +44,6 @@ int main(int argc, char** argv)
         printf("\toptind:   %d\n" , optind   );
         printf("\toptopt:   %d\n" , optopt   );
         printf("\topterr:   %d\n" , opterr   );
-        printf("\toptreset: %d\n" , optreset );
 
         switch (ch) {
 
