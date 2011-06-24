@@ -83,7 +83,10 @@ int main(int argc, char** argv)
             exit(EXIT_FAILURE);
 
         case 0:
-            printf("Matched zero: '%s'\n", optarg);
+            // getopt_long() set a variable, just keep going; this is
+            // the case for something like:
+            // { "blippy", required_argument, &myvar, 42},
+            // and now myvar == 42.
             break;
 
         default:
