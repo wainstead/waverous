@@ -1,0 +1,223 @@
+<HTML>
+<HEAD>
+<TITLE> MCP/2.1 Software for MOO </TITLE>
+</HEAD>
+<BODY BGCOLOR=#ffffff>
+
+<FONT FACE=Helvetica>
+
+<A HREF=../tkMOO-light/>tkMOO-light</A>
+
+<HR>
+
+<H3> MCP/2.1 Software for MOO </H3>
+
+MCP/2.1 is an out of band protocol used for sending messages between
+servers and clients.  Several useful applications are available
+that are built on MCP/2.1.  Programmers can use MCP/2.1 to create
+new applications for MOO.
+
+<P>
+
+An overview of the MUD Client Protocol (MCP) and the protocol
+specification are available here:
+
+<UL>
+<DD> <A HREF=http://www.moo.mud.org/mcp2/>http://www.moo.mud.org/mcp2/</A>
+</UL>
+
+
+<H3> JHCore MCP/2.1 Implementation  </H3>
+
+The JHCore MCP/2.1 implementation is extracted from JHCore and is
+subject to the <A HREF=#1>JHCore Copyright notice and LICENCE</A>.  
+
+<P>
+
+The latest version of the JHCore database, which also contains this
+code is available here:
+
+<UL>
+<DD> <A HREF=ftp://ftp.ccs.neu.edu/pub/mud/sites/jhm/database/>ftp://ftp.ccs.neu.edu/pub/mud/sites/jhm/database/</A>
+</UL>
+
+<H3> Introduction </H3>
+
+JHCore implements MCP/2.1 support with a suite of objects which
+are hooked to the System Object.  This architecture means that it's
+very easy to extract the suite from a JHCore database and port it
+to other MOO databases.  So far I've been able to do this for (old)
+JHCore, LambdaCore and enCore databases and it's likely that the
+same can be said of any MOO database.
+
+<P>
+
+I've dumped the suite of objects to text files written a small
+README file and tarred the whole lot up so that other people can
+have a go.  Here it is:
+
+<UL>
+    <LI> <A HREF=README>README</A>
+    <LI> <A HREF=MCP.tar.gz>MCP.tar.gz</A>
+</UL>
+
+<H3>MCP/2.1 Packages</H3>
+
+The following packages are available separately as .tar.gz archives.
+These packages are written using the JHCore MCP/2.1 Implementation's
+API.
+
+<DL>
+
+    <DT> <STRONG>dns-org-mud-moo-simpleedit</STRONG>
+	 (<A HREF=packages/dns-org-mud-moo-simpleedit.tar.gz>archive</A>,
+	 <A HREF=packages/README.dns-org-mud-moo-simpleedit>README</A>)
+    <DD>
+    The package dns-org-mud-moo-simpleedit provides support for
+    local-editors in cooperating clients.  The package supports
+    the data in the form of a <STRONG>string</STRONG> a
+    <STRONG>string-list</STRONG> or <STRONG>moo-code</STRONG>.
+    Clients that don't provide special support for moo-code editing
+    can treat moo-code identically to string-list.
+
+    <P>
+
+    <DT> <STRONG>dns-com-awns-displayurl</STRONG>
+	 (<A HREF=packages/dns-com-awns-displayurl.tar.gz>archive</A>,
+	 <A HREF=packages/README.dns-com-awns-displayurl>README</A>)
+    <DD>
+    The package dns-com-awns-displayurl allows the server to send URLs
+    to the client.  The client should then use a client-side webbrowser
+    to display the contents of the URL.  The client can optionally
+    display a warning message to the user requesting if the URL should
+    be displayed.
+
+    <P>
+
+    <DT> <STRONG>dns-com-awns-serverinfo</STRONG>
+	 (<A HREF=packages/dns-com-awns-serverinfo.tar.gz>archive</A>,
+	 <A HREF=packages/README.dns-com-awns-serverinfo>README</A>)
+    <DD>
+    The package dns-com-awns-serverinfo lets the server give the
+    client a couple of useful URLs, the server's Home Page and Help
+    Page if such exist.  The client is free to make these available
+    though a Help menu or by some other method.
+
+    <P>
+
+    <DT> <STRONG>dns-com-awns-jtext</STRONG>
+	 (<A HREF=packages/dns-com-awns-jtext.tar.gz>archive</A>,
+	 <A HREF=packages/README.dns-com-awns-jtext>README</A>)
+    <DD>
+    The package dns-com-awns-jtext allows the client to access jtext
+    links.  Jtext is a hypertext format for the JHCore and this package
+    provides an MCP/2.1 version of the MCP/1.0 'jtext-pick' message.
+
+    <P>
+
+    <DT> <STRONG>dns-com-awns-status</STRONG>
+	 (<A HREF=packages/dns-com-awns-status.tar.gz>archive</A>,
+	 <A HREF=packages/README.dns-com-awns-status>README</A>)
+    <DD> 
+    The package dns-com-awns-status allows the server to send short,
+    human readable, informational messages to cooperating clients.  The
+    client can display the message in a number of ways.  For example
+    on the main chat screen, or in a special part of the client's status
+    bar or log window.  The client is free to ignore the message
+    completely if it wishes.
+
+    <P>
+
+    <DT> <STRONG>dns-com-awns-ping</STRONG>
+	 (<A HREF=packages/dns-com-awns-ping.tar.gz>archive</A>,
+	 <A HREF=packages/README.dns-com-awns-ping>README</A>)
+    <DD>
+    The package dns-com-awns-ping allows both client and server to
+    test the latency of a user's connection, a rough indication
+    of net-lag.  Accordingly the server can choose to 'back off'
+    a bandwidth-heavy activity to a slow user, to make the best of
+    what little connectivity the connection has to spare.
+
+    <P>
+
+    <DT> <STRONG>dns-com-awns-visual</STRONG>
+	 (<A HREF=packages/dns-com-awns-visual.tar.gz>archive</A>,
+	 <A HREF=packages/README.dns-com-awns-visual>README</A>)
+    <DD>
+    The package dns-com-awns-visual provides clients with up-to-date
+    information about places, topology and people online.  Clients can
+    display this information in the form of navigable maps or user
+    listings.
+
+    <P>
+
+    <DT> <STRONG>dns-com-awns-rehash</STRONG>
+	 (<A HREF=packages/dns-com-awns-rehash.tar.gz>archive</A>,
+	 <A HREF=packages/README.dns-com-awns-rehash>README</A>)
+    <DD>
+    The package dns-com-awns-rehash provides clients with up-to-date
+    information about the set of server commands which can be typed
+    by the user.  Clients can use this information for tricks like
+    command-completion, or the implementation of 'say'/'do'
+    interfaces.
+
+    <P>
+
+    <DT> <STRONG>dns-com-awns-getset</STRONG>
+	 (<A HREF=packages/dns-com-awns-getset.tar.gz>archive</A>,
+	 <A HREF=packages/README.dns-com-awns-getset>README</A>)
+    <DD>
+    The package dns-com-awns-getset allows clients to save data to
+    and load data from the server.
+
+    <P>
+
+    <DT> <STRONG>dns-com-awns-timezone</STRONG>
+	 (<A HREF=packages/dns-com-awns-timezone.tar.gz>archive</A>,
+	 <A HREF=packages/README.dns-com-awns-timezone>README</A>)
+    <DD>
+    The package dns-com-awns-timezone allows the client to send the
+    user's time-zone to the server.  Server-side applications can make
+    use of this information.
+
+</DL>
+
+<A NAME=1>
+<H3>JHCore Copyright notice and LICENCE </H3>
+</A>
+
+Portions of this database are derived from the LambdaCore distribution,
+available for anonymous ftp at parcftp.xerox.com. The following
+copyright notice applies to new and derived works within this
+database.
+
+<P>
+
+Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998 by Ken Fox. 
+
+<P>
+
+All Rights Reserved 
+
+<P>
+
+Permission to use, copy, modify, and distribute this software and
+its documentation for any purpose and without fee is hereby granted,
+provided that the above copyright notice appear in all copies and
+that both that copyright notice and this permission notice appear
+in supporting documentation.
+
+<P>
+
+KEN FOX DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
+INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS,
+IN NO EVENT SHALL KEN FOX BE LIABLE FOR ANY SPECIAL, INDIRECT OR
+CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
+OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
+OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE
+USE OR PERFORMANCE OF THIS SOFTWARE.
+
+</FONT>
+
+</BODY>
+</HTML>

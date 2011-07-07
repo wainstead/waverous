@@ -1,4 +1,16 @@
-These are a handful of objects I've created over the years; toys, mostly.
+MCP: the MUD Client Protocol is an attempt to provide a standard
+message format on which to build MUD-based client-server
+applications. This directory contains the JHCore implementation; for
+more information see http://www.moo.mud.org/mcp/
+
+
+These are a handful of objects I've created over the years; toys,
+mostly:
+
+algoredoll.moo		gwbushdoll.moo		parrot.moo
+clippy.moo		knights.moo		puppet.moo
+engrish.moo		lander.moo		timer.moo
+governor.moo		michaelscott.moo
 
 To load them via tf, do:
 

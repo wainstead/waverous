@@ -1,0 +1,489 @@
+PORTING JHCORE'S MCP/2.1 IMPLEMENTATION TO OTHER MOOS
+
+CONTENTS
+
+    INTRODUCTION
+    JHCORE MCP/2.1 IMPLEMENTATION
+    JHCORE COPYRIGHT NOTICE AND LICENCE
+    MANIFEST
+    THE MCP/2.1 SUITE
+    PORTING THE OBJECTS
+    CORE-SPECIFIC NOTES
+    TESTING
+    GENERAL COMMENTS
+    QUOTA ISSUES
+
+    IN-DB API
+
+
+INTRODUCTION
+
+This file details how to port the objects from JHCore's MCP/2.1
+implementation to another MOO.  This is not programmer documentation
+for MCP/2.1, nor will it tell you how to use the objects once you've
+installed them.
+
+The objects in this distribution were extracted from JHCore-21May98b5.db.
+The suite has been tested for enCore-1.0.db and LambdaCore-latest.db
+(from around August 98).
+
+You can find out more about MCP/2.1 here:
+
+    http://www.moo.mud.org/mcp2/
+
+
+JHCORE MCP/2.1 IMPLEMENTATION
+
+The JHCore MCP/2.1 implementation is extracted from JHCore and is
+subject to the JHCore Copyright notice and LICENCE.
+
+
+JHCORE COPYRIGHT NOTICE AND LICENCE
+
+Portions of this database are derived from the LambdaCore distribution,
+available for anonymous ftp at parcftp.xerox.com. The following
+copyright notice applies to new and derived works within this
+database.
+
+Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998 by Ken Fox. 
+
+All Rights Reserved 
+
+Permission to use, copy, modify, and distribute this software and
+its documentation for any purpose and without fee is hereby granted,
+provided that the above copyright notice appear in all copies and
+that both that copyright notice and this permission notice appear
+in supporting documentation.
+
+KEN FOX DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
+INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS,
+IN NO EVENT SHALL KEN FOX BE LIABLE FOR ANY SPECIAL, INDIRECT OR
+CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
+OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
+OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE
+USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+MANIFEST
+
+The file MCP.tar.gz contains the following files:
+
+    README			this file
+    encore.system.moo		modified verbs on #0 for enCore
+    jhcore.system.moo		modified verbs on #0 for JHCore
+    lmcore.system.moo		modified verbs on #0 for LambdaCore
+    listutils.extra.moo		additional verbs for $list_utils
+    package.moo
+    cdispatch.moo
+    parser.moo
+    cord.moo
+    mcp.moo
+    registry.moo
+    create.moo
+    negotiate.moo
+    session.moo
+    dispatch.moo
+    wizme.moo			make some verbs and properties wiz-owned
+
+
+THE MCP/2.1 SUITE
+
+The object's in JHCore's MCP/2.1 suite are owned by a non wizard
+user and contain several wizardly verbs and properties.  It's a
+good idea to port the objects with this in mind, don't have all
+the objects owned by a wizard.  Instead, choose a good programmer
+user (you or 'Mr MCP', or somesuch) and port all the objects as
+that user.  Then use a wizard character to make some of the verbs
+and properties wizardly.
+
+For no good reason, I've taken MOO's normal output from the @dump
+command and modified it replacing certain object numbers with
+__TOKENS__.  The file 'create.moo' contains a short script for
+creating the objects (with no verbs or properties), and the object
+created by each command corresponds to a __TOKEN__.
+
+
+PORTING THE OBJECTS
+
+You will need:
+
+	o	patience
+	o	a decent text editor that lets you search and
+		replace strings
+	o	a way to paste large amounts of text in to the MOO
+
+1.	As an ordinary user, use the 'create.moo' file to create
+	all the objects required.  Make a note of the newly created
+	object numbers for the next step.
+
+2.	As an ordinary user, port the files in the order they appear
+	in the 'File' column below.
+
+	When a file contains one of the __*__ tokens you need to
+	replace the token with the MOO object number produced by
+	the create.moo file.  Replace the __WIZARD__ token with
+	the empty string ("").
+
+	Object heirarchy		File		__TOKEN__
+	----------------		----		---------
+        generic message dispatch object	dispatch.moo
+            generic MCP package		package.moo	__PACKAGE__
+                mcp-negotiate		negotiate.moo	__NEGOTIATE__
+                mcp-cord		cord.moo	__MCP-CORD__
+        MCP 2.1 parser			parser.moo	__PARSER__
+        MCP 2.1 session			session.moo	__SESSION__
+        MCP package registry		registry.moo	__REGISTRY__
+        MCP 2.1				mcp.moo		__MCP__
+    
+       (unused: cdispatch.moo **)
+
+3.	Nominate a wizard character to own wizz'd verbs, and
+	properties.  As a wizard, port the wizme.moo file to change
+	the verb and property ownership. Nominated wizard ==
+	__WIZARD__.
+
+4.	You now need to modify existing versb on the System Object
+	(#0) to make it call $mcp.  You'll need to think about
+	this, one place MOOs tend to differ a lot is in their
+	implementation of #0 verbs.  I've included examples of the
+	following 4 verbs for JHCore, LambdaCore and enCore derived
+	MOOs:
+
+            #0:do_out_of_band_command
+            #0:user_created
+            #0:user_disconnected
+            #0:user_reconnected
+
+	See 'CORE-SPECIFIC NOTES' for more details.
+
+5.	You need to register the various packages, as a wizard
+
+            @add-package __NEGOTIATE__ to __REGISTRY__
+            @add-package __MCP-CORD__ to __REGISTRY__
+
+6.	Now you can try and log in.  Good luck...
+
+
+CORE-SPECIFIC NOTES
+
+The MCP/2.1 suite expects some special verbs to be present on
+$list_utils.  These verbs are defined in the file:
+
+	listutils.extra.moo
+
+You can use these definitions to upgrade your own $list_utils, but
+it's just as correct to place these verbs on $mcp (say) and make
+all callers refer to $mcp:<verb> instead of $list_utils:<verb>.
+This further reduces the number of changes you need to make to your
+own 'core' objects.
+
+Several JHCore idioms may be present.  Verbs like :dnamec(),
+:name("#") etc can usually be rewritten as .name without any loss
+of functionality.
+
+The '@add-package' verb implements the default security policy for
+adding new packages to MCP.  It expects the person issuing the
+command to be a Wizard, that is, someone who knows just what the
+package they're adding is going to do the the sustem an to the
+users.  Some MOOs may choose to relax this security policy to allow
+trusted users or anyone else to add or remove packages.
+
+
+TESTING
+
+Here are a couple of verbs you can put on yourself or a FO.  '@mcp'
+lists the MCP/2.1 package supported by your connection, or the
+connection of another user.  '@mcps' lists the other users on your
+MOO who appear to support MCP/2.1.
+
+--- cut here ---
+@program me:@mcp any none none
+if (!valid(who = player:my_match_object(dobjstr)))
+  who = player;
+endif
+session = $mcp:session_for(who);
+packages = session.packages;
+player:tell("session: ", session);
+for p in (packages)
+  player:tell(p[1].name, " (", p[1], ") ", p[2][1], ".", p[2][2]);
+endfor
+player:tell("---");
+.
+
+@program me:@mcps none none none
+for p in (connected_players())
+  session = $mcp:session_for(p);
+  if (session:handles_package($mcp:match_package("mcp-negotiate")))
+    player:tell(p.name);
+  endif
+endfor
+player:tell("---");
+.
+--- cut here ---
+
+
+GENERAL COMMENTS
+
+The extracted JHCore implementation contained 22 verbs and one
+property bearing the Wizard bit.  It might be possible to reduce
+the amount of code running under wizard permissions in this
+implementation.  This would help to make the security review
+procedure a lot simpler for people who're porting the code to new
+MOOs.
+
+No attempt has been made to port the $cord support object from
+JHCore.  The $cord object is like a _utils object in the normal
+MOO sense.  The ported suite *does* contain the cord package, and
+the MOO will be able to send and receive cord messages, though in
+the current port they'll be a little tricky to use.
+
+JHCore is tuned for the LambdaMOO/1.8x architecture and contains
+code that might not work on LambdaMOO/1.7x servers.  For example
+code containing the 'try...' and " ` ... ' " idioms may need to be
+rewritten for LambdaMOO/1.7x.
+
+**	cdispatch.moo contains the $cord dispatcher from JHCore.
+	I just don't know how this works and have nothing client-side
+	that tests it.  Ask someone else...
+
+There's no $player.mcp_snoop interface in the May98 JHCore.  That's
+a pity because it's useful.
+
+
+QUOTA ISSUES
+
+Once MCP/2.1 is installed each connected player object will be
+shadowed by a connection object.  Connection objects are around
+500 bytes in size and can grow when client configuration details
+are added, ie the list of supported packages compiled during the
+MCP negotiation phase.  A connection object supporting 5 different
+packages is around 1300 bytes.
+
+When connection objects are created they're taken from the quota
+of the owner of the MCP/2.1 object suite.  So you need to ensure
+that the owner has a quota sufficiently large to support all the
+connection objects of the peak number of players connected to your
+server at any time.  If this quota is exceeded the current
+implementation traces back with a warning like:
+
+--- cut here ---
+#2024:create_session, line 5:  Resource limit exceeded
+... called from #2024:initialize_connection, line 5
+... called from #2024:user_created user_connected user_reconnected, line 6
+... called from #0:user_created user_connected, line 9
+(End of traceback)
+--- cut here ---
+
+The message isn't fatal, you'll still be connected, but the MCP/2.1
+functionality will not be available.  The remedy is to increase
+the available quota for the MCP/2.1 owner.
+
+
+IN-DB API
+
+Several properties are defined to be part of the JHCore MCP/2.1
+API and are used throughout the code.  If you're porting this
+implementation then these properties should remain defined, other
+packages rely upon their existance.
+
+$mcp.registry
+
+    the object identifier of the MCP Registry Object
+
+$mcp.parser
+
+    the object supporting the MCP/2.1 parsing code
+
+$mcp.session
+
+    the generic MCP/2.1 session class
+
+$mcp.cord
+
+    the the object identifier of the mcp-cord package
+
+$mcp.negotiate
+
+    the the object identifier of the mcp-negotiate package
+
+@create __PACKAGE__ named dns-com-awns-example		__EXAMPLE__
+
+    the name of the object is important it should be the full name
+    of the MCP/2.1 package.  the object can have an alias for the
+    sake of convenience, but the .name property is used by the
+    MCP/2.1 for matching purposes.
+
+;__EXAMPLE__:set_version_range({"1.0", "1.0"})
+
+    sets the min-version and max-version version supported by this
+    package.  if the package only supports version 1.0 (say) then
+    both min-version and max-version should be set to "1.0".  the
+    version numbers are STRings not FLOATs
+
+;__EXAMPLE__:set_messages_in({{"", {"foo", "bar"}}, {"blah", {"wibble"}}})
+;__EXAMPLE__:set_messages_out({{"", {"foo", "bar"}}, {"blah", {"data"}}, {"woo", {}}})
+
+
+@add-package __EXAMPLE__ to __REGISTER__
+
+    you need to be a wizard to do this when using the standard
+    version of the JHCore MCP/2.1 implementation.  the choice is
+    down to the MOO's administrators though, so you could modify
+    @add-package to let other trusted people maintain the list of
+    MCP/2.1 packages.
+
+$mcp:session_for(player)
+
+    returns the out-of-band session object for 'player' or $nothing
+    if the player is not connected.  a session object exists whether
+    or not the player's client supports MCP/2.1.
+
+$mcp:match_package(package_name)
+
+    returns the object identifier for the MCP/2.1 package registered
+    in $mcp.registry (__REGISTRY__) whos name matches 'package_name'.
+    returns $failed_match if no matching package is available.
+
+session:handles_package(package)
+
+    test to see if the session can understand messages from 'package'.
+    returns a list comprising the major and minor version numbers
+    of the supported package eg {1, 0}, otherwise returns the empty
+    list {}.
+
+    for example the following code fragment tests to see if the
+    player's out-of-band session is able to support version 1.0 of
+    the dns-com-awns-example package.
+
+        session = $mcp:session_for(player)
+        package = $mcp:match_package("dns-com-awns-example");
+        "do we support dns-com-awns-example/1.0...";
+        "** note that version 1.0 is represented by the list {1, 0}";
+        if ( session:handles_package(package) != {1, 0} )
+            "no joy..."
+            return E_PERM;
+        endif
+        "continue processing..."
+        package:send_(session);
+
+Set up some handlers for the dns-com-awns-example package.  Each
+message defined by the :messages_in(...) initialisation requires
+a handler verb.  The verb name is the string 'handle_' followed by
+the name of the message, after the package name has been removed.
+
+The message 'dns-com-awns-example' of the dns-com-awns-example
+package requires a handler verb named 'handle_':
+
+    @verb __EXAMPLE__:handle_ tnt
+    @program __EXAMPLE__:handle_
+    {session} = args;
+    .
+
+The message 'dns-com-awns-example-blah' of the dns-com-awns-example
+package requires a handler verb named 'handle_blah':
+
+    @verb __EXAMPLE__:handle_blah tnt
+    @program __EXAMPLE__:handle_blah
+    {session, wibble} = args;
+    .
+
+When messages are received from the client, the message arguments
+will be parsed out and used to build the 'args' of the handler_
+verb.  The first argument is always the MCP session id for the
+connection.
+
+protection in __PACKAGE__:send_* requires that only the package
+itself can call :send_*.  a useful approach is to write a wrapper
+verb for the send_ call which performs some meaningful permissions
+checking and parameter validation.  for example, the following
+wrapper sends the 'empty' message for the dns-com-awns-example
+package:
+
+    @program __EXAMPLE__:send_ tnt
+    "send dns-com-awns-example";
+    "perms/parameter checks go here...";
+    return pass(@args);
+    .
+
+the following wrapper ends the 'blah' message for the dns-com-awns-example
+package, it also check that the caller's permissions are from a
+list of trusted users, and also performs some arguments checking.
+
+    @program __EXAMPLE__:send_blah tnt
+    {session, data} = args;
+    "send dns-com-awns-example-blah";
+    "do we permit the caller to send this message?"
+    if ( ! (caller_perms() in this.trusted) )
+        return E_PERM;
+    endif;
+    "check the data argument";
+    if ( ! (data in {"1", "2", "5"}) ) {
+        return E_PERM;
+    endif;
+    return pass(@args);
+    .
+
+it's good practice to have a different wrapper for each message in
+the package.  the wrapper verbs should be named as ':send_<message
+name>', so that you're sure which messages you're checking permissions
+for.  for example, the following wrapper sends the 'woo' message
+of the dns-com-awns-example package:
+
+    @program __EXAMPLE__:send_woo tnt
+    "send dns-com-awns-example-woo";
+    "perms/parameter checks go here...";
+    return pass(@args);
+    .
+
+if several messages share the same permissions then you can use
+verbs with multiple names.  for example, the following wrapper
+sends both the 'msg1' and  'msg2' messages of the dns-com-awns-example
+package:
+
+    @program __EXAMPLE__:"send_msg1 send_msg2" tnt
+    "send either dns-com-awns-example-msg1 or dns-com-awns-example-msg2";
+    "perms/parameter checks go here...";
+    return pass(@args);
+    .
+
+session:wait_for_package(package, ?timeout)
+
+    it's sometimes useful to initiate an action that requires a
+    packages support before you know for certain that the session
+    can handle the package.  you may want to write code that is
+    called immediately upon the user's connection to the MOO.
+    calling :wait_for_package will delay a verb until such time as
+    the session becomes able to deal with the package.
+
+    for example the following MOO code fragment waits till the
+    user's session becomes aware of version 1.0 of the dns-com-awns-example
+    package before sending the 'dns-com-awns-example-woo' message.
+    the code will wait no longer than 60 seconds before proceeding.
+
+        "wait till we can deal with dns-com-awns-example-woo";
+        session = $mcp:session_for(player);
+        package = $mcp:match_package("dns-com-awns-example");
+        if ( session:wait_for_package(package, 60) != {1, 0} ) 
+	    "whoops, we either timed out OR the negotiation phase";
+	    "is over and the session still doesn't know how to handle";
+	    "this package OR the session was destroyed, perhaps the";
+	    "user disconnected";
+            return;
+        endif;
+        "ok to proceed...";
+        package:send_woo();
+
+    :wait_for_package returns the package version immediately if
+    the session knows the package, otherwise waits until the session
+    learns about the package, or until the 'timeout' seconds have
+    passed, if specified.  if the code is forced to wait it will
+    eventually return either the package version if one is available
+    or it will return false.
+
+    if no timeout is given, :wait_for_package will wait until the
+    session is destroyed, this usually happens when the user
+    disconnects from the MOO.  if the client sends the message
+    'mcp-negotiate-end' then this means that no more negotiation
+    messages will be arriving.  any package waiters still waiting
+    will be told that the package they're waiting for is never
+    going to turn up.
