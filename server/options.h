@@ -18,14 +18,6 @@
 #ifndef Options_h
 #define Options_h 1
 
-/******************************************************************************
- * The server is prepared to keep a log of every command entered by players
- * since the last checkpoint.  The log is flushed whenever a checkpoint is
- * successfully begun and is dumped into the server log when and if the server
- * panics.  Define LOG_COMMANDS to enable this logging.
- */
-
-/* #define LOG_COMMANDS */
 
 /******************************************************************************
  * The server normally forks a separate process to make database checkpoints;

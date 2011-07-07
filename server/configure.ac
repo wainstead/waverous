@@ -565,6 +565,20 @@ else
 fi
 
 
+dnl Enable/disable user command logging
+AC_ARG_WITH([command-logging],
+        [AS_HELP_STRING([--with-command-logging],	[Log user commands since the last database checkpoint @<:@default: no@:>@])],
+        [log_commands=${withval}],
+        [log_commands=no])
+
+if test "x${log_commands}" = xyes; then
+   AC_MSG_NOTICE([All user commands will be logged])
+   AC_DEFINE([LOG_COMMANDS], 1, [All user commands will be logged since the last database checkpoint])
+else
+   AC_MSG_NOTICE([No user commands will be logged])
+fi
+
+
 
 dnl # let the user choose to enable ssl or not
 AC_ARG_WITH([openssl],

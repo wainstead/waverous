@@ -1265,6 +1265,8 @@ Optional Packages:
                           yes]
   --with-fup              Include the ext-FUP extension for manipulating
                           external files [default: no]
+  --with-command-logging  Log user commands since the last database checkpoint
+                          [default: no]
   --with-openssl          include openssl (Secure Socket Layers)
                           (experimental) [default: no]
 
@@ -8993,6 +8995,29 @@ _ACEOF
 else
    { echo "$as_me:$LINENO: The ext-FUP file manipulation extension will not be included in this build" >&5
 echo "$as_me: The ext-FUP file manipulation extension will not be included in this build" >&6;}
+fi
+
+
+
+# Check whether --with-command-logging was given.
+if test "${with_command_logging+set}" = set; then
+  withval=$with_command_logging; log_commands=${withval}
+else
+  log_commands=no
+fi
+
+
+if test "x${log_commands}" = xyes; then
+   { echo "$as_me:$LINENO: All user commands will be logged" >&5
+echo "$as_me: All user commands will be logged" >&6;}
+
+cat >>confdefs.h <<\_ACEOF
+#define LOG_COMMANDS 1
+_ACEOF
+
+else
+   { echo "$as_me:$LINENO: No user commands will be logged" >&5
+echo "$as_me: No user commands will be logged" >&6;}
 fi
 
 
