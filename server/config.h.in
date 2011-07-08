@@ -290,5 +290,18 @@
  */
 #undef LOG_COMMANDS
 
+/******************************************************************************
+ * The server normally forks a separate process to make database checkpoints;
+ * the original process continues to service user commands as usual while the
+ * new process writes out the contents of its copy of memory to a disk file.
+ * This checkpointing process can take quite a while, depending on how big your
+ * database is, so it's usually quite convenient that the server can continue
+ * to be responsive while this is taking place.  On some systems, however,
+ * there may not be enough memory to support two simultaneously running server
+ * processes.  Define UNFORKED_CHECKPOINTS to disable server forking for
+ * checkpoints.
+ */
+#undef UNFORKED_CHECKPOINTS
+
 #endif /* !Config_H */
 

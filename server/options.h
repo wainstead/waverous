@@ -18,20 +18,8 @@
 #ifndef Options_h
 #define Options_h 1
 
-
-/******************************************************************************
- * The server normally forks a separate process to make database checkpoints;
- * the original process continues to service user commands as usual while the
- * new process writes out the contents of its copy of memory to a disk file.
- * This checkpointing process can take quite a while, depending on how big your
- * database is, so it's usually quite convenient that the server can continue
- * to be responsive while this is taking place.  On some systems, however,
- * there may not be enough memory to support two simultaneously running server
- * processes.  Define UNFORKED_CHECKPOINTS to disable server forking for
- * checkpoints.
- */
-
-/* #define UNFORKED_CHECKPOINTS */
+// LOG_COMMANDS and UNFORKED_CHECKPOINTS have been moved into
+// config.h.in; they are ./configure options now. See ./configure --help.
 
 /******************************************************************************
  * If OUT_OF_BAND_PREFIX is defined as a non-empty string, then any lines of

@@ -1266,6 +1266,9 @@ Optional Packages:
   --with-fup              Include the ext-FUP extension for manipulating
                           external files [default: no]
   --with-command-logging  Log user commands since the last database checkpoint
+                          if the server panics [default: no]
+  --with-unforked-checkpoints
+                          Do not fork() when doing a database checkpoint
                           [default: no]
   --with-openssl          include openssl (Secure Socket Layers)
                           (experimental) [default: no]
@@ -9008,18 +9011,40 @@ fi
 
 
 if test "x${log_commands}" = xyes; then
-   { echo "$as_me:$LINENO: All user commands will be logged" >&5
-echo "$as_me: All user commands will be logged" >&6;}
+   { echo "$as_me:$LINENO: All user commands will be logged since the last database checkpoint if the server panics" >&5
+echo "$as_me: All user commands will be logged since the last database checkpoint if the server panics" >&6;}
 
 cat >>confdefs.h <<\_ACEOF
 #define LOG_COMMANDS 1
 _ACEOF
 
 else
-   { echo "$as_me:$LINENO: No user commands will be logged" >&5
-echo "$as_me: No user commands will be logged" >&6;}
+   { echo "$as_me:$LINENO: No user commands will be logged in the event of a server panic" >&5
+echo "$as_me: No user commands will be logged in the event of a server panic" >&6;}
 fi
 
+
+
+# Check whether --with-unforked-checkpoints was given.
+if test "${with_unforked_checkpoints+set}" = set; then
+  withval=$with_unforked_checkpoints; unforked_checkpoints=${withval}
+else
+  unforked_checkpoints=no
+fi
+
+
+if test "x${unforked_checkpoints}" = xyes; then
+   { echo "$as_me:$LINENO: The server will not fork() when doing a database checkpoint" >&5
+echo "$as_me: The server will not fork() when doing a database checkpoint" >&6;}
+
+cat >>confdefs.h <<\_ACEOF
+#define UNFORKED_CHECKPOINTS 1
+_ACEOF
+
+else
+   { echo "$as_me:$LINENO: The server will fork() when doing a database checkpoint" >&5
+echo "$as_me: The server will fork() when doing a database checkpoint" >&6;}
+fi
 
 
 
