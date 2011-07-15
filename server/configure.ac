@@ -580,12 +580,12 @@ fi
 
 
 dnl Enable/disable unforked checkpoints
-AC_ARG_WITH([unforked-checkpoints],
-        [AS_HELP_STRING([--with-unforked-checkpoints],	[Do not fork() when doing a database checkpoint @<:@default: no@:>@])],
-        [unforked_checkpoints=${withval}],
-        [unforked_checkpoints=no])
+AC_ARG_WITH([forked-checkpoints],
+        [AS_HELP_STRING([--with-forked-checkpoints],	[fork() when doing a database checkpoint @<:@default: yes@:>@])],
+        [forked_checkpoints=${withval}],
+        [forked_checkpoints=yes])
 
-if test "x${unforked_checkpoints}" = xyes; then
+if test "x${forked_checkpoints}" = xno; then
    AC_MSG_NOTICE([The server will not fork() when doing a database checkpoint])
    AC_DEFINE([UNFORKED_CHECKPOINTS], 1, [The server will not fork() when doing a database checkpoint])
 else
