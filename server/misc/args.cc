@@ -103,3 +103,53 @@ int main(int argc, char** argv)
     return 0;
 }
 
+
+/*
+
+Some of the constants should be moved out into configure options;
+others on the command line. Well, for that matter, all constants above
+the "do not edit below this line" should be either command line flags,
+configure options, or both. Most appear to be configure options.
+
+--log-commands Keep a log of every command entered by players since the last checkpoing
+#define LOG_COMMANDS
+./configure:
+--with-command-logging
+--without-command-logging
+
+--unforked-checkpoints Don't fork() to write out the database.
+#define UNFORKED_CHECKPOINTS
+./configure:
+--with-forked-checkpoints (default)
+--without-unforked-checkpoints
+
+--out-of-band-prefix='something'
+#define OUT_OF_BAND_PREFIX "#$#"
+./configure:
+--with-oob-prefix='prefix'
+--without-oob-prefix
+
+--out-of-band-prefix-quote='something'
+#define OUT_OF_BAND_QUOTE_PREFIX "#$\""
+./configure:
+--oob-prefix-quote='something' (ignored if OUT_OF_BAND_QUOTE_PREFIX is unset)
+
+--default-max-stack-depth=N default maximum depth allowed for the MOO verb-call stack
+#define DEFAULT_MAX_STACK_DEPTH	50
+./configure:
+--with-max-stack-depth=N
+
+here's what the -O and +O flags mean...
+/* disable by default, +O enables: 
+/* #define OUTBOUND_NETWORK 0 
+
+/* enable by default, -O disables: 
+#define OUTBOUND_NETWORK 1
+--enable-outbound-network
+--disable-outbound-network
+./configure:
+--with-outbound-network
+--without-outbound-network
+x
+
+ */
