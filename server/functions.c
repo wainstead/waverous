@@ -55,8 +55,13 @@ static registry bi_function_registries[] = {
     register_tasks,
     register_verbs
 /* bg_name_lookup */
-	, register_name_lookup
+    , register_name_lookup
 /* !bg_name_lookup */
+
+#ifdef USE_FILEIO
+    // the File I/O external package
+    , register_fileio
+#endif
 };
 
 void

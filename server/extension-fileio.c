@@ -1,6 +1,29 @@
 /*
+ * extension-fileio.c
+ * Copyright 1996, 1997 by Ken Fox.  Copyright 1997 by Andy Bakun.
+ *
+ * All Rights Reserved
+ *
+ * Permission to use, copy, modify, and distribute this software and its
+ * documentation for any purpose and without fee is hereby granted,
+ * provided that the above copyright notice appear in all copies and that
+ * both that copyright notice and this permission notice appear in
+ * supporting documentation.
+ *
+ * KEN FOX AND ANDY BAKUN DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS
+ * SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+ * FITNESS, IN NO EVENT SHALL KEN FOX OR ANDY BAKUN BE LIABLE FOR ANY
+ * SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER
+ * RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF
+ * CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+ * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+
+
+/*
  * file i/o server modification
  */
+
 
 #define FILE_IO 1
 
@@ -34,6 +57,7 @@
 #include "tasks.h"
 #include "log.h"
 
+#ifdef USE_FILEIO
 #include "extension-fileio.h"
 
 /* apparently, not defined on some SysVish systems -- AAB 06/03/97 */
@@ -1614,4 +1638,4 @@ register_fileio(void)
 #endif
 }
 
-
+#endif // USE_FILEIO

@@ -558,10 +558,23 @@ AC_ARG_WITH([fup],
         [fup=no])
 
 if test "x${fup}" = xyes; then
-   AC_MSG_NOTICE([ext-FUP file manipulation package included])
-   AC_DEFINE([USE_EXT_FUP], 1, [ext-FUP external file manipulation included])
+   AC_MSG_NOTICE([The ext-FUP file manipulation package included])
+   AC_DEFINE([USE_EXT_FUP], 1, [The ext-FUP external file manipulation included])
 else
    AC_MSG_NOTICE([The ext-FUP file manipulation extension will not be included in this build])
+fi
+
+dnl Include (or don't) the File I/O extension for manipulating external files
+AC_ARG_WITH([fileio],
+        [AS_HELP_STRING([--with-fileio],	[Include the File I/O extension for manipulating external files @<:@default: no@:>@])],
+        [fileio=${withval}],
+        [fileio=no])
+
+if test "x${fileio}" = xyes; then
+   AC_MSG_NOTICE([The File I/O file manipulation package included])
+   AC_DEFINE([USE_FILEIO], 1, [File I/O external file manipulation included])
+else
+   AC_MSG_NOTICE([The File I/O file manipulation extension will not be included in this build])
 fi
 
 

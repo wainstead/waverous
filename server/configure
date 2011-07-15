@@ -669,6 +669,7 @@ ac_user_opts='
 enable_option_checking
 with_expat
 with_fup
+with_fileio
 with_command_logging
 with_forked_checkpoints
 with_openssl
@@ -1301,6 +1302,8 @@ Optional Packages:
   --with-expat            enable XML parsing via the Expat library [default:
                           yes]
   --with-fup              Include the ext-FUP extension for manipulating
+                          external files [default: no]
+  --with-fileio           Include the File I/O extension for manipulating
                           external files [default: no]
   --with-command-logging  Log user commands since the last database checkpoint
                           if the server panics [default: no]
@@ -6281,14 +6284,34 @@ fi
 
 
 if test "x${fup}" = xyes; then
-   { $as_echo "$as_me:${as_lineno-$LINENO}: ext-FUP file manipulation package included" >&5
-$as_echo "$as_me: ext-FUP file manipulation package included" >&6;}
+   { $as_echo "$as_me:${as_lineno-$LINENO}: The ext-FUP file manipulation package included" >&5
+$as_echo "$as_me: The ext-FUP file manipulation package included" >&6;}
 
 $as_echo "#define USE_EXT_FUP 1" >>confdefs.h
 
 else
    { $as_echo "$as_me:${as_lineno-$LINENO}: The ext-FUP file manipulation extension will not be included in this build" >&5
 $as_echo "$as_me: The ext-FUP file manipulation extension will not be included in this build" >&6;}
+fi
+
+
+# Check whether --with-fileio was given.
+if test "${with_fileio+set}" = set; then :
+  withval=$with_fileio; fileio=${withval}
+else
+  fileio=no
+fi
+
+
+if test "x${fileio}" = xyes; then
+   { $as_echo "$as_me:${as_lineno-$LINENO}: The File I/O file manipulation package included" >&5
+$as_echo "$as_me: The File I/O file manipulation package included" >&6;}
+
+$as_echo "#define USE_FILEIO 1" >>confdefs.h
+
+else
+   { $as_echo "$as_me:${as_lineno-$LINENO}: The File I/O file manipulation extension will not be included in this build" >&5
+$as_echo "$as_me: The File I/O file manipulation extension will not be included in this build" >&6;}
 fi
 
 

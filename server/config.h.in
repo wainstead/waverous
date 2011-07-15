@@ -276,6 +276,9 @@
  */
 #undef USE_EXT_FUP
 
+/* File I/O is the other package for manipulating files. */
+#undef USE_FILEIO
+
 /* Expat is the XML parsing library by James Clark. */
 #undef HAVE_EXPAT_H
 

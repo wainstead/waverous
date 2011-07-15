@@ -31,3 +31,7 @@ extern void register_verbs(void);
 extern void register_name_lookup(void);
 /* !bg_name_lookup */
 
+#ifdef USE_FILEIO
+// the File I/O optional external package
+extern void register_fileio(void);
+#endif
