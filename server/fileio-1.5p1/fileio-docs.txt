@@ -198,6 +198,9 @@
   The final character is either 'n' or 'f'.  If this character is that
   writes data to the stream.  If it is 'n' then this won't happen.
 
+  Example: ;file_open("myfile.txt", "a+tf")
+           => 0
+
   This is implemented using fopen().
 
   3.3.2.  file_close
