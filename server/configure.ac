@@ -16,7 +16,7 @@ dnl   Palo Alto, CA 94304
 dnl   Pavel@Xerox.Com
 dnl
 AC_PREREQ([2.61])
-AC_INIT([Waverous LambdaMOO], [beta1], [wainstead@gmail.com], [waverous-lambdamoo], [http://code.google.com/p/waverous/])
+AC_INIT([Waverous LambdaMOO], [beta2], [wainstead@gmail.com], [waverous-lambdamoo], [http://code.google.com/p/waverous/])
 AC_CONFIG_SRCDIR([functions.c])
 AC_CONFIG_HEADERS([config.h])
 
@@ -158,7 +158,7 @@ trfrom='[a-z]' trto='[A-Z]'
 changequote([,])dnl
 for var in $2
 do
-echo "checking whether $var is declared in $1"
+echo "moo_ndecl: checking whether $var is declared in $1"
 MOO_VAR_DECL_CHECK($1, $var, ,
 	AC_DEFINE(NDECL_`echo $var | tr "$trfrom" "$trto"`), $3)
 done
@@ -606,7 +606,7 @@ else
 fi
 
 
-dnl # let the user choose to enable ssl or not
+dnl Let the user choose to include openssl or not
 AC_ARG_WITH([openssl],
         [AS_HELP_STRING([--with-openssl], [include openssl (Secure Socket Layers) (experimental) @<:@default: no@:>@])],
         [openssl=${withval}],
