@@ -150,6 +150,10 @@ here's what the -O and +O flags mean...
 ./configure:
 --with-outbound-network
 --without-outbound-network
-x
+
+Also, in a "make install" we don't want to overwrite existing database
+files. Very bad. This can be avoided by the end user with Item 10 in
+Chapter 11 of the Autotools book: passing the flag -C to
+/usr/bin/install.
 
  */
