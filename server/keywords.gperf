@@ -1,4 +1,4 @@
-%{	/* -*- C -*- */
+%{	/* -*- C++ -*- */
 
 /******************************************************************************
   Copyright (c) 1992, 1995, 1996 Xerox Corporation.  All rights reserved.
@@ -67,6 +67,6 @@ E_FLOAT,	DBV_Float,	tERROR,	E_FLOAT
 const struct keyword *
 find_keyword(const char *word)
 {
-    return in_word_set(word, strlen(word));
+  return Perfect_Hash::in_word_set(word, strlen(word));
 }
 
