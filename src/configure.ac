@@ -662,5 +662,5 @@ AC_OUTPUT(Makefile)
 
 
 # Local Variables:
-# mode: c
+# mode: autoconf
 # End:
