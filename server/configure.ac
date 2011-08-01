@@ -634,6 +634,16 @@ else
    AC_MSG_NOTICE([openssl will not be included in this build])
 fi
 
+dnl Check for GNU gperf, issue a warning if not found. gperf is not a
+dnl must-have for the end user unless they want to tinker with the Moo
+dnl language.
+AC_CHECK_PROG(HAVE_GPERF, gperf, true, false)
+
+if test "x$HAVE_GPERF" = "xfalse"; then
+   AC_MSG_WARN([GNU gperf not found. This probably won't matter unless you intend to hack on the MOO language itself.])
+else
+   AC_MSG_NOTICE([GNU gperf found])
+fi
 
 AC_C_INLINE
 AC_FUNC_ALLOCA
