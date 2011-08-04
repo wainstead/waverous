@@ -17,6 +17,7 @@ dnl   Pavel@Xerox.Com
 dnl
 AC_PREREQ([2.61])
 AC_INIT([Waverous LambdaMOO], [beta2], [wainstead@gmail.com], [waverous-lambdamoo], [http://code.google.com/p/waverous/])
+AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([functions.c])
 AC_CONFIG_HEADERS([config.h])
 
@@ -667,8 +668,8 @@ echo "|"
 echo "|   $NETWORK_CONFIGURATIONS"
 echo "----------------------------------------------------------------------"
 
-
-AC_OUTPUT(Makefile)
+AC_CONFIG_FILES([Makefile])
+AC_OUTPUT
 
 
 # Local Variables:
