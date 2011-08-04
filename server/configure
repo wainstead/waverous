@@ -2337,18 +2337,6 @@ ac_config_headers="$ac_config_headers config.h"
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 for ac_prog in 'bison -y' byacc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
@@ -4024,71 +4012,6 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
-
-echo checking for NeXT
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#ifdef NeXT
-  yes
-#endif
-
-_ACEOF
-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "yes" >/dev/null 2>&1; then :
-  $as_echo "#define _NEXT_SOURCE 1" >>confdefs.h
-
-   $as_echo "#define _POSIX_SOURCE 1" >>confdefs.h
-
-fi
-rm -f conftest*
-
-
-echo checking for the DEC Alpha running OSF/1
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#if defined(__osf__) && defined(__alpha) && !defined(__GNUC__)
-  yes
-#endif
-
-_ACEOF
-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "yes" >/dev/null 2>&1; then :
-  CC="$CC -Olimit 2500"
-fi
-rm -f conftest*
-
-
-echo checking for the SGI compiler
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#if defined(sgi) && !defined(__GNUC__)
-  yes
-#endif
-
-_ACEOF
-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "yes" >/dev/null 2>&1; then :
-  CC="$CC -Olimit 2500"
-fi
-rm -f conftest*
-
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#if defined(sgi)
-  yes
-#endif
-
-_ACEOF
-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "yes" >/dev/null 2>&1; then :
-  CC="$CC -U__EXTENSIONS__"
-fi
-rm -f conftest*
-
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ANSI C header files" >&5
 $as_echo_n "checking for ANSI C header files... " >&6; }
 if ${ac_cv_header_stdc+:} false; then :
@@ -4391,40 +4314,6 @@ fi
 
 fi
 done
-
-
-echo checking for A/UX
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#if defined(AUX)
-  yes
-#endif
-
-_ACEOF
-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "yes" >/dev/null 2>&1; then :
-  $as_echo "#define _POSIX_SOURCE 1" >>confdefs.h
-
-fi
-rm -f conftest*
-
-
-echo checking for HP/UX
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#if defined(__hpux)
-  yes
-#endif
-
-_ACEOF
-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "yes" >/dev/null 2>&1; then :
-  $as_echo "#define _HPUX_SOURCE 1" >>confdefs.h
-
-fi
-rm -f conftest*
 
 
 echo "checking that the C compiler handles important ANSI C constructs"
@@ -4807,63 +4696,22 @@ for func in sqrt
 do
     trfrom='[a-z]' trto='[A-Z]'
   var=HAVE_`echo $func | tr "$trfrom" "$trto"`
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $func" >&5
-$as_echo_n "checking for $func... " >&6; }
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <assert.h>
-int
-main ()
-{
-
-/* The GNU C library defines this for functions which it implements
-    to always fail with ENOSYS.  Some functions are actually named
-    something starting with __ and the normal name is an alias.  */
-#if defined (__stub_$func) || defined (__stub___$func)
-choke me
-#else
-/* Override any gcc2 internal prototype to avoid an error.  */
-extern char $func(); $func();
-#endif
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
+    as_ac_var=`$as_echo "ac_cv_func_$func" | $as_tr_sh`
+ac_fn_c_check_func "$LINENO" "$func" "$as_ac_var"
+if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
   cat >>confdefs.h <<_ACEOF
 #define $var 1
 _ACEOF
 
 else
-  SAVELIBS="$LIBS"
+
+    SAVELIBS="$LIBS"
     for lib in -lm /lib/libm.a "-static -lm"
     do
       LIBS="$LIBS $lib"
-      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $func" >&5
-$as_echo_n "checking for $func... " >&6; }
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <assert.h>
-int
-main ()
-{
-
-/* The GNU C library defines this for functions which it implements
-    to always fail with ENOSYS.  Some functions are actually named
-    something starting with __ and the normal name is an alias.  */
-#if defined (__stub_$func) || defined (__stub___$func)
-choke me
-#else
-/* Override any gcc2 internal prototype to avoid an error.  */
-extern char $func(); $func();
-#endif
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
+      as_ac_var=`$as_echo "ac_cv_func_$func" | $as_tr_sh`
+ac_fn_c_check_func "$LINENO" "$func" "$as_ac_var"
+if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
   cat >>confdefs.h <<_ACEOF
 #define $var 1
 _ACEOF
@@ -4872,13 +4720,11 @@ _ACEOF
 else
   LIBS="$SAVELIBS"
 fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
+
     done
 
 fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
+
 done
 
 
@@ -4886,63 +4732,22 @@ for func in mkfifo waitpid sigemptyset
 do
     trfrom='[a-z]' trto='[A-Z]'
   var=HAVE_`echo $func | tr "$trfrom" "$trto"`
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $func" >&5
-$as_echo_n "checking for $func... " >&6; }
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <assert.h>
-int
-main ()
-{
-
-/* The GNU C library defines this for functions which it implements
-    to always fail with ENOSYS.  Some functions are actually named
-    something starting with __ and the normal name is an alias.  */
-#if defined (__stub_$func) || defined (__stub___$func)
-choke me
-#else
-/* Override any gcc2 internal prototype to avoid an error.  */
-extern char $func(); $func();
-#endif
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
+    as_ac_var=`$as_echo "ac_cv_func_$func" | $as_tr_sh`
+ac_fn_c_check_func "$LINENO" "$func" "$as_ac_var"
+if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
   cat >>confdefs.h <<_ACEOF
 #define $var 1
 _ACEOF
 
 else
-  SAVELIBS="$LIBS"
+
+    SAVELIBS="$LIBS"
     for lib in -lposix /lib/libposix.a
     do
       LIBS="$LIBS $lib"
-      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $func" >&5
-$as_echo_n "checking for $func... " >&6; }
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <assert.h>
-int
-main ()
-{
-
-/* The GNU C library defines this for functions which it implements
-    to always fail with ENOSYS.  Some functions are actually named
-    something starting with __ and the normal name is an alias.  */
-#if defined (__stub_$func) || defined (__stub___$func)
-choke me
-#else
-/* Override any gcc2 internal prototype to avoid an error.  */
-extern char $func(); $func();
-#endif
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
+      as_ac_var=`$as_echo "ac_cv_func_$func" | $as_tr_sh`
+ac_fn_c_check_func "$LINENO" "$func" "$as_ac_var"
+if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
   cat >>confdefs.h <<_ACEOF
 #define $var 1
 _ACEOF
@@ -4951,13 +4756,11 @@ _ACEOF
 else
   LIBS="$SAVELIBS"
 fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
+
     done
 
 fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
+
 done
 
 
@@ -4965,63 +4768,22 @@ for func in accept
 do
     trfrom='[a-z]' trto='[A-Z]'
   var=HAVE_`echo $func | tr "$trfrom" "$trto"`
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $func" >&5
-$as_echo_n "checking for $func... " >&6; }
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <assert.h>
-int
-main ()
-{
-
-/* The GNU C library defines this for functions which it implements
-    to always fail with ENOSYS.  Some functions are actually named
-    something starting with __ and the normal name is an alias.  */
-#if defined (__stub_$func) || defined (__stub___$func)
-choke me
-#else
-/* Override any gcc2 internal prototype to avoid an error.  */
-extern char $func(); $func();
-#endif
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
+    as_ac_var=`$as_echo "ac_cv_func_$func" | $as_tr_sh`
+ac_fn_c_check_func "$LINENO" "$func" "$as_ac_var"
+if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
   cat >>confdefs.h <<_ACEOF
 #define $var 1
 _ACEOF
 
 else
-  SAVELIBS="$LIBS"
+
+    SAVELIBS="$LIBS"
     for lib in "-lsocket -lnsl" -lsocket -linet
     do
       LIBS="$LIBS $lib"
-      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $func" >&5
-$as_echo_n "checking for $func... " >&6; }
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <assert.h>
-int
-main ()
-{
-
-/* The GNU C library defines this for functions which it implements
-    to always fail with ENOSYS.  Some functions are actually named
-    something starting with __ and the normal name is an alias.  */
-#if defined (__stub_$func) || defined (__stub___$func)
-choke me
-#else
-/* Override any gcc2 internal prototype to avoid an error.  */
-extern char $func(); $func();
-#endif
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
+      as_ac_var=`$as_echo "ac_cv_func_$func" | $as_tr_sh`
+ac_fn_c_check_func "$LINENO" "$func" "$as_ac_var"
+if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
   cat >>confdefs.h <<_ACEOF
 #define $var 1
 _ACEOF
@@ -5030,13 +4792,11 @@ _ACEOF
 else
   LIBS="$SAVELIBS"
 fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
+
     done
 
 fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
+
 done
 
 
@@ -5044,63 +4804,22 @@ for func in t_open
 do
     trfrom='[a-z]' trto='[A-Z]'
   var=HAVE_`echo $func | tr "$trfrom" "$trto"`
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $func" >&5
-$as_echo_n "checking for $func... " >&6; }
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <assert.h>
-int
-main ()
-{
-
-/* The GNU C library defines this for functions which it implements
-    to always fail with ENOSYS.  Some functions are actually named
-    something starting with __ and the normal name is an alias.  */
-#if defined (__stub_$func) || defined (__stub___$func)
-choke me
-#else
-/* Override any gcc2 internal prototype to avoid an error.  */
-extern char $func(); $func();
-#endif
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
+    as_ac_var=`$as_echo "ac_cv_func_$func" | $as_tr_sh`
+ac_fn_c_check_func "$LINENO" "$func" "$as_ac_var"
+if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
   cat >>confdefs.h <<_ACEOF
 #define $var 1
 _ACEOF
 
 else
-  SAVELIBS="$LIBS"
+
+    SAVELIBS="$LIBS"
     for lib in -lnsl -lnsl_s
     do
       LIBS="$LIBS $lib"
-      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $func" >&5
-$as_echo_n "checking for $func... " >&6; }
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <assert.h>
-int
-main ()
-{
-
-/* The GNU C library defines this for functions which it implements
-    to always fail with ENOSYS.  Some functions are actually named
-    something starting with __ and the normal name is an alias.  */
-#if defined (__stub_$func) || defined (__stub___$func)
-choke me
-#else
-/* Override any gcc2 internal prototype to avoid an error.  */
-extern char $func(); $func();
-#endif
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
+      as_ac_var=`$as_echo "ac_cv_func_$func" | $as_tr_sh`
+ac_fn_c_check_func "$LINENO" "$func" "$as_ac_var"
+if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
   cat >>confdefs.h <<_ACEOF
 #define $var 1
 _ACEOF
@@ -5109,13 +4828,11 @@ _ACEOF
 else
   LIBS="$SAVELIBS"
 fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
+
     done
 
 fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
+
 done
 
 
@@ -5123,63 +4840,22 @@ for func in crypt
 do
     trfrom='[a-z]' trto='[A-Z]'
   var=HAVE_`echo $func | tr "$trfrom" "$trto"`
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $func" >&5
-$as_echo_n "checking for $func... " >&6; }
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <assert.h>
-int
-main ()
-{
-
-/* The GNU C library defines this for functions which it implements
-    to always fail with ENOSYS.  Some functions are actually named
-    something starting with __ and the normal name is an alias.  */
-#if defined (__stub_$func) || defined (__stub___$func)
-choke me
-#else
-/* Override any gcc2 internal prototype to avoid an error.  */
-extern char $func(); $func();
-#endif
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
+    as_ac_var=`$as_echo "ac_cv_func_$func" | $as_tr_sh`
+ac_fn_c_check_func "$LINENO" "$func" "$as_ac_var"
+if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
   cat >>confdefs.h <<_ACEOF
 #define $var 1
 _ACEOF
 
 else
-  SAVELIBS="$LIBS"
+
+    SAVELIBS="$LIBS"
     for lib in -lcrypt -lcrypt_d
     do
       LIBS="$LIBS $lib"
-      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $func" >&5
-$as_echo_n "checking for $func... " >&6; }
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <assert.h>
-int
-main ()
-{
-
-/* The GNU C library defines this for functions which it implements
-    to always fail with ENOSYS.  Some functions are actually named
-    something starting with __ and the normal name is an alias.  */
-#if defined (__stub_$func) || defined (__stub___$func)
-choke me
-#else
-/* Override any gcc2 internal prototype to avoid an error.  */
-extern char $func(); $func();
-#endif
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
+      as_ac_var=`$as_echo "ac_cv_func_$func" | $as_tr_sh`
+ac_fn_c_check_func "$LINENO" "$func" "$as_ac_var"
+if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
   cat >>confdefs.h <<_ACEOF
 #define $var 1
 _ACEOF
@@ -5188,13 +4864,11 @@ _ACEOF
 else
   LIBS="$SAVELIBS"
 fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
+
     done
 
 fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
+
 done
 
 for ac_header in unistd.h sys/cdefs.h stdlib.h tiuser.h machine/endian.h
