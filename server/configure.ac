@@ -22,16 +22,6 @@ AC_CONFIG_HEADERS([config.h])
 
 
 dnl ***************************************************************************
-dnl 	MOO_MALLOC_H
-dnl Define NEED_MALLOC_H if `malloc()' is not declared in <stdlib.h> and
-dnl <malloc.h> exists.
-define(MOO_MALLOC_H, [
-echo checking whether stdlib.h declares malloc and friends
-MOO_FUNC_DECL_CHECK(stdlib.h, malloc, ,
-	[AC_HEADER_CHECK(malloc.h, AC_DEFINE(NEED_MALLOC_H))])])
-
-
-dnl ***************************************************************************
 dnl Start of actual configuration tests
 dnl ***************************************************************************
 
@@ -39,7 +29,7 @@ AC_PROG_YACC
 AC_PROG_CXX
 AC_PROG_INSTALL
 AC_GCC_TRADITIONAL
-AC_PROGRAM_EGREP(yes, [
+AC_EGREP_CPP(yes, [
 #if __GNUC__==2
   yes
 #endif
