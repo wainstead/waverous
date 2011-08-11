@@ -20,6 +20,7 @@ AC_INIT([Waverous LambdaMOO], [beta2], [wainstead@gmail.com], [waverous-lambdamo
 AC_CONFIG_SRCDIR([functions.c])
 AC_CONFIG_HEADERS([config.h])
 
+AC_LANG([C++])
 
 dnl ***************************************************************************
 dnl Start of actual configuration tests
@@ -43,7 +44,6 @@ AC_SCO_INTL
 AC_PROG_CC_STDC
 MOO_CONST
 CPP=""
-AC_PROG_CPP
 AC_HEADER_CHECK(sys/bsdtypes.h, AC_DEFINE(NEED_BSDTYPES_H))
 AC_HEADER_CHECK(sys/select.h, AC_DEFINE(NEED_SELECT_H))
 AC_HEADER_CHECK(memory.h, AC_DEFINE(NEED_MEMORY_H))
