@@ -70,14 +70,6 @@ extern const char *sys_errlist[];
 #  define strerror(error_code)	sys_errlist[error_code]
 #endif
 
-#if NDECL_BZERO && !defined(bzero)
-#  if BZERO_IN_STDLIB_H
-#    include "my-stdlib.h"
-#  else
-extern void bzero(char *, int);
-#  endif
-#endif
-
 #if NDECL_MEMSET
 #include "my-types.h"
 

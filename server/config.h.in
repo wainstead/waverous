@@ -80,7 +80,6 @@
 #undef NDECL_STRTOD		/* <stdlib.h>	  */
 #undef NDECL_STRTOL		/* <stdlib.h>	  */
 #undef NDECL_STRTOUL		/* <stdlib.h>	  */
-#undef NDECL_BZERO		/* <string.h>	  */
 #undef NDECL_MEMCPY		/* <string.h>	  */
 #undef NDECL_MEMSET		/* <string.h>	  */
 #undef NDECL_STRERROR		/* <string.h>	  */
@@ -94,10 +93,6 @@
 #undef NDECL_T_ERRLIST		/* <tiuser.h>	  */
 #undef NDECL_FORK		/* <unistd.h>	  */
 #undef NDECL_WAITPID		/* <sys/wait.h>	  */
-
-/* Some systems declare bzero() in <stdlib.h> instead of in <string.h>. */
-
-#undef BZERO_IN_STDLIB_H
 
 /* Some header files are only present on certain kinds of UNIXes (e.g., BSD,
  * System V, or POSIX).  The following symbols are defined only if the named

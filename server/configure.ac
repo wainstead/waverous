@@ -74,13 +74,12 @@ MOO_NDECL_FUNCS(sys/socket.h, accept bind shutdown)
 MOO_NDECL_FUNCS(sys/stat.h, fstat)
 MOO_NDECL_FUNCS(stdio.h, fclose perror remove vfprintf)
 MOO_NDECL_FUNCS(stdlib.h, random srandom strtod strtol strtoul)
-MOO_NDECL_FUNCS(string.h, bzero memcpy memset strerror, [
+MOO_NDECL_FUNCS(string.h, memcpy memset strerror, [
 #if NEED_MEMORY_H
 #include <memory.h>
 #endif
 ])
-echo checking for bzero being declared in stdlib.h
-MOO_FUNC_DECL_CHECK(stdlib.h, bzero, AC_DEFINE(BZERO_IN_STDLIB_H))
+
 MOO_NDECL_FUNCS(sys/time.h, getitimer setitimer select, [
 #if NEED_SELECT_H
 #include <sys/types.h>
