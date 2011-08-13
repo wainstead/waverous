@@ -129,16 +129,6 @@
 #undef HAVE_TM_ZONE
 #undef HAVE_TZNAME
 
-/* Some compilers `almost' conform to the ANSI C standard, in that they provide
- * the vast majority of the features and constructs used by the server code,
- * but one common failing with which the code can cope is the lack of support
- * for the `const' keyword.  If your compiler doesn't support `const', then
- * this symbol will be defined as a macro that expands into nothing, thus
- * eliding all uses of the keyword in the code.
- */
-
-#undef const
-
 /* Some sites have installed GCC improperly or incompletely, thereby requiring
  * the server to be compiled with the `-traditional' switch.  That disables the
  * `const', `volatile' or `signed' keywords, which we need.  Thus, for GCC, we

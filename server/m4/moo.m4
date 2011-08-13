@@ -126,26 +126,3 @@ do
     ])
 done
 ])
-
-dnl ***************************************************************************
-dnl	MOO_CONST
-dnl Check whether or not the C compiler can cope with simple uses of the ANSI C
-dnl `const' keyword, defining `const' as the empty string if it can't.
-define(MOO_CONST, [
-echo checking for a working const keyword
-cat << EOF > conftest.c
-#ifdef __GNUC__
-#define const __const__
-#endif
-int foo(const char *x) { return 17 + (x - x); }
-int bar() { int x = foo("foo"); return x; }
-EOF
-if $CC -c conftest.c > conftest.out 2>&1; then
-  if test -s conftest.out; then
-    AC_DEFINE(const,)
-  fi
-else
-  AC_DEFINE(const,)
-fi
-rm -f conftest*
-])
