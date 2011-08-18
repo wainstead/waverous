@@ -16,7 +16,7 @@ dnl   Palo Alto, CA 94304
 dnl   Pavel@Xerox.Com
 dnl
 AC_PREREQ([2.61])
-AC_INIT([Waverous LambdaMOO], [beta2], [wainstead@gmail.com], [waverous-lambdamoo], [http://code.google.com/p/waverous/])
+AC_INIT([Waverous LambdaMOO], [0.2], [wainstead@gmail.com], [waverous-lambdamoo], [http://code.google.com/p/waverous/])
 AC_CONFIG_SRCDIR([functions.c])
 AC_CONFIG_HEADERS([config.h])
 
