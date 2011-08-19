@@ -389,7 +389,7 @@ AC_FUNC_REALLOC
 AC_FUNC_STRTOD
 AC_FUNC_WAIT3
 AC_HEADER_STDBOOL
-AC_PREREQ
+
 AC_PROG_LN_S
 AC_TYPE_SSIZE_T
 AC_CHECK_FUNCS([alarm bzero floor gethostbyaddr gethostbyname getpagesize gettimeofday inet_ntoa memmove memset mkdir mkfifo modf pow re_comp rmdir select socket strchr strcspn strerror strrchr strstr strtol strtoul])
