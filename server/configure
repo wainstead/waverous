@@ -4630,7 +4630,6 @@ $as_echo "none needed" >&6; } ;; #(
 $as_echo "$ac_cv_prog_cc_stdc" >&6; } ;;
 esac
 
-MOO_CONST
 CPP=""
 ac_fn_cxx_check_header_mongrel "$LINENO" "sys/bsdtypes.h" "ac_cv_header_sys_bsdtypes_h" "$ac_includes_default"
 if test "x$ac_cv_header_sys_bsdtypes_h" = xyes; then :
