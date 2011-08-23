@@ -339,6 +339,25 @@ else
    AC_MSG_NOTICE([The server will fork() when doing a database checkpoint])
 fi
 
+dnl Enable/disable outbound network connections
+AC_ARG_WITH([outbound-network],
+        [AS_HELP_STRING([--with-outbound-network],
+        [Outbound network connections. Args: enabled/disabled/blocked  @<:@default: blocked@:>@])],
+        [outbound_network=${withval}],
+        [outbound_network=blocked])
+
+if test "x${outbound_network}" = xblocked || test "x${outbound_network}" = xno; then
+   AC_MSG_NOTICE([Outbound network connections will be completely blocked])
+elif test "x${outbound_network}" = xdisabled; then
+   AC_MSG_NOTICE([Outbound network connections are disabled by default (enable with +O at runtime)])
+   AC_DEFINE([OUTBOUND_NETWORK], 0, [Outbound network connections are disabled by default (enable with +O at runtime)])
+elif test "x${outbound_network}" = xenabled || test "x${outbound_network}" = xyes; then
+   AC_MSG_NOTICE([Outbound network connections will be enabled by default (disable with -O at runtime)])
+   AC_DEFINE([OUTBOUND_NETWORK], 1, [Outbound network connections are enabled by default (disable with -O at runtime)])
+else
+   AC_MSG_ERROR([Invalid argument for outbound-network: '${outbound_network}' (valid options are: blocked/enabled/disabled)])
+fi
+
 
 dnl Let the user choose to include openssl or not
 AC_ARG_WITH([openssl],
