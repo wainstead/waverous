@@ -6,4 +6,4 @@ swain = Steve Wainstead <wainstead@gmail.com>
 wainstead = Steve Wainstead <wainstead@gmail.com>
 wrog = Roger Crew <crew@cs.stanford.edu>
 xplat = xplat <xplat>
-xythian = xythian <xythian>
+xythian = Ken Fox <fox@mars.org>
