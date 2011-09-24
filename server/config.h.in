@@ -80,7 +80,6 @@
 #undef NDECL_STRTOD		/* <stdlib.h>	  */
 #undef NDECL_STRTOL		/* <stdlib.h>	  */
 #undef NDECL_STRTOUL		/* <stdlib.h>	  */
-#undef NDECL_BZERO		/* <string.h>	  */
 #undef NDECL_MEMCPY		/* <string.h>	  */
 #undef NDECL_MEMSET		/* <string.h>	  */
 #undef NDECL_STRERROR		/* <string.h>	  */
@@ -94,10 +93,6 @@
 #undef NDECL_T_ERRLIST		/* <tiuser.h>	  */
 #undef NDECL_FORK		/* <unistd.h>	  */
 #undef NDECL_WAITPID		/* <sys/wait.h>	  */
-
-/* Some systems declare bzero() in <stdlib.h> instead of in <string.h>. */
-
-#undef BZERO_IN_STDLIB_H
 
 /* Some header files are only present on certain kinds of UNIXes (e.g., BSD,
  * System V, or POSIX).  The following symbols are defined only if the named
@@ -133,16 +128,6 @@
 #undef TM_IN_SYS_TIME
 #undef HAVE_TM_ZONE
 #undef HAVE_TZNAME
-
-/* Some compilers `almost' conform to the ANSI C standard, in that they provide
- * the vast majority of the features and constructs used by the server code,
- * but one common failing with which the code can cope is the lack of support
- * for the `const' keyword.  If your compiler doesn't support `const', then
- * this symbol will be defined as a macro that expands into nothing, thus
- * eliding all uses of the keyword in the code.
- */
-
-#undef const
 
 /* Some sites have installed GCC improperly or incompletely, thereby requiring
  * the server to be compiled with the `-traditional' switch.  That disables the
@@ -308,3 +293,28 @@
 
 #endif /* !Config_H */
 
+/******************************************************************************
+ * The built-in MOO function open_network_connection(), when enabled,
+ * allows (only) wizard-owned MOO code to make outbound network connections
+ * from the server.  When disabled, it raises E_PERM whenever called.
+ *
+ * The +O and -O command line options can explicitly enable and disable this
+ * function.  If neither option is supplied, the definition given to
+ * OUTBOUND_NETWORK here determines the default behavior
+ * (use 0 to disable by default, 1 or blank to enable by default).
+ * 
+ * If OUTBOUND_NETWORK is not defined at all,
+ * open_network_connection() is permanently disabled and +O is ignored.
+ *
+ * *** THINK VERY HARD BEFORE ENABLING THIS FUNCTION ***
+ * In some contexts, this could represent a serious breach of security.  
+ *
+ * Note: OUTBOUND_NETWORK may not be defined if NETWORK_PROTOCOL is either
+ *	 NP_SINGLE or NP_LOCAL.
+ */
+
+/* possible values:                                     */
+/* 0: disabled by default, +O enables at runtime        */
+/* 1: enabled by default, -O disables at runtime        */
+/* undef: outbound network connections are not possible */
+#undef OUTBOUND_NETWORK

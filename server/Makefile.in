@@ -15,7 +15,7 @@ LIBS	= @LIBS@
 YACC	= @YACC@
 
 # for debugging you might prefer:
-# CFLAGS='-g -m32 -O0 -Wall
+# CFLAGS='-g -m32 -O0 -Wall'
 
 CFLAGS		= -m32 -O
 CPPFLAGS	= @CPPFLAGS@

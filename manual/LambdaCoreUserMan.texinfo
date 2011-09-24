@@ -1,0 +1,2848 @@
+\input texinfo   @c -*-texinfo-*-
+
+@comment %**start of header (This is for running Texinfo on a region.)
+@setfilename LambdaCoreManual.txt
+@settitle LambdaCore Database User's Manual
+@c Uncomment the following line for two-sided printing.
+@c @setchapternewpage odd
+@comment %**end of header (This is for running Texinfo on a region.)
+
+@iftex
+@finalout
+@end iftex
+
+@ifinfo
+@format
+@sp 5
+		   *****************************************
+		   *** LambdaCore Database User's Manual ***
+		   *****************************************
+				       
+			   For LambdaMOO version 1.3
+				 May 1991
+				       
+			    by Mike Prudence (blip)
+			    by Simon Hunt (Ezeke)
+			    by Floyd Moore (Phantom)
+			    by Kelly Larson (Zaphod)
+			    by Al Harrington (geezer)
+@sp 4
+Copyright @copyright{} 1991  Mike Prudence, Simon Hunt, Floyd Moore,
+Kelly Larson, Al Harrington.
+@end format
+
+Permission is granted to make and distribute verbatim copies of this manual
+provided the copyright notice and this permission notice are preserved on all
+copies.
+
+@ignore
+Permission is granted to process this file through TeX and print the results,
+provided the printed document carries copying permission notice identical to
+this one except for the removal of this paragraph (this paragraph not being
+relevant to the printed manual).
+
+@end ignore
+Permission is granted to copy and distribute modified versions of this manual
+under the conditions for verbatim copying, provided that the entire resulting
+derived work is distributed under the terms of a permission notice identical
+to this one.
+
+Permission is granted to copy and distribute translations of this manual into
+another language, under the above conditions for modified versions, except
+that this permission notice may be stated in a translation approved by the
+author.
+@format
+@sp 5
+@end format
+@end ifinfo
+
+@titlepage
+@title LambdaCore Database User's Manual
+@subtitle For LambdaMOO version 1.3
+@subtitle April 1991
+@author Mike Prudence (blip)
+@author Simon Hunt (Ezeke)
+@author Floyd Moore (Phantom)
+@author Kelly Larson (Zaphod)
+@author Al Harrington (geezer)
+@page
+@vskip 0pt plus 1filll
+Copyright @copyright{} 1991 Mike Prudence, Simon Hunt, Floyd Moore,
+Kelly Larson, Al Harrington.
+
+Copies of the electronic source for this document can be obtained using
+anonymous FTP on the Internet.  At the site @code{belch.berkeley.edu} the
+files are @code{pub/moo/LambdaMOO/LamdaCoreManual.*}; several different
+file formats are provided, including Texinfo, plain text, and Postscript.
+
+Permission is granted to make and distribute verbatim copies of this manual
+provided the copyright notice and this permission notice are preserved on all
+copies.
+
+Permission is granted to copy and distribute modified versions of this manual
+under the conditions for verbatim copying, provided that the entire resulting
+derived work is distributed under the terms of a permission notice identical
+to this one.
+
+Permission is granted to copy and distribute translations of this manual into
+another language, under the above conditions for modified versions, except
+that this permission notice may be stated in a translation approved by the
+author.
+@end titlepage
+
+@unnumbered Introduction
+
+The LambdaCore database provides the facilities needed to make a
+LambdaMOO server useful for Multi User Adventuring.  If you compare the
+LambdaMOO server to a piece of computer hardware, then LambdaCore is the
+operating system needed to allow the user to do useful work.
+
+This document gives a rundown on the commands of the LambdaCore
+database, providing examples of how they are used, and some of the ideas
+behind them.  It does not cover how the commands work, nor how they are
+implemented as verbs in the MOO programming language.  A companion
+manual, @strong{The LambdaCore Programmer's Manual} covers those aspects
+of the LambdaCore database.
+
+The user may find it useful to read the other companion manual to this
+one, @dfn{The LambdaMOO Programmer's Manual}.  An understanding of MOO
+concepts and the MOO language can be useful when playing the game.
+
+@chapter The LambdaCore Player Commands
+A player interacts with the game using a large number of commands.  Most
+of these commands are implemented within the database as verbs of object
+classes.
+
+The following sections list the commands in the LambdaCore database,
+grouped roughly by function.  Some commands, such as those used for
+manipulating notes, are defined by the particular class of object they
+work on, in this case the @code{Note} class. Other commands are defined
+for one or more classes.
+
+This section intends to give a paper reference for the information given
+in the @dfn{help} system within the LambdaCore database, with some
+additional explanation of the concepts involved.
+
+Note that, for commands that can be abbreviated, the form in which the
+command is specified in the database is shown.  For example, the
+@code{inventory} command is written down as
+
+@example
+i*nventory
+@end example
+
+@noindent
+which means that this command can be invoked by the player typing any of
+the following:
+
+@example
+i
+in
+inv
+inven
+etc@dots{}
+@end example
+
+@chapter Commands That Affect Your Player
+
+The @code{$player} class defines a number of verbs that allow the player
+to change and view certain of his/her characteristics.  The following
+commands are available :
+
+@deffn Command help/information/?
+@deffnx Command help @var{topic}
+@deffnx Command help @strong{index}
+@deffnx Command help @var{object:verbname}
+@deffnx Command help $@var{something}_utils
+
+This command is used to print out entries from the online documentation
+system.  The first form prints out a summary table of contents for the
+entire help system.
+
+The second form prints out the documentation available on the given
+@var{topic}.  Many help system entries contain references to other
+entries accessible in this way.  The topic name may be abbreviated in
+either of two ways: you may give only a prefix of the complete topic
+name (e.g., @samp{bui} instead of @samp{building}) and you may omit an
+initial @samp{@@} character (e.g., @samp{who} instead of @samp{@@who}).
+If the abbreviation you give is ambiguous, you will be presented with a
+list of the matching complete topic names.
+
+The @samp{help index} commands prints out a complete list of all help topic
+names, arranged alphabetically.  It is sometimes easier to find the
+topics you're interested in this way, rather than tracing through the
+chain of cross references.
+
+Finally, we have two addtional forms that are likely to be only of use 
+to programmers:
+
+@example
+help @var{object:verbname}
+@end example
+
+@noindent
+This is used to print any documentation strings that are present at the
+beginning of the program for that verb.
+
+@example
+help $@var{foo_utils}
+@end example
+
+@noindent
+prints general information about one of the @code{$@dots{}_utils} objects
+(e.g., @code{$string_utils}, @code{$list_utils}, etc@dots{}), which are all
+libraries of generally used verbs.
+
+The commands @samp{?} and @samp{information} (usually abbreviated
+@samp{info}) are synonyms for @samp{help}.
+@end deffn
+
+@deffn Command @@quit
+This command is used to disconnect from the MOO.  This breaks your
+network connection and leaves your player sleeping.  Disconnecting in
+most parts of the MOO automatically returns your player to its
+designated home.
+@end deffn
+
+@deffn Command @@gender @var{gender}
+@deffnx Command @@gender
+
+The first form, with an argument, defines your player to have the gender
+@var{gender}.  If @var{gender} is one of the standard genders (e.g.,
+@samp{male}, @samp{female}, @samp{neuter},@dots{}), your various pronouns
+will also be set appropriately, making exits and certain other objects
+behave more pleasantly for you.
+
+The second form tells you the current definition of your player's
+gender, your current pronouns, and the complete list of standard
+genders.
+@end deffn
+
+@deffn Command @@password @var{old-password} @var{new-password}
+
+Changes your player's password (as typed in the @samp{connect} command
+when you log in to the MOO) to @var{new-password}.  For security
+reasons, you are required to type your current (soon to be old) password
+as the first argument.
+
+Your password is stored in an encrypted form in the MOO database; in
+principle, not even the wizards can tell what it is, though they can
+change it, of course.
+@end deffn
+
+@deffn Command @@sethome
+
+Sets your designated home (see @samp{help home}) to be the room you're
+in now.  If the current room wouldn't allow you to teleport in, then the
+@samp{@@sethome} command nicely refuses to set your home there.  This
+avoids later, perhaps unpleasant, surprises.
+@end deffn
+
+
+@chapter Exploring and Interacting With the Virtual World
+
+The main purpose of the core classes in the LambdaCore database is to
+allow players to construct and explore a virtual world.  This involves
+moving from one room to another, using designated pathways or
+@dfn{exits} and looking at objects and locations along the way.  The
+command given in this section are used for exploring the virtual world,
+and interacting with the game administrators, using @code{news} and
+@code{@@gripe}.  These verbs are defined by a variety of different
+classes. 
+
+@section Movement
+The descriptions of most rooms outline the directions in which exits
+exist.  Typical directions include the eight compass points
+(@samp{north}, @samp{south}, @samp{east}, @samp{west}, @samp{northeast},
+@samp{southeast}, @samp{northwest}, and @samp{southwest}), @samp{up},
+@samp{down}, and @samp{out}.
+
+To go in a particular direction, simply type the name of that direction
+(e.g, @samp{north}, @samp{up}).  The name of the direction can usually
+be abbreviated to one or two characters (e.g., @samp{n}, @samp{sw}).
+You can also type @samp{go @var{direction}} to move; this is
+particularly useful if you know you're going to type several movement
+commands in a row.
+
+In addition to such vanilla movement, some areas may contain objects
+allowing teleportation and almost all areas permit the use of the
+@samp{home} command to teleport you to your designated home.
+
+A couple of other commands are available to allow movement from one
+place to another.
+
+@deffn Command go @var{direction} @dots{}
+
+Invokes the named exits in the named order, moving through many rooms in
+a single command.
+
+@example
+blip types:
+> go n e e u e e s e
+@end example
+
+and moves quite rapidly north, east, east, up, east, east south and
+east, all in one command.
+@end deffn
+
+@deffn Command home
+
+Instantly teleports you to your designated home room.  Initially, this
+room is the @code{$player_start} room.  You can change your designated
+home using the @var{@@sethome} command.
+@end deffn
+
+@section Commands for Manipulating Objects
+Objects usually have verbs defined on them that allow players to
+manipulate and use them in various ways. Standard ones are:
+
+@display
+@table @code
+@item get
+- pick an object up and place it in your inventory
+@item drop
+- remove an object from your inventory and place it in the room
+@item put
+- take an object from your inventory and place it in a container
+@item give
+- hand an object to some other player
+@item look
+- see what an object looks like
+@end table
+@end display
+
+You can see what objects you're carrying with the @samp{inventory} command.
+
+Some specialized objects will have other commands. The programmer of the
+object will usually provide some way for you to find out what the
+commands are.  One way that works for most objects is the @samp{examine}
+command.
+
+@deffn Command inventory
+Prints a list showing every object you're carrying.
+@end deffn
+
+@deffn Command take @var{object}
+@deffnx Command get @var{object}
+@deffnx Command take @var{object} from @var{container}
+@deffnx Command get @var{object} from @var{container}
+@deffnx Command remove @var{object} from @var{container}
+
+The first two forms pick up the named object and place it in your
+inventory.  Sometimes the owner of the object won't allow it to be
+picked up for some reason.
+
+The remaining forms move the named object from inside the named
+container into your inventory.  As before, sometimes the owner of an
+object will not allow you to do this.
+@end deffn
+
+@deffn Command drop @var{object}
+@deffnx Command throw @var{object}
+Remove an object you are carrying from your inventory and put it in your
+current room.  Occasionally you may find that the owner of the room
+won't allow you to do this.
+@end deffn
+
+@deffn Command put @var{object} @strong{into} @var{container}
+@deffnx Command insert @var{object} @strong{in} @var{container}
+Moves the named object into the named container.  Sometimes the owners
+of the object and/or the container will not allow you to do this.
+@end deffn
+
+@deffn Command give @var{object} @strong{to} @var{player}
+@deffnx Command hand @var{object} @strong{to} @var{player}
+Move an object from your contents to that of another player.  This
+doesn't change the ownership of the object.  Some players may refuse to
+accept gifts and some objects may refuse to be given.
+@end deffn
+
+@deffn Command look
+@deffnx Command look @var{object}
+@deffnx Command look @var{object} @strong{in} @var{container}
+This command is used to show a description of something.  The first
+form, with no arguments, shows you the name and description of the room
+you're in, along with a list of the other objects that are there.
+
+The second form lets you look at a specific object.  Most objects have
+descriptions that may be read this way.  You can look at your own
+description using @samp{look me}.  You can set the description for an
+object or room, including yourself, with the @samp{describe} command.
+
+The third form shows you the description of an object that is inside
+some other object, including objects being carried by another player.
+@end deffn
+
+@deffn Command examine @var{object}
+@deffnx Command exam @var{object}
+
+Prints several useful pieces of information about the named object,
+including the following:
+
+@itemize @bullet 
+@item
+its full name, aliases, and object number
+@item
+its owner's name and object number
+@item
+its description
+@item
+its key expression (if it is locked and if you own it)
+@item
+its contents and their object numbers
+@item
+the @dfn{obvious} verbs defined on it
+@end itemize
+
+The @dfn{obvious} verbs are those that are readable and that can be
+invoked as commands.  To keep a verb off this list, either make it
+unreadable using @samp{@@chmod}or, if it shouldn't be used as a
+command, give it @code{args} of @samp{this none this}.
+@end deffn
+
+@chapter Interacting With Other Players
+
+There are several commands available to allow you to communicate with
+your fellow players.  Other commands are available to affect the way
+communication occurs.  The following list shows the commands used for
+these functions:
+
+@display
+@table @code
+@item say
+- talking to the other connected players in the room
+@item whisper
+- talking privately to someone in the same room
+@item page
+- yelling to someone anywhere in the MOO
+@item emote
+- non-verbal communication with others in the same room
+@item @@gag, @@listgag, @@ungag
+- screening out noise generated by certain other players
+@item news
+- reading the wizards' most recent set of general announcements
+@item @@gripe
+- sending complaints to the wizards
+@item @@typo @@bug @@idea @@suggest
+- sending complaints/ideas to the owner of the current room
+@item whereis
+- locating other players
+@item @@who
+- finding out who is currently logged in
+@item mail
+- the MOO email system
+@item @@paranoid, @@check, @@sweep
+- the facilities for detecting forged messages and eavesdropping.
+@end table
+@end display
+
+@section Communicating With Other Players
+
+Several commands are available for communicating with other players in
+the way you might do in real life.
+
+@deffn Command say @var{anything} @dots{}
+@deffnx Command "@var{anything} @dots{}
+
+Says @var{anything} out loud, so that everyone in the same room hears
+it.  This is so commonly used that there's a special abbreviation for
+it: any command-line beginning with a double-quote (@samp{"}) is treated
+as a @samp{say} command.
+
+For example, suppose that blip types the following command:
+@example
+"This is a great MOO!
+@end example
+
+@noindent
+He would see this printed on his terminal screen:
+
+@example
+You say, "This is a great MOO!"
+@end example
+
+@noindent
+Others in the same room see this:
+
+@example
+blip says, "This is a great MOO!"
+@end example
+@end deffn
+
+@deffn Command whisper "@var{text}" to @var{player}
+This command sends the message "@var{yourname} whispers, "@var{text}" to
+you " to @var{player}, if they are in the room.  This is used to send a
+private message to a another player in the room. The message is passed
+to @var{player} only.  No-one else can hear or detect the message.  For
+example, the command
+
+@example
+whisper "Hello there" to blip
+@end example
+
+@noindent
+sends the following message to blip:
+
+@example
+Ezeke whispers, "hello there" to blip.
+@end example
+@end deffn
+
+@deffn Command  page @var{player} [[with] @var{text}]
+This verb is a player command used to send messages between players who
+are not physically located in the same room in the virtual world.  You
+can imagine a @dfn{page} to be a worldwide form of shouting.  Without an
+argument, a message like
+
+@example
+You sense that blip is looking for you in The Venue Hallway.
+@end example
+
+@noindent
+is sent to the recipient of the page.  If an argument is given, it is
+treated as a message to send to the other player.  This results in the
+recipient getting a message like
+
+@example
+You sense that blip is looking for you in The Hallway
+He pages, "Hello - are you busy ?"
+@end example
+
+Paging is used primarily to attract the attention of a player, or to
+pass short messages between players in different locations.  It is not
+intended to be used for conversation.
+@end deffn
+
+The following commands can be used to set messages referred to by
+@samp{@@page}:
+
+@deffn Command @@page_origin @var{message}
+The @dfn{page origin} message determines how the recipient is told of
+your location.  The default value of this message is @samp{You sense
+that %n is looking for you in %l.}
+@end deffn
+
+@deffn Command @@page_echo @var{message}
+The @dfn{page echo} message determines the response received by anyone
+who pages you.  The default value of this message is @samp{Your message
+has been sent.}
+@end deffn
+
+@deffn Command @@page_absent @var{message}
+This message determines the response received by anyone who tries to
+page you when you aren't connected. The default value of this message is
+@samp{%n is not currently logged in.}
+@end deffn
+
+All of these undergo the usual pronoun substitutions except that in both
+cases the direct object @samp{%d} refers to the recipent of the page and
+the indirect object @samp{%i} refers to the sender.
+
+@deffn Command emote @var{anything} @dots{}
+@deffnx Command :@var{anything} @dots{}
+
+Announces @var{anything} to everyone in the same room, prepending your
+name.  This is commonly used to express various non-verbal forms of
+communication.  In fact, it is so commonly used that there's a special
+abbreviation for it: any command-line beginning with @samp{:} is treated
+as an @samp{emote} command.
+
+For example, if blip types the following:
+@example
+:wishes he were much taller@dots{}
+@end example
+
+@noindent
+Everyone in the same room would see the following message:
+@example
+blip wishes he were much taller@dots{}
+@end example
+@end deffn
+
+@section Gagging - How to Ignore Other Players and Objects
+
+Occasionally, you may run into a situation in which you'd rather not
+hear from certain other players.  It might be that they're being
+annoying, or just that whatever they're doing makes a lot of noise.
+Gagging a player will stop you from hearing the results of any task
+initiated by that player.  You can also gag a specific object, if you
+want to hear what the owner of that object says, but not the output from
+their noisy robot.  The commands to use gagging are described below:
+
+@deffn Command  @@gag @var{player or object} [@var{player or object}@dots{}]
+Add the given players to your @dfn{gag list}.  You will no longer see any
+messages that result from actions initiated by these players.  In
+particular, you will not hear them if they try to speak, emote, or
+whisper to you.
+
+For example, if blip types in the following command:
+@example
+@@gag geezer
+@end example
+
+@noindent
+and no longer hears anything that geezer says. @footnote{What a relief!}
+
+If you specify an object, then any text originating from that object
+will not be printed.
+
+For example, suppose @code{Noisy Robot} prints @samp{Hi there} every 15
+seconds.  In order to avoid seeing that, blip types the following
+command:
+
+@example
+@@gag Noisy
+@end example
+
+@noindent
+and no longer hears that robot!  Note that blip must be in the same room
+as @code{Noisy Robot} for this to work, or know its object number.
+@end deffn
+
+@deffn Command  @@ungag @var{player or object}
+@deffnx Command @@ungag @strong{everyone}
+
+Remove the given player or object (or, in the second form,
+@strong{everyone}) from your @samp{gag list}.  You will once again see
+any messages that result from actions initiated by the ungagged
+player(s) or objects.  In particular, you will once again be able to
+hear them if they speak, emote, or whisper to you.
+
+For example, suppose that blip types the following:
+@example
+@@ungag geezer
+@end example
+
+@noindent
+and is once again able to hear geezer's witty remarks.  @footnote{Ah
+well, it could be worse@dots{}}
+@end deffn
+
+@deffn Command @@listgag
+
+Shows you a list of the players and objects currently on your @dfn{gag
+list}.  You don't see any messages that result from actions initiated by
+the players or objects on this list.  In particular, you will not hear
+them if they try to speak, emote, or whisper to you.
+@end deffn
+
+
+@section Communicating With The Game Administrators
+
+Several commands are provided for communicating with the people that run
+the game.  The @code{news} command is used by the wizards to let players
+know of anything that is globally interesting.  Players can use
+@samp{@@grip} to complain to the wizards, and commands like
+@samp{@@typo} to report defects to builders and programmers.
+
+The following section describes these commands in detail.
+
+@deffn Command news
+Read the latest edition of the LambdaMOO server news, which carries
+articles concerning recent changes to the MOO server or to the main
+public classes, or whatever else is important for players to know.
+@end deffn
+
+@deffn Command @@gripe @var{anything} @dots{}
+Puts you into the MOO mail system to register a complaint (or,
+conceivably, a compliment) with the wizards.  The rest of the command
+line (the @var{anything} @dots{} part) is used as the subject line for
+the message.  More information on using the MOO mail system is given
+once you're in it.
+
+You may hear back from the wizards eventually.  For example:
+
+@example
+>@@gripe The Fruitbat
+>"How come I can't ever see the fruitbat in the Venue Clock?
+>"        -- A frustrated player
+@end example
+
+sends it, and, somewhat later, the wizards reply with a note about being
+sure to look while the Clock is chiming.
+@end deffn
+
+@deffn Command @@typo [@var{text}]
+@deffnx Command @@suggest [@var{text}]
+@deffnx Command @@bug [@var{text}]
+@deffnx Command @@idea [@var{text}]
+
+If @var{text} is given, a one-line message is sent to the owner of the
+room, presumably about something that you've noticed.  If @var{text} is
+not given, we assume you have more to say than can fit comfortably on a
+single line; the usual mail editor is invoked.  The convention is that
+@@typo is for typographical errors on the room or objects found therein,
+@@bug is for anomalous or nonintuitive behaviour of some sort, and
+@@idea/@@suggest for anything else.
+
+The usual mail editor is only invoked for this command when in rooms
+that allow free entry, i.e., rooms that are likely to allow you back
+after you are done editing your message.  Otherwise these commands will
+require @var{text} and only let you do one-line messages.  Most
+adventuring scenario rooms fall into this latter category.
+@end deffn
+
+@section Locating Other Players in the Virtual World
+
+Two commands are available for finding out where other players are
+hiding in the virtual world, as follows:
+
+@deffn Command whereis @var{player} [@var{player}@dots{}]
+@deffnx Command @@whereis @var{player} [@var{player}@dots{}]
+Returns the current location of each of the specified players.  whereis
+refers to each player's @samp{@@whereis_location} message to determine
+what should be printed.  This message defaults to
+
+@example
+"%N (%#) is in %l (%[#l])." 
+@end example
+
+@noindent
+and the usual pronoun substitutions are done.
+
+For example the default message could expand to
+
+@example
+"blip (#42) is in The Venue Manager's Office (#47)
+@end example
+@end deffn
+
+@deffn Command @@who
+@deffnx Command @@who @var{player} [@var{player} @dots{}]
+The first form lists all of the currently-connected players, along with
+the amount of time they've been connected, the amount of time they've
+been idle, and their present location in the MOO.
+
+The second form, in which a list of player names is given, shows
+information for just those players.  For any listed players that are not
+connected, we show the last login time instead of the connect/idle
+times.
+
+@samp{@@who} refers to the @samp{@@who_location} on each of the players
+to be listed in order to determine what should be printed in the
+location column.  Pronoun substitutions are done on this string in the
+usual manner.  The default value is "%l" (i.e., @code{player.location}).
+@end deffn
+
+@section Checking the Security of Your Communication
+There are several commands available that allow you to check that your
+communications with other players are secure.  The following commands
+are available:
+
+@deffn Command @@sweep
+Used when you wish to have a private conversation, and are concerned
+someone may be listening in. @code{@@sweep} tries to list the avenues by which
+information may be leaving the room. In a manner analogous to @@check,
+it assumes that you don't want to hear about your own verbs, or those
+belonging to wizards, who presumably wouldn't stoop to bugging.
+@end deffn
+
+@deffn Command @@paranoid
+@deffnx Command @@paranoid @strong{off}
+@deffnx Command @@paranoid @strong{immediate}
+@deffnx Command @@paranoid @var{number}
+
+In immediate mode, the monitor prepends everything you hear with the
+name of the character it considers responsible for the message.
+Otherwise, it keeps records of the last @var{number} (defaults to 20)
+lines you have heard. These records can be accessed by the @@check
+command.
+@end deffn
+
+@deffn Command @@check @var{options}
+Used when you are suspicious about the origin of some of the messages
+your character has just heard.  Various @var{options} can be specified:
+
+@itemize @bullet
+@item 
+the number of lines to be displayed 
+@item 
+a player's name, someone to be "trusted" during the assignment of
+responsibility for the message.
+@item a player's named prefixed by !, someone not to be "trusted".
+@end itemize
+
+Output from @@check is in columns that contain, in order, the monitor's
+best guess as to:
+@itemize @bullet
+@item 
+what object the message came from,
+@item 
+what verb on that object that was responsible,
+@item 
+whose permissions that verb was running with, and the beginning of the
+actual message.
+@end itemize
+
+@samp{@@check} operates by examining the list of verbs that were
+involved in delivering the message, and assigning responsibility to the
+first owner it sees who is not @dfn{trusted}.  By default, it trusts you
+and all the wizards.  It uses the records maintained by
+@samp{@@paranoid}, so you must have used that command before you
+received the message.
+@end deffn
+
+@chapter Using Pronoun Substitutions
+Some kinds of messages are not printed directly to players; they are
+allowed to contain special characters marking places to include the
+appropriate pronoun for some player.  For example, a builder might have
+a doorway that's very short, so that people have to crawl to get through
+it.  When they do so, the builder wants a little message like this to be
+printed:
+
+@example
+Zaphod crawls through the little doorway, bruising his knee.
+@end example
+
+@noindent
+The problem is the use of @samp{his} in the message; what if the player
+in question is female?  The correct setting of the @samp{oleave} message
+on that doorway is as follows:
+
+@example
+crawls through the little doorway, bruising %p knee.
+@end example
+
+The @samp{%p} in the message will be replaced by either @samp{his},
+@samp{her}, or @samp{its}, depending upon the gender of the player.
+
+As it happens, you can also refer to elements of the command line (e.g.,
+direct and indirect objects) the object issuing the message, and the
+location where this is all happening.  In addition one can refer to
+arbitrary string properties on these objects, or get the object numbers
+themselves.
+
+The complete set of substitutions is as follows:
+
+@display
+@table @code
+@item %% 
+=> `%'  (just in case you actually want to talk about percentages).
+@item %n 
+=> the player
+@item %t 
+=> this object (i.e., the object issuing the message,@dots{} usually)
+@item %d 
+=> the direct object from the command line
+@item %i 
+=> the indirect object from the command line
+@item %l 
+=> the location of the player
+@item %s 
+=> subject pronoun:          either @samp{he},  @samp{she}, or @samp{it}
+@item %o 
+=> object pronoun:           either @samp{him}, @samp{her}, or @samp{it}
+@item %p 
+=> posessive pronoun (adj):  either @samp{his}, @samp{her}, or @samp{its}  
+@item %q 
+=> posessive pronoun (noun): either @samp{his}, @samp{hers}, or @samp{its}
+@item %r 
+=> reflexive pronoun:  either @samp{himself}, @samp{herself}, or @samp{itself}
+@item %(foo) 
+=> player.foo 
+@item %[tfoo], %[dfoo], %[ifoo], %[lfoo]
+=> this.foo, dobj.foo, iobj.foo, and player.location.foo
+@item %#  
+=> player's object number
+@item %[#t], %[#d], %[#i], %[#l]
+=> object numbers for this, direct obj, indirect obj, and location.
+@end table
+@end display
+
+In addition there is a set of capitalized substitutions for use at the
+beginning of sentences.  These are, respectively,
+
+@itemize @bullet
+@item
+%N, %T, %D, %I, %L for object names, 
+@item
+%S, %O, %P, %Q, %R for pronouns, and
+@item
+%(Foo), %[dFoo] (== %[Dfoo] == %[DFoo]),@dots{} for general properties
+@end itemize
+
+Note that there is a special exception for player name's (the
+@code{.name} propertywhich are assumed to already be capitalized as
+desired.
+
+There may be situations where the standard algorithm, i.e., upcasing the
+first letter, yields something incorrect, in which case a
+@dfn{capitalization} for a particular string property can be specified
+explicitly.  If your object has a @code{.foo} property that is like
+this, you need merely add a @code{.fooc} (in general
+@code{.(@var{propertyname}+"c")}) specifying the correct capitalization.
+This will also work for player @code{.name}'s if you want to specify a
+capitalization that is different from your usual .@code{name}
+
+For example, Phantom makes a hand-grenade with a customizable explode
+message.  Suppose someone sets @code{grenade.explode_msg} to:
+
+@example
+"%N(%#) drops %t on %p foot.  %T explodes.  
+%L is engulfed in flames."
+@end example
+
+@noindent
+If the current location happens to be #1234("blip's house"),
+the resulting substitution may produce, eg.,
+
+@example
+Phantom(#42) drops grenade on his foot.  Grenade explodes.  
+Blip's house is engulfed in flames.
+@end example
+
+@noindent
+which contains an incorrect capitalization (The name @samp{blip} cannot
+be capitalized.  blip may remedy this by setting
+
+@example
+#1234.namec="blip's house".
+@end example
+
+@noindent
+
+A special nore for programmers: in programs, use
+@code{$string_utils:pronoun_sub()}.  Using the substitution @code{%n}
+actually calls @code{player:title()} while @code{%(name)} refers to
+@code{player.name} directly.
+
+
+@chapter The MOO Mail System
+The MOO email system allows you to send and receive messages to and from
+other players.  Whilst not approaching the complexity of a fully fledged
+email system, it does allow players to send short messages between
+themselves, normally on game related topics.  The @code{Mail Room} class
+defines a set of verbs that can be used by other MOO programs to send
+mail.  This is used, for example, by the @code{@@gripe} command, which
+uses the MOO Mail system to deliver gripes to the game administrators.
+
+The following commands are used to activate portions of the MOO mail
+system:
+
+@display
+@table @code
+@item @@mail
+- seeing a table of contents for your collection of email messages
+@item @@read
+- reading individual messages in your collection
+@item @@next
+- reading the 'next'     message in your collection
+@item @@prev
+- reading the 'previous' message in your collection
+@item @@send
+- composing and sending a message to other players
+@item @@answer
+- replying to one of the messages in your collection
+@item @@rmmail
+- discarding one or more messages from your collection
+@item @@renumber
+- renumbering the messages in your collection
+@end table
+@end display
+
+@deffn Command @@mail 
+@deffnx Command @@mail new
+
+Shows a table of contents for your MOO email message collection.  You
+are notified when you connect to the MOO if there are any such messages.
+A little arrow indicates the mail system's notion of your @dfn{current
+message}.  The first form lists all of your messages; the second form
+lists all messages after your @dfn{current message}.
+
+If you have a large number of mail messages, you can give arguments so
+that @@mail only lists the messages you're interested in.  The general
+format is
+
+@example
+@@mail @var{message-sequence}
+@end example
+
+@noindent
+where @var{message-sequence} is some combination of the following
+
+@display
+@table @code
+@item cur
+- the current message
+@item new
+- all messages after the current message
+@item @var{#}
+- (where @var{#} is a number) the message numbered @var{#} if there is one.
+@item @var{#}-@var{#}
+- all messages in the given range, if any.
+@item last:@var{#}
+- the last @var{#} messages
+@item -@var{#}
+- the last @var{#} messages
+@end table
+@end display
+
+You may use as many of these at once as sanity permits, e.g.,
+
+@example
+@@mail 1 4 7 last:10 2-3 15 cur
+@end example
+@end deffn
+
+@deffn Command @@read @var{message-number} @var{message-number} @dots{}
+@deffnx Command @@read
+
+Prints the contents of the indicated messages from your MOO email
+collection.  You get the message numbers for use here by typing the
+@samp{@@mail} command, which prints a table of contents for your entire MOO
+email collection.  If no arguments are given to @samp{@@read}, then the
+@dfn{current message} in your collection is printed.  In any case, the
+@dfn{current message} after @samp{@@read} finishes is the last one printed.
+@end deffn
+
+@deffn Command @@next
+Print the @samp{next} message in your MOO email collection.  The mail
+system's notion of your @dfn{current message} is incremented.  Thus, one
+can read all of one's new messages one-by-one simply by typing @samp{@@next}
+repeatedly.
+@end deffn
+
+@deffn Command @@prev
+Print the @samp{previous} message in your MOO email collection.  The
+mail system's notion of your @dfn{current message} is decremented.  Thus,
+one can review all of one's previous messages one-by-one simply by
+typing @samp{@@prev} repeatedly.
+@end deffn
+
+@deffn Command @@send @var{recipient} [@var{recipient} @dots{}]
+Prepares for you to compose a MOO email message to the recipients named
+on the command line.  A recipient can be specified by giving a player
+name or object-id, or a @samp{*} followed by the name or object-id of
+some non-player mail recipient (e.g., a mailing list or a mail folder).
+A list of such non-player recipients is available from within the
+mailroom with the @samp{showlists} command.
+
+When the @samp{@@send} command is typed, the usual line editor is
+invoked.  The @samp{subject} command is used to set a @code{Subject:}
+line.  Use @samp{say} (@samp{"}) to insert lines in the body of your
+message.
+
+Giving this command without arguments resumes editing the previous
+unsent draft message if one exists.
+@end deffn
+
+@deffn Command @@reply [@var{message-number}] [sender] [all] [incl] [noincl]
+@deffnx Command @@answer [@var{message-number}] [sender] [all] [incl] [noincl]
+
+Prepares for you to compose a MOO email message to the players who
+either received or composed the indicated message from your collection.
+The usual editor is invoked.  The subject line for the new message will
+be initialized from that of the indicated message.  If you leave off the
+message number, the reply will be to your current message, if that
+exists.
+
+If there is a @code{Reply-to:} field in the message you are answering,
+its contents will be used to initialize the @code{To:} line of your
+reply.  Otherwise, a @code{To:} line is determined depending on whether
+you specified @samp{sender} or @samp{all} in the command line (or your
+@code{.mail_options}).
+
+@samp{incl} includes the text of the original message in your reply,
+@samp{noincl} does not.
+
+Defaults are @samp{sender} and @samp{noincl}, but you can change this by
+setting your @code{.mail-options} property.
+@end deffn
+
+@deffn Command @@rmmail @var{message-number} @var{message-number} @dots{}
+Deletes the indicated messages from your MOO email collection.  There is
+no confirmation for this action, so be careful; deleted messages are
+really gone, irrecoverable.  You get the message numbers for use here by
+typing the @samp{@@mail} command, which prints a table of contents for your
+entire MOO email collection.
+
+You may specify @strong{cur} in place of a number to specify your current
+message.  @samp{@@rmm} with no arguments deletes your current message.
+@end deffn
+
+@deffn Command @@renumber
+Renumbers the messages in your collection to go from 1 to however many
+you have at the moment.
+@end deffn
+
+@section Mail Options
+There are 3 personal properties that you can use to customize how your
+mail is composed and forwarded
+
+@subsection .mail_forward 
+This property is a list of people (object reference numbers) who will
+receive any mail that gets sent to you.  This list may include
+non-person recipients (i.e.,descendants of @code{$mail_recipient}).  If
+this list is nonempty, you will not receive any mail yourself unless you
+are on it.  E.g., if blip is #42 and ur-blip is #43
+
+@example
+#43.mail_forward=@{@}         -- usual case; ur-blip gets his own mail.
+#43.mail_forward=@{#42@}      -- blip gets ur-blip's mail instead.
+#43.mail_forward=@{#43,#42@}  -- ur-blip gets mail and blip gets a copy.
+#43.mail_forward=@{#-1@}      -- ur-blip's mail disappears without a trace.
+@end example
+
+@subsection .mail_notify
+This property is a list of people (object reference numbers) to be
+notified whenever mail is sent to you.  This list may include anything
+that has a @code{:tell()} verb.  Notification will take place regardless
+of whether or how your mail is forwarded.  Thus, in the previous example
+
+@example
+#42.mail_notify=@{#43@}
+@end example
+
+@noindent
+means that ur-blip will be told whenever blip is sent new mail.
+
+@subsection .mail_options
+This property is a list of options that is consulted by @@send and
+@@answer to determine how messages should initially be composed
+
+The following options are available for @@answer:
+@display
+@table @code
+@item sender 
+-  replies go only to the message's author (@code{From:} line).
+@item all    
+- replies go to everyone who got the original (@code{From:} + @code{To:}
+lines)
+@item incl   
+-  include original message in the body of your reply.
+@item noincl 
+-  don't include original message in the body of your reply.
+@end table
+@end display
+
+The following option affects the behaviour of @@send and @@answer:
+@display
+@table @code
+@item replyto
+="@var{list of people}". A @code{Reply-to:} field will be added containing these people.
+@end table
+@end display
+
+So, for example, if ur-blip usually wants his replies to go to everyone
+and always start out with the text of the original included, he should
+do
+@example
+;#43.mail_options = @{"all", "incl"@};
+@end example
+
+@chapter Building and Creating Objects
+There are a number of commands available to players for building new
+parts of the MOO.  The primary means for players to extend the MOO is
+for them to create new objects with interesting behavior.  There are
+convenient commands for creating and recycling objects and for keeping
+track of the objects you've created.
+
+The following commands are used in the creation of objects:
+
+@display
+@table @code
+@item @@dig
+- conveniently building new rooms and exits
+@item @@create
+- making other kinds of objects
+@item @@recycle
+- destroying objects you no longer want
+@item @@quota
+- determining how many more objects you can build
+@item @@count
+- determining how many objects you already own
+@item @@audit
+- listing all of your objects
+@item @@classes
+- listing all of the public classes available for your use
+@item @@move
+- moving your objects from place to place
+@end table
+@end display
+
+They are described in detail in the following paragraphs.
+
+@deffn Command @@create @var{class-name} named "@var{names}"
+@deffnx Command @@create @var{parent-object} named "@var{names}"
+
+The main command for creating objects other than rooms and exits, for
+which @samp{@@dig} is more convenient.
+
+The first argument specifies the @dfn{parent} of the new object: loosely
+speaking, the @dfn{kind} of object you're creating.  @var{class-name} is
+one of the four standard classes of objects: 
+
+@itemize @bullet
+@item
+$note
+@item 
+$letter
+@item
+$thing
+@item
+$container
+@end itemize
+
+  As time goes on, more @dfn{standard classes} may be added.  If the parent
+you have in mind for your new object isn't one of these, you may use the
+parent's name (if it's in the same room as you) or else its object
+number (e.g., #1234).
+
+The @var{names} are given in the same format as in the @samp{@@rename}
+command, as follows:
+
+@example
+@var{name}:@var{alias},@dots{},@var{alias}
+@end example
+
+@noindent
+or alternatively
+
+@example
+@var{name-and-alias},@var{alias},@dots{},@var{alias}
+@end example
+@end deffn
+
+@deffn Command @@describe @var{object} @strong{as} @var{description}
+Sets the description string of @var{object} to @var{description}.  This
+is the string that is printed out whenever someone uses the @samp{look}
+command on @var{object}.  To describe yourself, use @samp{me} as the
+@var{object}.
+
+For example, if blip types the following:
+@example
+@@describe me as "A very fine fellow, if a bit on the short side."
+@end example
+
+@noindent
+People who type @samp{look blip} now see this:
+
+@example
+A very fine fellow, if a bit on the short side.
+@end example
+
+The description of an object is kept in its @code{.description}
+property.  For multi-line descriptions, @code{.description} can be a
+list of strings.
+@end deffn
+
+@deffn Command @@rename @var{object} @strong{to} @var{name}:@var{alias},@dots{},@var{alias}
+@deffnx Command @@rename @var{object} @strong{to} @var{name-and-alias},@var{alias},@dots{},@var{alias}
+@deffnx Command @@rename @var{object}:@var{verb} @strong{to} @var{new-verb-name}
+The first two forms are used to change the name and aliases of an
+object.  The name is what will be used in most printed descriptions of
+the object.  The aliases are the names by which players can refer to the
+object in commands.  NOTE that the name of a player may not include
+spaces and that no two players may have the same name at the same time.
+
+For example, if blip names his dog using the following command:
+
+@example
+@@rename #4237 to "Rover the Wonder Dog":Rover,dog
+@end example
+
+@noindent
+Now we'll see @samp{Rover the Wonder Dog} if we're in the same room as
+him and we can refer to him as either @samp{Rover} or just @samp{dog} in
+our commands, like @samp{pet dog}.
+
+The third form of the @@rename command is for use by programmers, to
+change the name of a verb they own.  If the @var{new-verb-name} contains
+spaces, the verb will have multiple names, one for each space-separated
+word.
+@end deffn
+
+@deffn Command @@recycle @var{object-name-or-number}
+Destroys the indicated object utterly and irretrievably.  Naturally, you
+may only do this to objects that you own.
+@end deffn
+
+@deffn Command @@quota
+Each player has a limit as to how many objects that player may create,
+called their @dfn{quota}.  Every object they create lowers the quota by one
+and every object they recycle increases it by one.  If the quota goes to
+zero, then that player may not create any more objects (unless, of
+course, they recycle some first).
+
+The @samp{@@quota} command prints out your current quota.
+
+To get a larger quota, talk to a wizard.  They will take a look at what
+you've done with the objects you've built so far and make a
+determination about whether or not it would be a net gain for the MOO
+community if you were to build some more things.  If so, they will
+increase your quota; if not, they will try to explain some ways in which
+you could build things that were more useful, entertaining, or otherwise
+interesting to other players.
+
+The quota mechanism is intended to solve a long-standing problem in many
+MUDs: database bloat.  The problem is that a large number of people
+build a large number of dull objects and areas that are subsequently
+never used or visited.  The database becomes quite large and difficult
+to manage without getting substantially more interesting.  With the
+quota system, we can make it possible for players to experiment and
+learn while simultaneously keeping random building to acceptable levels.
+
+It is expected that some will find the quota system distasteful or
+otherwise controversial.  It was invented by Haakon and he is always
+interested in hearing your constructive comments, suggestions and
+protests.
+@end deffn
+
+@deffn Command @@count
+Prints out the number of objects you own.  Do not be surprised if this
+is one larger than you think it should be: remember that your player
+object is owned by you as well, even though you didn't create it in the
+usual way.
+@end deffn
+
+@deffn Command @@audit
+@deffnx Command @@audit @var{player}
+@deffnx Command @@audit @var{player} from @var{number}
+The first form prints out a list of every object you own, giving each
+one's name and object number.
+
+The second form does the same for the named player.
+
+The third form does the same for the named player, but begins searching
+the database with the numbered object.  @var{player} may be replaced by
+"me" to restrict the audit of yourself.  This can be useful if you know
+the player does not own any objects below a certain number (typically
+the player's number itself).
+
+Interestingly, due to a quirk of the code, "@@audit me from me" will
+show you objects owned by you starting with your object number, an
+unexpected shorthand.
+@end deffn
+
+@deffn Command @@classes
+@deffnx Command @@classes @var{class-name} @dots{}
+The wizards have identified several useful classes of objects in the
+database.  The @samp{@@classes} command is used to see which classes
+exist and what their member objects are.
+
+The first form simply lists all of the defined classes along with short
+descriptions of the membership of each.
+
+The second form prints an indented listing of that subset of the object
+parent/child hierarchy containing the objects in the class(es) you
+specify.
+@end deffn
+
+@deffn Command @@move @var{thing} to @var{place}
+Move the specified object to the specified location.  This is not
+guaranteed to work; in particular, the object must agree to be moved and
+the destination must agree to allow the object in.  This is usually the
+case, however.  The special case where @var{thing} is @samp{me} is
+useful for teleporting yourself around.
+
+If @@move doesn't work and you own the room where the object is located,
+try using @samp{@@eject} instead.
+@end deffn
+
+@deffn Command @@eject @var{object}
+@deffnx Command @@eject @var{object} from @var{place}
+
+This command is used to remove unwanted objects from places you own.
+Players thus removed are unceremoniously dumped in the default player
+starting place.  Other kinds of objects get thrown into @code{#-1} or
+@code{$nothing}.  Unlike @samp{@@move}, @samp{@@eject} does @emph{not}
+check to see if the object wants to be moved, and with the destination
+being what it is, there is no question of the destination refusing the
+move, either.  Generally, you should only resort to @samp{@@eject} if
+@samp{@@move} doesn't work.
+
+The first form of the command removes the object from the current room.
+The second form removes the object from the specified place (which, in
+most cases, you'll have to specify as an object number).  In either
+case, this command only works if you own the room/entity from which the
+object is being ejected.
+
+The form of the command
+
+@example
+@@eject @dots{} from me
+@end example
+
+@noindent
+suffices to get rid of some unwanted object in your inventory.
+@end deffn
+
+On any given room, one may user the following commands to set the
+messages used for ejection:
+
+@deffn Command @@ejection @var{message}
+This message is Printed to player issuing the @@eject command.  The
+default @var{message} is @samp{You expel %d from %i.}
+@end deffn
+
+@deffn Command @@oejection @var{message}
+This message is Printed to others in the room from which the ejection
+occurs.  The default @var{message} is @samp{%D is unceremoniously
+expelled from %i.}
+@end deffn
+
+@deffn Command @@victim_ejection @var{message}
+This message is Printed to the victim being ejected.  The default
+@var{message} is @samp{You have been expelled from %i.}
+@end deffn
+
+@section Rooms and Exits
+Rooms and exits are the stuff from which the landscape of the virtual
+world is created.  A @dfn{room} is generally an instance of the generic
+room class, also referred to as @code{$room}.  An exit is an instance of
+the generic exit class, @code{$exit}.   An exit can be thought of as a
+one way tunnel leading from one room to another.  If you wish to have a
+two way exit, you have to use two exits: one going from the @dfn{source}
+to the @code{destination} and one going from the @code{destination} to
+the @code{source}.
+
+The following commands are used for creating and managing rooms and
+exits: 
+
+@deffn Command @@dig "@var{new-room-name}"
+@deffnx Command @@dig @var{exit-spec} @strong{to} "@var{new-room-name}"
+@deffnx Command @@dig @var{exit-spec} @strong{to} @var{old-room-object-number}
+This is the basic building tool.  The first form of the command creates
+a new room with the given name.  The new room is not connected to
+anywhere else; it is floating in limbo.  The @samp{@@dig} command tells
+you its object number, though, so you can use the @samp{@@move} command
+to get there easily.
+
+The second form of the command not only creates the room, but one or two
+exits linking your current location to (and possibly from) the new room.
+An @var{exit-spec} has one of the following two forms:
+
+@example
+@var{names}
+@var{names}|@var{names}
+@end example
+
+@noindent
+where the first form is used when you only want to create one exit, from
+your current room to the new room, and the second form when you also
+want an exit back, from the new room to your current room.  In any case,
+the @var{names} piece is just a list of names for the exit, separated by
+commas; these are the names of the commands players can type to use the
+exit.  It is usually a good idea to include explicitly the standard
+abbreviations for direction names (e.g., @samp{n} for @samp{north},
+@samp{se} for @samp{southeast}, etc.).  DO NOT put spaces in the names
+of exits; they are useless in MOO.
+
+The third form of the command is just like the second form except that
+no new room is created; you instead specify by object number the other
+room to/from which the new exits will connect.
+
+NOTE: You must own the room at one end or the other of the exits you
+create.  If you own both, everything is hunky-dorey.  If you own only
+one end, then after creating the exits you should write down their
+object numbers.  You must then get the owner of the other room to use
+@samp{@@add-exit} and @samp{@@add-entrance} to link your new exits to
+their room.
+
+For example,
+
+@example
+@@dig "The Conservatory"
+@end example
+
+@noindent
+creates a new room named "The Conservatory" and prints out its object number.
+
+@example
+@@dig north,n to "The North Pole"
+@end example
+
+@noindent
+creates a new room and also an exit linking the player's current
+location to the new room; players would say either @samp{north} or
+@samp{n} to get from here to the new room.  No way to get back from that
+room is created.
+
+@example
+@@dig west,w|east,e,out to "The Department of Auto-Musicology"
+@end example
+
+creates a new room and two exits, one taking players from here to the
+new room (via the commands @samp{west} or @samp{w}) and one taking them
+from the new room to here (via @samp{east}, @samp{e}, or @samp{out}).
+
+@example
+@@dig up,u to #7164
+@end example
+
+creates an exit leading from the player's current room to #7164, which
+must be an existing room.
+@end deffn
+
+@deffn Command @@add-exit @var{exit-object-number}
+Add the exit with the given object number as a conventional exit from
+the current room (that is, an exit that can be invoked simply by
+uttering its name, like @samp{east}).  Usually, @samp{@@dig} does this
+for you, but it doesn't if you don't own the room in question.  Instead,
+it tells you the object number of the new exit and you have to find the
+owner of the room and get them to use the @samp{@@add-exit} command to
+link it up.
+@end deffn
+
+@deffn Command @@add-entrance @var{exit-object-number}
+Add the exit with the given object number as a recognized entrance to
+the current room (that is, one whose use is not considered
+teleportation).  Usually, @samp{@@dig} does this for you, but it doesn't
+if you don't own the room in question.  Instead, it tells you the object
+number of the new exit and you have to find the owner of the room and
+get them to use the @@add-entrance command to link it up.
+@end deffn
+
+@deffn Command @@exits
+Prints a list of all conventional exits from the current room (but only
+if you own the room).  A conventional exit is one that can be used
+simply by uttering its name, like @samp{east}.
+@end deffn
+
+@deffn Command @@entrances
+Prints a list of all recognized entrances to the current room (but only
+if you own the room).  A recognized entrance is one whose use is not
+considered to be teleportation.
+@end deffn
+
+@chapter Notes and Letters
+Notes and letters are objects that can have text written on them to be
+read later.  They are useful for leaving messages to people, or for
+documenting your creations.
+
+Note that, like most objects, only the owner of a note can recycle it.
+If you'd like to make it possible for a reader of your note to destroy
+it (this is a common desire for notes to other individual players), then
+you might want to look at using a @code{$letter} instead.
+
+@section Using Notes
+You can make a note by creating a child of the standard note,
+@code{$note}.  The following commands are available for interacting with
+notes:
+
+@deffn Command read @var{note}
+Prints the text written on the named object, usually a note or letter.
+Some notes are encrypted so that only certain players may read them.
+@end deffn
+
+@deffn Command write "@var{any text}" @strong{on} @var{note}
+Adds a line of text to the named note or letter.  Only the owner of a
+note may do this.
+@end deffn
+
+@deffn Command erase @var{note}
+Deletes all of the text written on a note or letter.  Only the owner of
+a note may do this.
+@end deffn
+
+@deffn Command delete @var{line-number} from @var{note}
+Removes a single line of text from a note.  The first line of text is
+numbered 1, the second is 2, and so on.  Only the owner of a note may do
+this.
+@end deffn
+
+@deffn Command @@notedit @var{note-object}
+@deffnx Command @@notedit @var{object}.@var{property}
+Enters the MOO Note Editor to edit the text on the named object For the
+first form, @var{note-object} must be a descendant of $note.  For the
+second form, @var{object}.@var{property} can be any text-valued (i.e.,
+list of strings) property on any object.
+
+The standard MOO editor is used to perform editing operations.
+@end deffn
+
+@deffn Command encrypt @var{note} with @var{key-expression}
+Restricts the set of players who can read the named note or letter to
+those for whom the given key expression is true.  Only the owner of a
+note may do this.
+@end deffn
+
+@deffn Command decrypt @var{note}
+Removes any restriction on who may read the named note or letter.  Only
+the owner of a note may do this.
+@end deffn
+
+@section Using Letters
+A letter is a special kind of note with the added feature that it can be
+recycled by anyone who can read it.  This is often useful for notes from
+one player to another.  You create the letter as a child of the generic
+letter, @code{$letter}, encrypt it so that only you and the other player
+can read it and then either give it to the player
+in question or leave it where they will find it.  Once they've read it,
+they can use the @samp{burn} command to recycle the letter.
+
+The following command is available for letters, in addition to those
+used for notes.
+
+@deffn Command burn @var{letter}
+Destroy the named letter irretrievably.  Only players who can read the
+letter can do this.
+@end deffn
+
+@chapter Using Containers
+Containers are objects that allow you to store other objects inside
+them.  Containers may be open or closed, using the verbs @samp{open} and
+@samp{close} on the container.  Containers have a separate lock to
+determine if a player may open them.  You can make a container by
+creating a child of the standard container, @code{$container}.
+
+Containers have a large number of messages which get printed when
+players act upon them. 
+
+Containers have opacity.  This is manipulated using the following
+command :
+
+@deffn Command @@opacity @var{container} is @var{integer}
+The opacity can take on one of three values:
+@display
+@table @code
+@item 0
+- The container is transparent and you can always see into it.
+@item 1
+- The container is opaque, and you cannot see into it when closed
+@item 2
+- The container is a black hole, and you can never see into it whether
+closed or open.
+@end table
+@end display
+
+The default opacity is @samp{1} - the container is opaque.
+@end deffn
+
+@chapter Messages on Objects
+Most objects have messages that are printed when a player succeeds or
+fails in manipulating the object in some way.  Of course, the kinds of
+messages printed are specific to the kinds of manipulations and those,
+in turn, are specific to the kind of object.  Regardless of the kind of
+object, though, there is a uniform means for listing the kinds of
+messages that can be set and then for setting them.
+
+The @samp{@@messages} command prints out all of the messages you can set
+on any object you own.
+
+To set a particular message on one of your objects use a command with
+this form:
+
+@example
+@@@var{message-name} @var{object} is "@var{message}"
+@end example
+
+where @samp{@var{message-name}} is the name of the message being set,
+@var{object} is the name or number of the object on which you want to
+set that message, and @var{message} is the actual text.
+
+For example, consider the @samp{leave} message on an exit; it is printed
+to a player when they successfully use the exit to leave a room.  To set
+the @samp{leave} message on the exit @samp{north} from the current room,
+use the command
+
+@example
+@@leave north is "You wander in a northerly way out of the room."
+@end example
+
+This class of commands automatically applies to any property whose name
+ends in @samp{_msg}.  Thus, in the example above, the command is setting
+the @samp{leave_msg} property of the named exit.  You can get such a
+command to work on new kinds of objects simply by giving the appropriate
+properties names that end in @samp{_msg}.
+
+Messages of this type are used on the following objects:
+
+@itemize @bullet
+@item
+containers
+@item
+exits
+@item
+things
+@end itemize
+
+@deffn Command @@messages @var{object}
+List all of the messages that can be set on the named object and their
+current values.
+@end deffn
+
+@section Setting Messages for Exits
+Several kinds of messages can be set on an exit object ; they are
+printed to various audiences at certain times whenever an attempt is
+made to go through the exit.  The ones whose names begin with @samp{o} are
+always shown prefixed with the name of the player making the attempt and
+a single space character.  The standard pronoun substitutions (with
+respect to the player) are made on each message before it is printed.
+
+The following commands can be used to set the corresponding messages on
+an exit: 
+
+@deffn Command @@leave @var{message}
+This command sets the message printed to the player just before they
+successfully use the exit.  The default message is @samp{}.
+@end deffn
+
+@deffn Command @@oleave @var{message}
+This command sets the message printed to others in the source room when
+a player successfully uses the exit.  The default message is @samp{ has left.}.
+@end deffn
+
+@deffn Command @@arrive @var{message}
+This command sets the message printed to the player just after they
+successfully use the exit.  The default message is @samp{}.
+@end deffn
+
+@deffn Command @@oarrive @var{message}
+This command sets the message printed to others in the destination room
+when a player successfully uses the exit.  The default message is 
+@samp{has arrived.}.
+@end deffn
+
+@deffn Command @@nogo @var{message}
+This command sets the message printed to the player when they fail in
+using the exit.  The default message is @samp{ You can't go that way.}.
+@end deffn
+
+@deffn Command @@onogo @var{message}
+This command sets the message printed to others when a player fails in
+using the exit.  The default message is @samp{}.
+@end deffn
+
+@section Setting Messages for Things
+Several kinds of messages can be set on @dfn{things}, that is, objects
+that have @code{$thing} as an ancestor.  They are printed to various
+audiences under various circumstances when an attempt is made to
+@samp{take} or @samp{drop} a thing.  The ones whose names begin with
+@samp{o} are always shown prefixed with the name of the player making
+the attempt and a single space character.  The standard pronoun
+substitutions (with respect to the player) are made on each message
+before it is printed.
+
+The following commands can be used to set the corresponding messages on
+things:
+
+@deffn Command @@take_failed
+This command is used to set the message printed to a player who fails to
+take the object.  The default message is @samp{You can't pick that up.}.
+@end deffn
+
+@deffn Command @@otake_failed
+This command is used to set the message printed to others in the same
+room if a player fails to take the object. The default message is
+@samp{}.
+@end deffn
+
+@deffn Command @@take_succeeded
+This command is used to set the message printed to a player who succeeds
+in taking the object. The default message is @samp{ You take %t.}.
+@end deffn
+
+@deffn Command @@otake_succeeded
+This command is used to set the message printed to others in the same
+room if a player succeeds in taking the object. The default message is
+@samp{ picks up %t.}.
+@end deffn
+
+@deffn Command @@drop_failed
+This command is used to set the message printed to a player who fails to
+drop the object. The default message is @samp{ You can't seem to drop %t
+here.}.
+@end deffn
+
+@deffn Command @@odrop_failed
+This command is used to set the message printed to others in the same
+room if a player fails to drop the object. The default message is
+@samp{tries to drop %t but fails!}.
+@end deffn
+
+@deffn Command @@drop_succeeded
+This command is used to set the message printed to a player who succeeds
+in dropping the object. The default message is @samp{ You drop %t.}.
+@end deffn
+
+@deffn Command @@odrop_succeeded
+This command is used to set the message printed to others in the room if
+a player succeeds in dropping the object. The default message is @samp{
+drops %t.}.
+@end deffn
+
+@section Setting Messages for Containers
+Several kinds of messages can be set on a container object; they are
+printed to various audiences at certain times whenever an attempt is
+made to use the container.  The ones whose names begin with 'o' are
+always shown prefixed with the name of the player making the attempt and
+a single space character.  The standard pronoun substitutions (with
+respect to the player) are made on each message before it is printed.
+
+The following commands can be used to set the corresponding messages
+used with containers.
+
+@deffn Command @@empty
+This command is used to set the message printed in place of the contents
+list when the container is empty. The default message is @samp{It is
+empty.}
+@end deffn
+
+@deffn Command @@open  
+This command is used to set the message printed to the player who
+successfully opens the container. The default message is @samp{You open
+%d.}
+@end deffn
+
+@deffn Command @@oopen  
+This command is used to set the message printed to others in the same
+room if the player successfully opens the container. The default message
+is @samp{opens %d.}
+@end deffn
+
+@deffn Command @@open_fail  
+This command is used to set the message printed to the player who cannot
+open the container. The default message is @samp{You can't open that.}
+@end deffn
+
+@deffn Command @@oopen_fail  
+This command is used to set the message printed to others in the room
+when a player fails to open a container. The default message is @samp{}
+@end deffn
+
+@deffn Command @@close  
+This command is used to set the message printed to the player who closes
+a container. The default message is @samp{You close %d}
+@end deffn
+
+@deffn Command @@oclose  
+This command is used to set the message printed to others in the room
+when a player closes a container. The default message is @samp{closes
+%d}
+@end deffn
+
+@deffn Command @@put  
+This command is used to set the message printed to a player when an
+object is successfully placed in a container. The default message is
+@samp{You put %d in %i}
+@end deffn
+
+@deffn Command @@oput  
+This command is used to set the message printed to others in the room
+when a player successfully places an object in a container. The default
+message is @samp{puts %d in %i.}
+@end deffn
+
+@deffn Command @@put_fail  
+This command is used to set the message printed when a player fails to
+put an object in a container. The default message is @samp{You can't
+put %d in that.}
+@end deffn
+
+@deffn Command @@oput_fail  
+This command is used to set the message printed to others in the room
+when a player fails to place an object in a container. The default
+message is @samp{}
+@end deffn
+
+@deffn Command @@remove  
+This command is used to set the message printed when a player succeeds
+in removing an object from a container. The default message is
+@samp{You remove %d from %i}
+@end deffn
+
+@deffn Command @@oremove  
+This command is used to set the message printed to others in the room
+when a player succeeds in removing an object from a container. The
+default message is @samp{removes %d from %i.}
+@end deffn
+
+@deffn Command @@remove_fail  
+This command is used to set the message printed when a player fails to
+remove an object from a container. The default message is @samp{You
+can't remove that.}
+@end deffn
+
+@deffn Command @@oremove_fail  
+This command is used to set the message printed to others in the room
+when a player fails to remove an object from a container. The default
+message is @samp{}
+@end deffn
+
+@chapter Using Locks With Objects
+It is frequently useful to restrict the use of some object.  For
+example, one might want to keep people from using a particular exit
+unless they're carrying a bell, a book, and a candle.  Alternatively,
+one might allow anyone to use the exit unless they're carrying that huge
+golden coffin in the corner.  LambdaMOO supports a general locking
+mechanism designed to make such restrictions easy to implement, usually
+without any programming.
+
+Every object supports a notion of being @dfn{locked} with respect to
+certain other objects.  For example, the exit above might be locked for
+any object that was carrying the coffin object but unlocked for all
+other objects.  In general, if some object @samp{A} is locked for
+another object, @samp{B}, then @samp{B} is usually prevented from using
+@samp{A}.  Of course, the meaning of @dfn{use} in this context depends
+upon the kind of object.
+
+The various standard classes of objects use locking as follows:
+@itemize @bullet
+@item
+Rooms and containers refuse to allow any object inside them if they're locked for it.
+@item
+Exits refuse to transport any object that they're locked for.
+@item
+Things (including notes and letters) cannot be moved to locations that they're locked for.
+@end itemize
+
+There are two sides to locking:
+@itemize @bullet
+@item
+How is it specified whether one object is locked for another one?
+@item
+What is the effect of an object being locked?
+@end itemize
+
+Note that these two questions are entirely independent: one could invent
+a brand-new way to specify locking, but the effect of an exit being
+locked would be unchanged.
+
+Programmers should note that the interface between these two sides is
+the verb 
+
+@example
+@var{x}:is_unlocked_for(@var{y})
+@end example
+
+@noindent which is called by @var{x} to determine if it
+is locked for the object @var{y}.  The way in which
+@code{:is_unlocked_for} is implemented is entirely independent of the
+ways in which @var{x} uses its results.  Note that you can play on
+either side of this interface with your own objects, either defining new
+implementations of @code{:is_unlocked_for} that match your particular
+circumstances or having your objects interpret their being locked in new
+ways.
+
+The following commands are used to specify locks on objects.
+
+@deffn Command @@lock @var{object} @strong{with} @var{key expression}
+Set a lock on @var{object} to restrict its use.
+@end deffn
+
+@deffn Command @@unlock @var{object}
+Clear any lock that might exist on the given object.
+@end deffn
+
+@deffn Command @@lock_for_open @var{container} @strong{with} @var{key expression}
+Set the lock on @var{container} which restricts who can open it.
+@end deffn
+
+@deffn Command @@unlock_for_open @var{container}
+Clears the lock which restricts who may open @var{container}.
+@end deffn
+
+@section Keys
+LambdaMOO supports a simple but powerful notation for specifying locks
+on objects, encryption on notes, and other applications.  The idea is to
+describe a constraint that must be satisfied concerning what some object
+must be or contain in order to use some other object.
+
+The constraint is given in the form of a logical expression, made up of
+object numbers connected with the operators @samp{and}, @samp{or}, and @samp{not}
+(written @samp{&&}, @samp{||}, and @samp{!}, for compatibility with the MOO programming
+language).  When writing such expressions, though, one usually does not
+use object numbers directly, but rather gives their names, as with most
+MOO commands.
+
+These logical expressions (called @dfn{key expressions}) are always
+evaluated in the context of some particular @dfn{candidate} object, to see
+if that object meets the constraint.  To do so, we consider the
+candidate object, along with every object it contains (and the ones
+those objects contain, and so on), to be @samp{true} and all other objects to
+be @samp{false}.
+
+As an example, suppose the player blip wanted to lock the exit leading
+to his home so that only he and the holder of his magic wand could use
+it.  Further, suppose that blip was object #999 and the wand was #1001.
+blip would use the '@@lock' command to lock the exit with the following
+key expression:
+
+@example
+me || magic wand
+@end example
+
+@noindent
+and the system would understand this to mean
+
+@example
+#999 || #1001
+@end example
+
+That is, players could only use the exit if they were (or were carrying)
+either #999 or #1001.
+
+To encrypt a note so that it could only be read by blip or someone
+carrying his book, his bell, and his candle, blip would use the
+@samp{encrypt} command with the key expression
+
+@example
+me || (bell && book && candle)
+@end example
+
+Finally, to keep players from taking a large gold coffin through a
+particularly narrow exit, blip would use this key expression:
+@example
+! coffin
+@end example
+
+That is, the expression would be false for any object that was or was
+carrying the coffin.
+
+There is one other kind of clause that can appear in a key expression:
+
+@example
+? @var{object}
+@end example
+
+This is evaluated by testing whether the given object is unlocked for
+the candidate object; if so, this clause is true, and otherwise, it is
+false.  This allows you to have several locks all sharing some single
+other one; when the other one is changed, all of the locks change their
+behavior simultaneously.
+
+The internal representation of key expressions, as stored in .key on
+every object, for example, is very simple and easy to construct on the
+fly.
+
+@subsection Key Representation
+The representation of key expressions is very simple and makes it easy
+to construct new keys on the fly.
+
+Objects are represented by their object numbers and all other kinds of
+key expressions are represented by lists.  These lists have as their
+first element a string drawn from the following set:
+
+@example
+"&&"     "||"     "!"     "?"
+@end example
+
+@noindent
+For the first two of these, the list should be three elements long; the
+second and third elements are the representations of the key expressions
+on the left- and right-hand sides of the appropriate operator.  In the
+third case, @samp{!}, the list should be two elements long; the second
+element is again a representation of the operand.  Finally, in the @samp{?}
+case, the list is also two elements long but the second element must be
+an object number.
+
+As an example, the key expression
+
+@example
+#45  &&  ?#46  &&  (#47  ||  !#48)
+@end example
+@noindent
+would be represented as follows:
+
+@example
+@{"&&", @{"&&", #45, @{"?", #46@}@}, @{"||", #47, @{"!", #48@}@}@}
+@end example
+
+@chapter The MOO Editor
+One can always enter an editor by teleporting to it, or you can use one
+of the commands provided
+
+@display
+@table @code
+@item @@edit     @var{object}:@var{verb}
+invokes the Verb Editor (edits verb code)
+@item @@notedit  @var{note_object}
+invokes the Note Editor (edits note text)
+@item @@notedit  @var{object}.@var{prop}
+invokes the Note Editor (edits text property)
+@item @@send     @var{list of recipients}
+invokes the Mailer (edits a mail message)
+@item @@answer   [@var{msg_number}] [@var{flags}@dots{}]
+invokes the Mailer (edits a reply)
+@end table
+@end display
+
+This will transport you to one of several special rooms that have
+editing commands available.  These editors are admittedly not as good as
+EMACS, but for those with no other editing capability on their host
+systems, it is better than nothing.
+
+In addition to the commands provided by the generic editor, individual
+editors provide their own additional commands for loading text from
+places, saving text to places, and various specialized functions.
+
+Note that a given editor only allows you one session at a time (ie. one
+verb, one note, or one mail message).  If you leave an editor without
+either aborting or compiling/saving/sending the item you're working on,
+that editor remembers what you are doing next time you enter it, whether
+you enter it by teleporting or by using the appropriate command.  Note
+that editors are periodically flushed so if you leave stuff there for
+sufficiently long, it will go away.
+
+A player may have his own @code{.edit_options} property which is a list
+containing one or more (string) flags from the following list
+
+@display
+@table @code
+@item quiet_insert
+suppresses those annoying @samp{Line n added.} or @samp{Appended@dots{}}
+messages that one gets in response to @samp{say} or @samp{emote}.  This
+is useful if you're entering a long list of lines, perhaps via some
+macro on your client, and you don't want to see an equally long list of
+@samp{Line n added@dots{}} messages.  What you do want, however is some
+indication that this all got through, which is why the @samp{.} command
+is an abbreviation for insert.
+@end table
+@end display
+
+There will be more options, some day.
+
+@section Editor Ranges
+Most editor commands act upon a particular range of lines.  Essentially,
+one needs to specify a first line and a last line.  Line numbers may be
+given in any of the following forms
+  
+@display
+@table @code
+@item n
+(i.e., the nth line of text)
+@item n^
+n-th line after/below  the current insertion point
+@item n_
+n-th line before/above the current insertion point
+@item n$
+n-th line before the end.
+@end table
+@end display
+
+In the latter three, n defaults to 1, so that @samp{^} by itself refers
+to the line below the current (i.e., the line that gets @samp{^} printed
+before it), and likewise for @samp{_} while @samp{$} refers to the last
+line.  Note that the usage depends on whether you are specifying a line
+or an insertion point (space between lines). @samp{^5} is the space
+above/before line 5, while @samp{5^} is the fifth line after/below the
+current insertion point.
+
+Ranges of lines may be specified in any of the
+following ways:
+
+@display
+@table @code
+@item @var{line}
+just that line
+@item from @var{line} to @var{line}
+what it says; the following two forms are equivalent:
+@example
+@var{line}-@var{line}            
+@var{line} @var{line}
+@end example
+@end table
+@end display
+
+With the @samp{from l to l} form, either the @strong{from} or the
+@strong{to} can be left off and it will default to whatever is usual for
+that command (usually a line above or below the insertion point).
+
+@section Editor Commands
+
+The following commands are provided by the editor classes.  Those that
+are not generic are specifically marked so.
+
+@deffn Command say @var{text}
+@deffnx Command "@var{text}
+Adds @var{text} to whatever you are editing.  The second form is
+equivalent to the first except in that it doesn't strip leading blanks
+off of @var{text} (just as with the normal @samp{say} and @samp{"}
+commands).
+
+The added text appears as a new line at the insertion point.  The
+insertion point, in turn, gets moved so as to be after the added text.
+For example:
+
+@example
+>"first line
+@print{}Line 1 added.
+
+>"  second line"
+@print{}Line 2 added.
+
+>list
+@print{}1: first line
+@print{}__2_   second line"
+@print{}^^^^
+@end example
+@end deffn
+
+@deffn Command emote @var{text}
+@deffnx Command :@var{text}
+
+Appends @var{text} to the end of the line before the insertion point.
+The second form is equivalent to the first except that it doesn't strip
+leading blanks off of @var{text} (just as with the normal @samp{emote}
+and @samp{:} commands).  The insertion point is left unmoved.
+
+@example
+>list .
+@print{}_37_ Hello there
+@print{}^38^ Oh, I'm fine.
+
+>:, how are you
+@print{}Appended to line 37.
+
+>:?
+@print{}Appended to line 37.
+
+>list .
+@print{}_37_ Hello there, how are you?
+@print{}^38^ Oh, I'm fine.
+@end example
+@end deffn
+
+@deffn Command lis*t [@var{range}] 
+Prints some subset of the current verb text.  The default range is some
+reasonable collection of lines around the current insertion point:
+currently this is @samp{8_-8^}, ie., 8 lines above the insertion point
+to 8 lines below it unless this runs up against the beginning or end of
+file, in which case we just take the first or last 16 lines, or just
+@samp{1-$} if there aren't that many.
+@end deffn
+
+@deffn Command ins*ert [@var{ins}] ["@var{text}]
+@deffnx Command .
+Many editor commands refer to an "insertion point" which is (usually)
+the place right below where the most recent line was inserted.  The
+insertion point should really be thought of as sitting @emph{between}
+lines.  In listings, the line above the insertion point is marked with
+@samp{_} while the one below is marked with @samp{^}.
+
+The @samp{insert} command, when given an argument, sets the insertion
+point.  If @var{text} is provided, a new line will be created and
+inserted as with @samp{say}.  @var{ins}, both here and in other commands
+that require specifying an insertion point (e.g., copy/move), can be one
+of
+
+@display
+@table @code          
+@item ^n
+above line n
+@item n
+above line n
+@item _n
+below line n
+@item $
+at the end
+@item ^$
+before the last line
+@item n^$
+n lines before the end
+@item .
+the current insertion point  (i.e., @samp{insert .} is a no-op)
+@item +n
+n lines below the current insertion point.
+@item -n
+n lines above the current insertion point.
+@end table
+@end display
+
+For the truly perverse, there are other combinations that also work due
+to artifacts of the parsing process, but these might go away@dots{}
+
+A single dot @samp{.} is the same as @samp{insert} without any
+arguments ie, start insertion at the current insertion point.
+@end deffn
+
+@deffn Command n*ext [@var{n}] ["@var{text}]
+Moves the insertion point down @var{n} lines.  If @var{text} is
+provided, inserts a new line there just like @samp{say}.  Equivalent to
+@samp{insert +@var{n}}.  As one might expect, @var{n} defaults to 1.
+@end deffn
+
+@deffn Command p*rev [@var{n}] ["@var{text}]
+Moves the insertion point up @var{n} lines.  If @var{text} is provided,
+a new line is inserted as with @samp{say}.  Equivalent to @samp{insert
+-@var{n}}.  As one might expect, @var{n} defaults to 1.
+@end deffn
+
+@deffn Command del*ete [@var{range}] 
+Deletes the specified range of lines.  Note that @var{range} defaults to
+the line @emph{before} the current insertion point.
+@end deffn
+
+@deffn Command f*ind / @var{str}[/[c][@var{ins}]]
+@deffnx Command / @var{str}[/[c][@var{ins}]]
+Searches for the first line after @var{ins} containing @var{str}.
+@var{ins} defaults to the current insertion point .  With the first
+form, any character (not just @samp{/}) may be used as a delimiter.  For
+the second form, you must use @samp{/}.  The @samp{c} flag, if given,
+indicates that case is to be ignored while searching
+@end deffn
+
+@deffn Command s*ubst / @var{str1} / @var{str2}[/[g][c][@var{range}]]
+Substitutes @var{str2} for @var{str1}, in all of the lines of
+@var{range}.  Any character (not just @samp{/}) may be used to delimit
+the strings.  If @var{str1} is blank, @var{str2} is inserted at the
+beginning of the line.  (For inserting a string at the end of a line use
+@samp{emote} or @samp{:}).
+
+Normally, only one substitution is done per line in the specified range,
+but if the @samp{g} flag is given, *all* instances of @var{str1} are
+replaced.  The @samp{c} flag indicates that case is not significant when
+searching for substitution instances.  @var{range} defaults to the line
+*before* the insertion point.
+
+You do @emph{not} need a space between the verb and the delimiter before
+@var{str1}.  [Bug: If you omit the space and the first whitespace in
+@var{str1} is a run of more than one space, those spaces get treated as
+one.]
+@end deffn
+
+@deffn Command m*ove [@var{range}] to @var{ins}
+5Moves the range of lines to place specified by @var{ins}.  If @var{ins}
+happens to be the current insertion point, the insertion point is moved
+to the end of the freshly moved lines.  If the range of lines contains
+the insertion point, the insertion point is carried over to the range's
+new location.
+@end deffn
+
+@deffn Command c*opy [@var{range}] to @var{ins}
+Copies the specified range of lines to place given by @var{ins}.  If
+@var{ins} happens to be the current insertion point, the insertion point
+moves to the end of the inserted lines.
+@end deffn
+
+@deffn Command join [@var{range}]
+@deffnx Command joinliteral [@var{range}]
+This command combines the lines in the specified range.  Normally,
+spaces are inserted and double space appears after periods and colons,
+but @samp{joinliteral} (abbreviates to @samp{joinl}) supresses this and
+joins the lines as is.  @var{range} defaults to the two lines
+surrounding the insertion point.
+@end deffn
+
+@deffn Command fill [@var{range}] [@@ @var{c}]
+This command combines the specified lines as in join and then splits
+them so that no line is more than @var{c} characters (except in cases of
+pathological lines with very long words).  @var{c} defaults to 70.
+@var{range} defaults to the single line preceding the insertion point.
+@end deffn
+
+@deffn Command w*hat
+Prints information about the editing session.
+@end deffn
+
+@deffn Command abort
+Abandons this editing session and any changes.
+@end deffn
+
+@deffn Command q*uit
+@deffnx Command done
+@deffnx Command pause  
+Leaves the editor.  If you have unsaved text it will be there when you
+return (and in fact you will not be able to do anything else with this
+editor until you @samp{abort} or save the text).
+@end deffn
+
+@deffn Command reply-to [@var{recipients}]
+This is a mail room command.  It reports the current contents of
+the @code{Reply-to:} field of your message.  With arguments, adds (or
+changes) the @code{Reply-to:} field.
+
+When someone @samp{@@answers} a message, the @code{Reply-to:} field is checked first
+when determining to whom the reply should be sent.
+
+To clear the @code{Reply-to:} field, enter the command
+
+@example
+reply-to ""
+@end example
+@end deffn
+
+@deffn Command edit @var{object}:@var{verb}
+This is a verb editor command. It changes what verb you are editing and
+loads the code for that verb into the editor.  Equivalent to 
+
+@example
+@@edit @var{object}:@var{verb}.
+@end example
+@end deffn
+
+@deffn Command edit @var{note-object}
+@deffnx Command edit @var{object}.@var{property}
+This command is used for both note and verb editors. It changes to a
+different note or a different object text property and loads its text
+into the editor.  These are equivalent to
+
+@example
+@@notedit @var{note}
+@end example
+
+@noindent 
+or
+
+@example
+@@notedit @var{object}.@var{property}
+@end example
+
+@noindent
+respectively.
+
+For both the verb-editor and note-editor commands, @var{object} will
+match on the room you came from, though if the room you came from was
+another editor, then all bets are off@dots{}
+@end deffn
+
+@deffn Command compile [as @var{object}:@var{verb}]
+This is a verb editor command. It installs the new program into the
+system if there are no syntax errors.  If a new @var{object:verb} is specified
+and actually turns out to exist, that @var{object}:@var{verb} becomes
+the default for subsequent compilations.
+@end deffn
+
+@deffn Command save [@var{note-object}]
+@deffnx Command save [@var{object}.@var{property}]
+This is a note editor command.  It installs the freshly edited text.  If
+@var{note} or @var{object}.@var{property} is specified, text is
+installed on that note or property instead of the original one.  In
+addition the new note or property becomes the default for future save
+commands.
+@end deffn
+
+@deffn Command subj*ect [@var{text}]
+This is a mail editor command.  It is used to specify a @code{Subject:}
+line for your message.  If @var{text} is "", the @code{Subject:} line is
+removed.
+@end deffn
+
+@deffn Command to [@var{recipients}]
+This is a mail editor command.  Specifies a new set of recipients (the
+@code{To:} line) for your message.  Recipient names not beginning with * are
+matched against the list of players.  Recipient names beginning with *
+are interpreted as mailing-lists/archives/other types of non-person
+addresses and are matched against all such publically available objects.
+If the list you want to use isn't in the database (i.e., isn't located
+in the database ($mail_agent)) you need to refer to it by object id.
+@end deffn
+
+@deffn Command also-to [@var{recipients}]
+This is a mail editor command.  Adds additional recipients to the To:
+line of your message.  Same rules apply as for the @samp{to} command.
+@end deffn
+
+@deffn Command pri*nt
+This is a mail editor command.  Print your message as it is going to
+appear at the far end.
+@end deffn
+
+@deffn Command send
+This is a mail editor command.  Send your message and exit the mail
+room.  If there are bogus addresses on your @code{To:} line, the message
+will not be sent.  It may be, however, that valid addresses on your
+@code{To:} line will forward to other addresses that are bogus; you'll
+receive warnings about these, but in this case your message will still
+be delivered to those addresses that are valid.
+@end deffn
+
+@deffn Command who 
+@deffnx Command who @var{rcpt}@dots{}
+This is a mail editor command.  Invokes @code{$mail_agent}'s
+mail-forwarding tracer and determines who (or what) is actually going to
+receive your message.  The resulting list will not include destinations
+that will simply forward the message without
+@code{:receive_message()}'ing a copy for themselves.
+
+The second form expands an arbitrary list of recipients, for if e.g.,
+you're curious about the members of particular mailing list.
+@end deffn
+
+@deffn Command showlists
+This is a mail editor command used to print a list of the publically
+available mailing lists or archives and other non-player entities that
+can receive mail.
+@end deffn
+
+@deffn Command subscribe @strong{to} @var{list-name}
+@deffnx Command subscribe [@var{name}@dots{}] @strong{to} @var{list-name}
+This is a mail room command.  Add yourself to the given mailing list.
+The second form adds arbitrary people to a mailing list.  You can only
+do this if you own the list or if it is listed as [Public] and you own
+whatever is being added.  Use the @samp{who} command to determine if you
+are on a given mailing list.
+@end deffn
+
+@deffn Command unsubscribe from @var{list-name}
+@deffnx Command unsubscribe @var{name}@dots{} from @var{list-name}
+This is a mail room command.  It is used to remove yourself from the
+given mailing list.  The second form removes arbitrary people from a
+mailing list.  You can only do this if you own whatever is being removed
+or you own the list.  
+
+You can use the @samp{who} command to determine if you are on a given
+mailing list.
+@end deffn
+
+@chapter Dealing with Verbs and Properties
+
+Verbs and properties are the elements of objects that make them useful.
+A verb allows you to define things to do with an object, and properties
+are used to store state information about the object.  A verb can be
+thought of as a MOO code program, executed when the verb on the object
+is invoked.  This can happen if the LambdaMOO parser matches the user
+input with the verb on an object, or when another MOO code program
+explicitly calls the verb.
+
+Several commands are available to allow manipulation of properties and
+verbs.
+
+@deffn Command @@show @var{object}
+@deffnx Command @@show @var{object}.@var{prop-name}
+@deffnx Command @@show @var{object}:@var{verb-name}
+Displays quite detailed information about an object, property or verb,
+including its name, owner, permission bits, etc.  The information
+displayed for an object can be quite long, but usually fits on most
+screens.
+@end deffn
+
+@deffn Command @@chmod @var{object} @var{object-permissions}
+@deffnx Command @@chmod @var{object}.@var{prop-name} @var{property-permissions}
+@deffnx Command @@chmod @var{object}:@var{verb-name} @var{verb-permissions}
+Changes the permissions of an object, property or verb, to those given.
+The following table shows what permission bits are allowed for each form
+of the command:
+
+@display
+@table @code
+@item @var{object-permissions}
+r, w
+@item @var{property-permissions}
+r, w, c
+@item @var{verb-permissions}
+r, w, x, d
+@end table
+@end display
+
+See the LambdaMOO Programmer's Manual for their meanings.
+
+To clear all of the permissions for an object, verb, or property, use ""
+as the second argument.
+@end deffn
+
+@deffn Command @@chparent @var{object} to @var{new parent}
+Changes the parent of the named object to be the named parent.  The
+object acquires all the verb and property definitions of its parent, as
+well as the parent's values for any newly-defined properties.  The
+parent object must be readable by the player in order to use it as a new
+parent.
+@end deffn
+
+@section Dealing with Verbs
+
+The following commands are used for creating and manipulating verbs.
+
+@deffn Command @@verb @var{object}:@var{verb-name(s)}
+@deffnx Command @@verb @var{object}:@var{verb-name(s)} @var{dobj} [@var{prep} [@var{iobj}]]
+@deffnx Command @@verb @var{object}:@var{verb-name(s)} @var{dobj} @var{prep} @var{iobj} @var{permissions}
+@deffnx Command @@verb @var{object}:@var{verb-name(s)} @var{dobj} @var{prep} @var{iobj} @var{permissions} @var{owner}
+
+Adds a new verb with the given name(s) to the named object.  If there
+are multiple names, they should be separated by spaces and all enclosed
+in quotes:
+
+@example
+@@verb foo:"bar baz mum*ble"
+@end example
+
+The direct and indirect object specifiers (@var{dobj} and @var{iobj})
+must be either @samp{none}, @samp{this}, or @samp{any}; their meaning is
+discussed in the LambdaMOO Programmer's Manual.  The preposition
+specifier (@var{prep}) must be either @samp{none}, @samp{any}, or one of
+the prepositional phrases possible. (a prepositional phrase with more
+than one word must be enclosed in quotes ("")).  All three specifiers
+default to @samp{none}.
+
+It is also possible to specify the new verb's permissions and owner as
+part of the same command (rather than having to issue separate
+@samp{@@chmod/@@chown} commands), using the third and fourth forms above.
+
+@var{permissions} are as with @@chmod, i.e., must be some subset of
+@samp{rwxd}.  They default to @samp{rxd} (specifying @samp{w} for a verb
+is highly inadvisable).  The owner defaults to the player typing the
+command; only wizards can create verbs with owners other than
+themselves.
+@end deffn
+
+@deffn Command @@rmverb @var{object}:@var{verb-name}
+Removes the named verb from the named object.
+@end deffn
+
+@deffn Command @@args @var{object}:@var{verb-name} @var{dobj}
+@deffnx Command @@args @var{object}:@var{verb-name} @var{dobj} @var{prep}
+@deffnx Command @@args @var{object}:@var{verb-name} @var{dobj} @var{prep} @var{iobj}
+Changes the direct object, preposition, and/or indirect object
+specifiers for the named verb on the named object.  Any specifiers not
+provided on the command line are not changed.  The direct and indirect
+object specifiers (@var{dobj} and @var{iobj}) must be either
+@samp{none}, @samp{this}, or @samp{any}.  The preposition specifier
+(@var{prep}) must be either @samp{none}, @samp{any}, or one of the
+prepositional phrases that are possible.
+@end deffn
+
+@deffn Command .program @var{object}:@var{verb-name}
+Provides or changes the MOO program associated with the named verb on
+the named object.
+
+This command works differently from all other MOO commands, in that it
+actually changes how the server will interpret later lines that you type
+to it.  After typing the @samp{.program} line, you are in @dfn{programming
+mode}.  All lines that you type in this mode are simply saved away in
+the server until you type a line containing only a single period (@samp{.}).
+At that point, those lines are interpreted as a MOO program and are
+checked for syntax errors.  If none are found, a message to that effect
+is printed and the code you typed is installed as the program for the
+verb in question.  In any case, after typing the @samp{.} line, you are
+returned to the normal input-handling mode.
+@end deffn
+
+@deffn Command @@list @var{object}:@var{verb}
+@deffnx Command @@list @var{object}:@var{verb} @strong{with parentheses}
+@deffnx Command @@list @var{object}:@var{verb} @strong{without numbers}
+@deffnx Command @@list @var{object}:@var{verb} @strong{with parentheses without numbers}
+Prints out the code for the MOO program associated with the named verb
+on the named object.  Normally, the code is shown with each line
+numbered and with only those parentheses that are necessary to show the
+meaning of the program.  By specifying options as shown in the last
+three forms above, you can have the numbers omitted and/or all
+parentheses included.
+
+For example, 
+
+@example
+@@list $room:@@move
+@end example
+
+@noindent
+to see the code for the @samp{@@move} command, or even 
+
+@example
+@@list $prog:@@list
+@end example
+
+@noindent
+to see the code implementing @code{@@list} itself.
+@end deffn
+
+@deffn Command @@edit @var{object}:@var{verb-name}
+Enters the MOO Verb Editor for the named verb on the named object.
+@end deffn
+
+@deffn Command eval @var{MOO-code}
+@deffnx Command ; @var{MOO-code}
+Evaluates the given piece of MOO code and prints the resulting value.
+If the MOO code begins with one of the MOO language keywords (@samp{if},
+@samp{for}, @samp{while}, @samp{fork}, or @samp{return}) or with the
+character @samp{;}, then the entire piece of code is treated as the
+program for a verb, with @samp{;} appended to the end.  Otherwise,
+@samp{return} is appended to the front and @samp{;} is appended to the
+end and that string is treated as the code for a verb.  In either case,
+the resulting verb is invoked and whatever value it returns is printed.
+
+For programmers, this is such a mind-bogglingly useful thing to do that
+there is a simple abbreviation for this command; any command beginning
+with a semicolon (@samp{;}) is treated as a use of @samp{eval}.
+
+For example:
+
+@example
+>eval 3 + 4
+@print{}7
+
+>;3+4
+@print{}7
+
+>;for x in (player.aliases) player:tell(x); endfor
+@print{}Haakon
+@print{}Wizard
+@print{}ArchWizard
+@print{}0
+
+;;l = @{@}; for i in [1..10] l = @{@@l, i@}; endfor return l
+@print{}@{1, 2, 3, 4, 5, 6, 7, 8, 9, 10@}
+@end example
+@end deffn
+
+@subsection Prepositions
+The complete list of prepositions recognized by the command-line parser
+is shown in the list below:
+
+@itemize @bullet
+@item
+with/using
+@item
+at/to
+@item
+in front of
+@item
+in/inside/into
+@item
+on top of/on/onto/upon
+@item
+out of/from inside/from
+@item
+over
+@item
+through
+@item
+under/underneath/beneath
+@item
+behind
+@item
+beside
+@item
+for/about
+@item
+is
+@item
+as
+@item
+off/off of
+@end itemize
+
+@section Dealing with Properties
+
+The following commands are used for dealing with properties.
+
+@deffn Command @@property @var{object}.@var{prop-name}
+@deffnx Command @@property @var{object}.@var{prop-name} @var{initial-value}
+@deffnx Command @@property @var{object}.@var{prop-name} @var{initial-value} @var{permissions}
+@deffnx Command @@property @var{object}.@var{prop-name} @var{initial-value} @var{permissions} @var{owner}
+Adds a new property named @var{prop-name} to the named object.  The
+initial value is given by the second argument, if present; it defaults
+to 0.
+
+Normally, a property is created with permissions @samp{rc} and owned by
+whoever types the command.  However, you may also specify these
+explicitly, using the third and fourth forms.  Only wizards can create
+properties with owners other than themselves.
+
+@samp{@@property} can be abbreviated as @samp{@@prop}.
+@end deffn
+
+@deffn Command @@rmproperty @var{object}.@var{prop-name}
+Removes the named property from the named object.  @samp{@@rmproperty} may be
+abbreviated as @samp{@@rmprop}.
+@end deffn
+
+@chapter Using Tasks
+A task is an execution of a MOO program.  There are three ways for tasks
+to be created in LambdaMOO:
+
+@itemize @bullet
+@item
+Every time a player types a command, a task is created to execute that
+command; we call these @dfn{command tasks}.
+@item
+Whenever a player connects or disconnects from the MOO, the server
+starts a task to do whatever processing is necessary, such as printing
+out @samp{blip has connected} to all of the players in the same room; these
+are called @dfn{server tasks}.
+@item
+The @code{fork()} statement in the programming language creates a task
+whose execution is delayed for at least some given number of seconds;
+these are @dfn{forked tasks}.
+@end itemize
+
+To prevent a maliciously- or incorrectly-written MOO program from
+running forever and monopolizing the server, limits are placed on the
+running time of every task.  One limit is that no task is allowed to run
+longer than one minute; this limit is, in practice, never reached.  The
+reason is that there is a second limit on the number of operations a
+task may execute.
+
+Every task has an associated @dfn{clock} that counts down @dfn{ticks} as the
+task executes.  The server counts one tick for every expression
+evaluation (other than variables and literals) and one for every time
+through the body of a loop.  If a task's clock winds all the way down to
+zero, the task is immediately and unceremoniously aborted.
+
+Command and server tasks are given brand-new clocks with an initial
+store of 20,000 ticks; this is enough for almost all normal uses.
+
+A forked task inherits the clock of the task that forked it, with
+however many ticks remain on it.  To allow objects like cuckoo clocks
+and other recurring tasks that do a little bit of work every once in a
+while forever, clocks also regain ticks at the rate of 25 ticks per
+second, up to the maximum of 20,000 ticks.  The seconds are counted from
+the end of the time that one task was counting down that clock to the
+time when the next user of that clock actually begins execution.
+
+Because forked tasks may exist for long periods of time before they
+begin execution, there are commands to list the ones that you own and to
+kill them before they execute.  These commands are covered in the
+following section.
+
+@deffn Command @@forked
+Gives a list of all of the forked tasks you own, along with detailed
+information about each one.  The information includes the following:
+
+@display
+@table @code
+@item Queue ID:
+A numeric identifier for the task, for use in killing it .
+@item Start Time:
+The time after which the task will begin execution.
+@item Owner:
+You, if you're not a wizard.
+@item Clock:
+The number of ticks left on the clock for the task right this moment; if
+the task does not execute immediately, this number will grow, up to a
+maximum of 20,000 ticks.
+@item Clock ID:
+It is possible for several tasks to share a single clock.  The clock ID
+is a numeric identifier for each clock, so that you can tell if one is
+being shared.
+@item Verb:
+The object and verb-name of the code that forked the task.
+@item Line:
+The line number of the first statement that the task will execute when
+it starts.  Note that the code for the verb in question may have changed
+since the task was forked; the forked task will use the version that was
+being executed when it was forked.
+@end table
+@end display
+@end deffn
+
+@deffn Command @@kill @var{queue-id}
+Immediately kills the forked task with the given numeric queue ID.  The
+@samp{@@forked} command is useful for finding out these queue IDs.  Only
+the owner of a task may kill it.
+@end deffn
+
+@chapter Miscellaneous
+The following verbs are useful, but not easily categorisable.
+
+@deffn Command @@version
+Prints out the version number for the currently-executing MOO server.
+@end deffn
+
+@deffn Command @@lastlog
+@deffnx Command @@lastlog @var{player}
+The first form prints out a list of all players, roughly sorted by how
+long it's been since that player last connected to the MOO.  For each
+player, the precise time of their last connection is printed.
+
+The second form only shows the last-connection time for the named
+player.
+@end deffn
+
+@deffn Command @@memory
+Prints out all information available on the current memory-usage
+behavior of the MOO server.  Probably only a wizard, if anyone, cares
+about this.
+@end deffn
+
+@iftex
+@unnumbered Verb Index
+@printindex fn
+
+@contents
+@end iftex
+
+@bye
+@c Local Variables:
+@c makeinfo-options: "+fill-column 79 +no-split"
+@c End:

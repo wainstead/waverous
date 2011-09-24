@@ -1,0 +1,10 @@
+bjj = Ben Jackson <ben@ben.com>
+merlin4269 = Randy Beiter <merlin4269@gmail.com>
+nop = nop <nop>
+pschwan = pschwan <pschwan>
+swain = Steve Wainstead <wainstead@gmail.com>
+wainstead = Steve Wainstead <wainstead@gmail.com>
+wrog = Roger Crew <crew@cs.stanford.edu>
+xplat = xplat <xplat>
+xythian = Ken Fox <fox@mars.org>
+verement = Rob Leslie <rob@mars.org>

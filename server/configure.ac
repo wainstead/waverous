@@ -16,269 +16,11 @@ dnl   Palo Alto, CA 94304
 dnl   Pavel@Xerox.Com
 dnl
 AC_PREREQ([2.61])
-AC_INIT([Waverous LambdaMOO], [beta2], [wainstead@gmail.com], [waverous-lambdamoo], [http://code.google.com/p/waverous/])
-AM_INIT_AUTOMAKE
+AC_INIT([Waverous LambdaMOO], [0.2], [wainstead@gmail.com], [waverous-lambdamoo], [http://code.google.com/p/waverous/])
 AC_CONFIG_SRCDIR([functions.c])
 AC_CONFIG_HEADERS([config.h])
 
-
-
-
-dnl ***************************************************************************
-dnl	MOO_AUX
-dnl Defines _POSIX_SOURCE if this machine is running A/UX; this appears to be
-dnl necessary in order to get declarations of POSIX functions.
-define(MOO_AUX, [
-echo checking for A/UX
-AC_PROGRAM_EGREP(yes, [
-#if defined(AUX)
-  yes
-#endif
-], AC_DEFINE(_POSIX_SOURCE))])
-
-dnl ***************************************************************************
-dnl	MOO_HPUX
-dnl Defines _HPUX_SOURCE if this machine is running HP/UX; this appears to be
-dnl necessary in order to get declarations of POSIX functions.
-define(MOO_HPUX, [
-echo checking for HP/UX
-AC_PROGRAM_EGREP(yes, [
-#if defined(__hpux)
-  yes
-#endif
-], AC_DEFINE(_HPUX_SOURCE))])
-
-dnl ***************************************************************************
-dnl	MOO_ALPHA
-dnl If this machine is a DEC Alpha running OSF/1, and we're not using GCC, then
-dnl add `-Olimit 1000' to the `cc' switches, to allow the compiler to run the
-dnl optimizer over large functions, like the main MOO interpreter loop.
-define(MOO_ALPHA, [
-echo checking for the DEC Alpha running OSF/1
-AC_PROGRAM_EGREP(yes, [
-#if defined(__osf__) && defined(__alpha) && !defined(__GNUC__)
-  yes
-#endif
-], CC="$CC -Olimit 2500")])
-
-dnl ***************************************************************************
-dnl	MOO_SGI
-dnl If this machine is an SGI running IRIX, and we're not using GCC, then
-dnl add `-Olimit 2500' to the `cc' switches, to allow the compiler to run the
-dnl optimizer over large functions, like the main MOO interpreter loop.  Also,
-dnl even if we are using GCC, undefine __EXTENSIONS__ to keep from seeing a
-dnl bunch of interfering declarations.
-define(MOO_SGI, [
-echo checking for the SGI compiler
-AC_PROGRAM_EGREP(yes, [
-#if defined(sgi) && !defined(__GNUC__)
-  yes
-#endif
-], CC="$CC -Olimit 2500")
-AC_PROGRAM_EGREP(yes, [
-#if defined(sgi)
-  yes
-#endif
-], CC="$CC -U__EXTENSIONS__")])
-
-dnl ***************************************************************************
-dnl	MOO_NEXT
-dnl On NeXT, we need to make sure that _NEXT_SOURCE and _POSIX_SOURCE are
-dnl defined.
-define(MOO_NEXT, [
-echo checking for NeXT
-AC_PROGRAM_EGREP(yes, [
-#ifdef NeXT
-  yes
-#endif
-], AC_DEFINE(_NEXT_SOURCE)
-   AC_DEFINE(_POSIX_SOURCE))])
-
-dnl ***************************************************************************
-dnl 	MOO_MALLOC_H
-dnl Define NEED_MALLOC_H if `malloc()' is not declared in <stdlib.h> and
-dnl <malloc.h> exists.
-define(MOO_MALLOC_H, [
-echo checking whether stdlib.h declares malloc and friends
-MOO_FUNC_DECL_CHECK(stdlib.h, malloc, ,
-	[AC_HEADER_CHECK(malloc.h, AC_DEFINE(NEED_MALLOC_H))])])
-
-dnl ***************************************************************************
-dnl	MOO_FUNC_DECL_CHECK(header, func,
-dnl			    if-declared [, if-not-declared[, extra-hdr]])
-dnl Do `if-declared' is `func' is declared in `header', and if-not-declared
-dnl otherwise.  If `extra-hdr' is provided, it is added after the #include of
-dnl `header'.
-define(MOO_FUNC_DECL_CHECK, [
-changequote(,)dnl
-pattern="[^_a-zA-Z0-9]$2 *\("
-changequote([,])dnl
-AC_PROGRAM_EGREP($pattern, [
-#include <$1>
-$5
-], [$3], [$4])])
-
-dnl ***************************************************************************
-dnl 	MOO_NDECL_FUNCS(header, func1 func2 ...[, extra-hdr])
-dnl Defines NDECL_func1, NDECL_func2, ... if they are not declared in header.
-dnl
-define(MOO_NDECL_FUNCS, [
-changequote(,)dnl
-trfrom='[a-z]' trto='[A-Z]'
-changequote([,])dnl
-for func in $2
-do
-echo "checking whether $func is declared in $1"
-MOO_FUNC_DECL_CHECK($1, $func, ,
-	AC_DEFINE(NDECL_`echo $func | tr "$trfrom" "$trto"`), $3)
-done
-])
-
-dnl ***************************************************************************
-dnl	MOO_VAR_DECL_CHECK(header, variable,
-dnl			   if-declared [, if-not-declared[, extra-hdr]])
-dnl Do `if-declared' is `variable' is declared in `header', and if-not-declared
-dnl otherwise.  If `extra-hdr' is provided, it is added after the #include of
-dnl `header'.
-define(MOO_VAR_DECL_CHECK, [
-changequote(,)dnl
-pattern="[^_a-zA-Z0-9]$2"
-changequote([,])dnl
-AC_PROGRAM_EGREP($pattern, [
-#include <$1>
-$5
-], $3, $4)])
-
-dnl ***************************************************************************
-dnl 	MOO_NDECL_VARS(header, var1 var2 ...[, extra-hdr])
-dnl Defines NDECL_var1, NDECL_var2, ... if they are not declared in header.
-dnl
-define(MOO_NDECL_VARS, [
-changequote(,)dnl
-trfrom='[a-z]' trto='[A-Z]'
-changequote([,])dnl
-for var in $2
-do
-echo "moo_ndecl: checking whether $var is declared in $1"
-MOO_VAR_DECL_CHECK($1, $var, ,
-	AC_DEFINE(NDECL_`echo $var | tr "$trfrom" "$trto"`), $3)
-done
-])
-
-dnl ***************************************************************************
-dnl 	MOO_HEADER_STANDS_ALONE(header [, extra-code])
-dnl Defines header_NEEDS_HELP if can't be compiled all by itself.
-define(MOO_HEADER_STANDS_ALONE, [
-changequote(,)dnl
-trfrom='[a-z]./' trto='[A-Z]__'
-changequote([,])dnl
-AC_COMPILE_CHECK(self-sufficiency of $1, [
-#include <$1>
-$2
-], , , AC_DEFINE(`echo $1 | tr "$trfrom" "$trto"`_NEEDS_HELP))
-])
-
-dnl ***************************************************************************
-dnl	MOO_HAVE_FUNC_LIBS(func1 func2 ..., lib1 "lib2a lib2b" lib3 ...)
-dnl For each `func' in turn, if `func' is defined using the current LIBS value,
-dnl leave LIBS alone.  Otherwise, try adding each of the given libs to LIBS in
-dnl turn, stopping when one of them succeeds in providing `func'.  Define
-dnl HAVE_func if `func' is eventually found.
-define(MOO_HAVE_FUNC_LIBS, [
-for func in $1
-do
-  changequote(,)dnl
-  trfrom='[a-z]' trto='[A-Z]'
-  var=HAVE_`echo $func | tr "$trfrom" "$trto"`
-  changequote([,])dnl
-  AC_FUNC_CHECK($func, AC_DEFINE_UNQUOTED($var), [
-    SAVELIBS="$LIBS"
-    for lib in $2
-    do
-      LIBS="$LIBS $lib"
-      AC_FUNC_CHECK($func, [AC_DEFINE_UNQUOTED($var)
-			 break],
-		    LIBS="$SAVELIBS")
-    done
-    ])
-done
-])
-
-dnl ***************************************************************************
-dnl	MOO_HAVE_HEADER_DIRS(header1 header2 ..., dir1 dir2 ...)
-dnl For each `header' in turn, if `header' is found using the current CC value
-dnl leave CC alone.  Otherwise, try adding each of the given `dir's to CC in
-dnl turn, stopping when one of them succeeds in providing `header'.  Define
-dnl HAVE_header if `header' is eventually found.
-define(MOO_HAVE_HEADER_DIRS, [
-for hdr in $1
-do
-  changequote(,)dnl
-  trfrom='[a-z]./' trto='[A-Z]__'
-  var=HAVE_`echo $hdr | tr "$trfrom" "$trto"`
-  changequote([,])dnl
-  AC_HEADER_CHECK($hdr, AC_DEFINE($var), [
-    SAVECC="$CC"
-    for dir in $2
-    do
-      CC="$CC $dir"
-      AC_HEADER_CHECK($hdr, [AC_DEFINE($var)
-			     break],
-		      CC="$SAVECC")
-    done
-    ])
-done
-])
-
-dnl ***************************************************************************
-dnl	MOO_CONST
-dnl Check whether or not the C compiler can cope with simple uses of the ANSI C
-dnl `const' keyword, defining `const' as the empty string if it can't.
-define(MOO_CONST, [
-echo checking for a working const keyword
-cat << EOF > conftest.c
-#ifdef __GNUC__
-#define const __const__
-#endif
-int foo(const char *x) { return 17 + (x - x); }
-int bar() { int x = foo("foo"); return x; }
-EOF
-if $CC -c conftest.c > conftest.out 2>&1; then
-  if test -s conftest.out; then
-    AC_DEFINE(const,)
-  fi
-else
-  AC_DEFINE(const,)
-fi
-rm -f conftest*
-])
-
-dnl ***************************************************************************
-dnl	MOO_ANSI_C
-dnl Check whether or not the C compiler handles ANSI C (i.e., allows function
-dnl prototypes and the `void *' type) and try to make it do so by adding 
-dnl command-line options like -Aa and -Xa, which some compilers require.  If
-dnl nothing works, abort configuration.
-define(MOO_ANSI_C, [
-echo "checking that the C compiler handles important ANSI C constructs"
-for opt in "" -Aa -Xa -ansi
-do
-SAVECC="$CC"
-CC="$CC $opt"
-AC_TEST_PROGRAM([
-int main(int argc, char *argv) { void *ptr; exit(0); }
-],
-[have_ansi=1
-break],
-[CC="$SAVECC"])
-done
-if test -z "$have_ansi"; then
-echo ""
-echo "*** Sorry, but I can't figure out how to find an ANSI C compiler here."
-echo "*** Compiling this program requires such a compiler."
-exit 1
-fi
-])
+AC_LANG([C++])
 
 dnl ***************************************************************************
 dnl Start of actual configuration tests
@@ -288,27 +30,19 @@ AC_PROG_YACC
 AC_PROG_CXX
 AC_PROG_INSTALL
 AC_GCC_TRADITIONAL
-AC_PROGRAM_EGREP(yes, [
+AC_EGREP_CPP(yes, [
 #if __GNUC__==2
   yes
 #endif
 ], [CC="$CC -Wall -Wwrite-strings"])
 test -n "$GCC" && CC="$CC -g"
 AC_PROG_CPP
-MOO_NEXT
-MOO_ALPHA
-MOO_SGI
 AC_AIX
 AC_ISC_POSIX
 AC_MINIX
 AC_SCO_INTL
-MOO_AUX
-MOO_HPUX
-MOO_ANSI_C
-MOO_CONST
+AC_PROG_CC_STDC
 CPP=""
-AC_PROG_CPP
-MOO_MALLOC_H
 AC_HEADER_CHECK(sys/bsdtypes.h, AC_DEFINE(NEED_BSDTYPES_H))
 AC_HEADER_CHECK(sys/select.h, AC_DEFINE(NEED_SELECT_H))
 AC_HEADER_CHECK(memory.h, AC_DEFINE(NEED_MEMORY_H))
@@ -339,13 +73,12 @@ MOO_NDECL_FUNCS(sys/socket.h, accept bind shutdown)
 MOO_NDECL_FUNCS(sys/stat.h, fstat)
 MOO_NDECL_FUNCS(stdio.h, fclose perror remove vfprintf)
 MOO_NDECL_FUNCS(stdlib.h, random srandom strtod strtol strtoul)
-MOO_NDECL_FUNCS(string.h, bzero memcpy memset strerror, [
+MOO_NDECL_FUNCS(string.h, memcpy memset strerror, [
 #if NEED_MEMORY_H
 #include <memory.h>
 #endif
 ])
-echo checking for bzero being declared in stdlib.h
-MOO_FUNC_DECL_CHECK(stdlib.h, bzero, AC_DEFINE(BZERO_IN_STDLIB_H))
+
 MOO_NDECL_FUNCS(sys/time.h, getitimer setitimer select, [
 #if NEED_SELECT_H
 #include <sys/types.h>
@@ -606,6 +339,25 @@ else
    AC_MSG_NOTICE([The server will fork() when doing a database checkpoint])
 fi
 
+dnl Enable/disable outbound network connections
+AC_ARG_WITH([outbound-network],
+        [AS_HELP_STRING([--with-outbound-network],
+        [Outbound network connections. Args: enabled/disabled/blocked  @<:@default: blocked@:>@])],
+        [outbound_network=${withval}],
+        [outbound_network=blocked])
+
+if test "x${outbound_network}" = xblocked || test "x${outbound_network}" = xno; then
+   AC_MSG_NOTICE([Outbound network connections will be completely blocked])
+elif test "x${outbound_network}" = xdisabled; then
+   AC_MSG_NOTICE([Outbound network connections are disabled by default (enable with +O at runtime)])
+   AC_DEFINE([OUTBOUND_NETWORK], 0, [Outbound network connections are disabled by default (enable with +O at runtime)])
+elif test "x${outbound_network}" = xenabled || test "x${outbound_network}" = xyes; then
+   AC_MSG_NOTICE([Outbound network connections will be enabled by default (disable with -O at runtime)])
+   AC_DEFINE([OUTBOUND_NETWORK], 1, [Outbound network connections are enabled by default (disable with -O at runtime)])
+else
+   AC_MSG_ERROR([Invalid argument for outbound-network: '${outbound_network}' (valid options are: blocked/enabled/disabled)])
+fi
+
 
 dnl Let the user choose to include openssl or not
 AC_ARG_WITH([openssl],
@@ -655,7 +407,7 @@ AC_FUNC_REALLOC
 AC_FUNC_STRTOD
 AC_FUNC_WAIT3
 AC_HEADER_STDBOOL
-AC_PREREQ
+
 AC_PROG_LN_S
 AC_TYPE_SSIZE_T
 AC_CHECK_FUNCS([alarm bzero floor gethostbyaddr gethostbyname getpagesize gettimeofday inet_ntoa memmove memset mkdir mkfifo modf pow re_comp rmdir select socket strchr strcspn strerror strrchr strstr strtol strtoul])
