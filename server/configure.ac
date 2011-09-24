@@ -17,6 +17,7 @@ dnl   Pavel@Xerox.Com
 dnl
 AC_PREREQ([2.61])
 AC_INIT([Waverous LambdaMOO], [0.2], [wainstead@gmail.com], [waverous-lambdamoo], [http://code.google.com/p/waverous/])
+AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([functions.c])
 AC_CONFIG_HEADERS([config.h])
 
@@ -43,9 +44,6 @@ AC_MINIX
 AC_SCO_INTL
 AC_PROG_CC_STDC
 CPP=""
-AC_HEADER_CHECK(sys/bsdtypes.h, AC_DEFINE(NEED_BSDTYPES_H))
-AC_HEADER_CHECK(sys/select.h, AC_DEFINE(NEED_SELECT_H))
-AC_HEADER_CHECK(memory.h, AC_DEFINE(NEED_MEMORY_H))
 AC_PID_T
 AC_MODE_T
 AC_SIZE_T
@@ -98,136 +96,6 @@ MOO_HEADER_STANDS_ALONE(sys/socket.h)
 MOO_HEADER_STANDS_ALONE(sys/stat.h)
 MOO_HEADER_STANDS_ALONE(time.h)
 
-dnl ***************************************************************************
-echo checking for string.h declaring some functions incorrectly
-echo "
-#include <sys/types.h>
-#include <string.h>
-#if NEED_MEMORY_H
-#include <memory.h>
-#endif
-" > conftest.c
-$CC $DEFS conftest.c -o conftest $LIBS > conftest.out 2>&1
-if grep "conflicting types for built-in function" conftest.out >/dev/null; then
-  AC_DEFINE(USE_OWN_STRING_H)
-fi
-rm -f conftest*
-
-dnl ***************************************************************************
-echo "checking for incompatibility between <sys/ioctl.h> and <stropts.h>"
-AC_TEST_CPP([
-#include <sys/ioctl.h>
-#include <stropts.h>
-], , AC_DEFINE(UNDEF_IO_IN_STROPTS_H))
-
-dnl ***************************************************************************
-echo "checking whether or not fstat() can tell how much data is in a FIFO"
-AC_TEST_PROGRAM([#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-main()
-{
-#ifdef NeXT
-/* The NeXT claims to have FIFOs, but using them panics the kernel... */
-  exit(-1);
-#endif
-  int	rfd, wfd, result; struct stat st;
-  unlink("/tmp/conftest-fifo");
-  result = (mknod("/tmp/conftest-fifo", 0666 | S_IFIFO, 0) < 0
-	    || (rfd = open("/tmp/conftest-fifo", O_RDONLY | O_NDELAY)) < 0
-	    || (wfd = open("/tmp/conftest-fifo", O_WRONLY)) < 0
-	    || write(wfd, "foo", 3) != 3
-	    || fstat(rfd, &st) < 0
-	    || st.st_size != 3);
-  unlink("/tmp/conftest-fifo");
-  exit(result);
-}
-], AC_DEFINE(FSTAT_WORKS_ON_FIFOS))
-
-dnl ***************************************************************************
-echo "checking whether or not select() can be used on FIFOs"
-AC_TEST_PROGRAM([#include <sys/types.h>
-#include <sys/time.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#ifndef FD_ZERO
-#define	NFDBITS		(sizeof(fd_set)*8)
-#define	FD_ZERO(p)	bzero((char *)(p), sizeof(*(p)))
-#define	FD_SET(n, p)	((p)->fds_bits[0] |= (1L<<((n)%NFDBITS)))
-#define	FD_ISSET(n, p)	((p)->fds_bits[0] &  (1L<<((n)%NFDBITS)))
-#endif /* FD_ZERO */
-main()
-{
-#ifdef NeXT
-/* The NeXT claims to have FIFOs, but using them panics the kernel... */
-  exit(-1);
-#endif
-  int	rfd, wfd, result; fd_set input; struct timeval tv;
-  tv.tv_sec = 2;
-  tv.tv_usec = 0;
-  unlink("/tmp/conftest-fifo");
-  result = (mknod("/tmp/conftest-fifo", 0666 | S_IFIFO, 0) < 0
-	    || (rfd = open("/tmp/conftest-fifo", O_RDONLY | O_NDELAY)) < 0
-	    || (wfd = open("/tmp/conftest-fifo", O_WRONLY)) < 0
-	    || (FD_ZERO(&input), FD_SET(rfd, &input),
-		select(rfd + 1, &input, 0, 0, &tv) != 0)
-	    || write(wfd, "foo", 3) != 3
-	    || (FD_ZERO(&input), FD_SET(rfd, &input),
-		select(rfd + 1, &input, 0, 0, &tv) != 1)
-	    || !FD_ISSET(rfd, &input));
-  unlink("/tmp/conftest-fifo");
-  exit(result);
-}
-], AC_DEFINE(SELECT_WORKS_ON_FIFOS))
-
-dnl ***************************************************************************
-echo "checking whether or not poll() can be used on FIFOs"
-AC_TEST_PROGRAM([#include <sys/types.h>
-#include <poll.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-main()
-{
-  int	rfd, wfd, result; struct pollfd fds[1];
-  unlink("/tmp/conftest-fifo");
-  result = (mknod("/tmp/conftest-fifo", 0666 | S_IFIFO, 0) < 0
-	    || (rfd = open("/tmp/conftest-fifo", O_RDONLY | O_NDELAY)) < 0
-	    || (wfd = open("/tmp/conftest-fifo", O_WRONLY)) < 0
-	    || write(wfd, "foo", 3) != 3
-	    || (fds[0].fd = rfd, fds[0].events = POLLIN, poll(fds, 1, 1) != 1)
-	    || (fds[0].revents & POLLIN) == 0);
-  unlink("/tmp/conftest-fifo");
-  exit(result);
-}
-], AC_DEFINE(POLL_WORKS_ON_FIFOS))
-
-dnl ***************************************************************************
-echo checking whether POSIX-style non-blocking I/O works
-AC_TEST_PROGRAM([#include <sys/types.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <signal.h>
-handler(int sig) { }
-main ()
-{ /* Testing a POSIX feature, so assume FIFOs */
-#ifdef NeXT
-/* The NeXT claims to have FIFOs, but using them panics the kernel... */
-  exit(-1);
-#endif
-  int	rfd, wfd, flags, result; char buffer[10];
-  unlink("/tmp/conftest-fifo");
-  signal(SIGALRM, handler);
-  result = (mknod("/tmp/conftest-fifo", 0666 | S_IFIFO, 0) < 0
-	    || (rfd = open("/tmp/conftest-fifo", O_RDONLY | O_NONBLOCK)) < 0
-	    || (wfd = open("/tmp/conftest-fifo", O_WRONLY)) < 0
-	    || (flags = fcntl(rfd, F_GETFL, 0)) < 0
-	    || fcntl(rfd, F_SETFL, flags | O_NONBLOCK) < 0
-	    || (alarm(3), read(rfd, buffer, 10) >= 0)
-	    || (alarm(0), errno != EAGAIN));
-  unlink("/tmp/conftest-fifo");
-  exit(result);
-}
-], AC_DEFINE(POSIX_NONBLOCKING_WORKS))
 
 dnl ***************************************************************************
 echo checking which MOO networking configurations are likely to work...
