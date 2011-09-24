@@ -10,3 +10,5 @@ moo
 *.db
 \#*\#
 .\#*
+*~
+server/databases/*
