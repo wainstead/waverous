@@ -14,4 +14,5 @@ configure
 moo
 server/databases/*.db
 server/databases/*.log
+server/databases/*.new
 y.tab.h
