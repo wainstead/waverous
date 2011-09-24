@@ -8,36 +8,46 @@
 # any specification.
 
 # @configure_input@
-bin_PROGRAMS = moo
-moo_YFLAGS = -d
-moo_YSOURCES = parser.y
 
-moo_SOURCES = ast.c code_gen.c db_file.c db_io.c db_objects.c db_properties.c \
-	db_verbs.c decompile.c disassemble.c eval_env.c eval_vm.c \
-	exceptions.c execute.c extensions.c functions.c keywords.c list.c \
-	log.c match.c md5.c name_lookup.c network.c net_mplex.c \
-	net_proto.c numbers.c objects.c parse_cmd.c pattern.c program.c \
-	property.c quota.c ref_count.c regexpr.c server.c storage.c streams.c str_intern.c \
-	sym_table.c tasks.c timers.c unparse.c utils.c verbs.c version.c \
-	bg_name_lookup.c ext-xml.c ext-FUP.c extension-fileio.c net_single.c net_multi.c \
-	net_mp_selct.c net_mp_poll.c net_mp_fake.c \
-	net_tcp.c \
-	net_bsd_tcp.c net_bsd_lcl.c net_sysv_tcp.c net_sysv_lcl.c \
-        ast.h bf_register.h code_gen.h db.h db_io.h db_private.h decompile.h \
-	db_tune.h \
-	disassemble.h eval_env.h eval_vm.h exceptions.h execute.h functions.h \
-	getpagesize.h keywords.h list.h log.h match.h md5.h name_lookup.h \
-	network.h net_mplex.h net_multi.h net_proto.h numbers.h opcode.h \
-	options.h parse_cmd.h parser.h pattern.h program.h quota.h random.h \
-	ref_count.h regexpr.h server.h storage.h streams.h structures.h  str_intern.h \
-	sym_table.h tasks.h timers.h tokens.h unparse.h utils.h verbs.h \
-	version.h \
-        my-ctype.h my-fcntl.h my-in.h my-inet.h my-ioctl.h my-math.h \
-	my-poll.h my-signal.h my-socket.h my-stat.h my-stdarg.h my-stdio.h \
-	my-stdlib.h my-string.h my-stropts.h my-sys-time.h my-time.h \
-	my-tiuser.h my-types.h my-unistd.h my-wait.h \
-	client_bsd.c client_sysv.c \
-	keywords.gperf
+CC	= @CXX@
+DEFS	= @DEFS@
+LIBS	= @LIBS@
+YACC	= @YACC@
+
+
+bin_PROGRAMS = moo
+
+AM_YFLAGS = -d
+BUILT_SOURCES = parser.c
+
+EXTRA_DIST = mooctl
+
+
+moo_SOURCES = ast.c code_gen.c db_file.c db_io.c db_objects.c		\
+	db_properties.c db_verbs.c decompile.c disassemble.c		\
+	eval_env.c eval_vm.c exceptions.c execute.c extensions.c	\
+	functions.c keywords.c list.c log.c match.c md5.c		\
+	name_lookup.c network.c net_mplex.c net_proto.c numbers.c	\
+	objects.c parse_cmd.c parser.y pattern.c program.c property.c	\
+	quota.c ref_count.c regexpr.c server.c storage.c streams.c	\
+	str_intern.c sym_table.c tasks.c timers.c unparse.c utils.c	\
+	verbs.c version.c bg_name_lookup.c ext-xml.c ext-FUP.c		\
+	extension-fileio.c net_single.c net_multi.c net_mp_selct.c	\
+	net_mp_poll.c net_mp_fake.c net_tcp.c net_bsd_tcp.c		\
+	net_bsd_lcl.c net_sysv_tcp.c net_sysv_lcl.c client_bsd.c	\
+	client_sysv.c ast.h bf_register.h code_gen.h db.h db_io.h	\
+	db_private.h decompile.h db_tune.h disassemble.h eval_env.h	\
+	eval_vm.h exceptions.h execute.h functions.h getpagesize.h	\
+	keywords.h list.h log.h match.h md5.h name_lookup.h network.h	\
+	net_mplex.h net_multi.h net_proto.h numbers.h opcode.h		\
+	options.h parse_cmd.h parser.h pattern.h program.h quota.h	\
+	random.h ref_count.h regexpr.h server.h storage.h streams.h	\
+	structures.h str_intern.h sym_table.h tasks.h timers.h		\
+	tokens.h unparse.h utils.h verbs.h version.h my-ctype.h		\
+	my-fcntl.h my-in.h my-inet.h my-ioctl.h my-math.h my-poll.h	\
+	my-signal.h my-socket.h my-stat.h my-stdarg.h my-stdio.h	\
+	my-stdlib.h my-string.h my-stropts.h my-sys-time.h my-time.h	\
+	my-tiuser.h my-types.h my-unistd.h my-wait.h
 
 keywords.c: keywords.gperf
 	gperf --language=C++ --ignore-case --readonly-tables --struct-type \
@@ -46,7 +56,7 @@ keywords.c: keywords.gperf
 		> keywords.c
 
 TAGS:
-	etags $(SRCS)
+	etags $(moo_SOURCES)
 
 
 # You have to run "make," thus compiling the project first before you
