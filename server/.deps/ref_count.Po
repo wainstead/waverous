@@ -1,1 +1,59 @@
-# dummy
+ref_count.o ref_count.o: ref_count.c config.h \
+  /usr/lib/gcc/i686-apple-darwin10/4.2.1/include/limits.h \
+  /usr/lib/gcc/i686-apple-darwin10/4.2.1/include/syslimits.h \
+  /usr/include/limits.h /usr/include/sys/cdefs.h \
+  /usr/include/machine/limits.h /usr/include/i386/limits.h \
+  /usr/include/i386/_limits.h /usr/include/sys/syslimits.h exceptions.h \
+  /usr/include/setjmp.h /usr/include/machine/setjmp.h \
+  /usr/include/i386/setjmp.h ref_count.h storage.h my-string.h \
+  /usr/include/string.h /usr/include/_types.h /usr/include/sys/_types.h \
+  /usr/include/machine/_types.h /usr/include/i386/_types.h structures.h \
+  my-stdio.h /usr/include/stdio.h
+
+config.h:
+
+/usr/lib/gcc/i686-apple-darwin10/4.2.1/include/limits.h:
+
+/usr/lib/gcc/i686-apple-darwin10/4.2.1/include/syslimits.h:
+
+/usr/include/limits.h:
+
+/usr/include/sys/cdefs.h:
+
+/usr/include/machine/limits.h:
+
+/usr/include/i386/limits.h:
+
+/usr/include/i386/_limits.h:
+
+/usr/include/sys/syslimits.h:
+
+exceptions.h:
+
+/usr/include/setjmp.h:
+
+/usr/include/machine/setjmp.h:
+
+/usr/include/i386/setjmp.h:
+
+ref_count.h:
+
+storage.h:
+
+my-string.h:
+
+/usr/include/string.h:
+
+/usr/include/_types.h:
+
+/usr/include/sys/_types.h:
+
+/usr/include/machine/_types.h:
+
+/usr/include/i386/_types.h:
+
+structures.h:
+
+my-stdio.h:
+
+/usr/include/stdio.h:

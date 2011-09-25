@@ -1,1 +1,198 @@
-# dummy
+bg_name_lookup.o bg_name_lookup.o: bg_name_lookup.c /usr/include/errno.h \
+  /usr/include/sys/errno.h /usr/include/sys/cdefs.h /usr/include/signal.h \
+  /usr/include/_types.h /usr/include/sys/_types.h \
+  /usr/include/machine/_types.h /usr/include/i386/_types.h \
+  /usr/include/sys/signal.h /usr/include/sys/appleapiopts.h \
+  /usr/include/machine/signal.h /usr/include/i386/signal.h \
+  /usr/include/i386/_structs.h /usr/include/sys/_structs.h \
+  /usr/include/machine/_structs.h /usr/include/mach/i386/_structs.h \
+  /usr/include/netdb.h \
+  /usr/lib/gcc/i686-apple-darwin10/4.2.1/include/stdint.h \
+  /usr/include/netinet/in.h /usr/include/sys/socket.h \
+  /usr/include/sys/types.h /usr/include/machine/types.h \
+  /usr/include/i386/types.h /usr/include/i386/_types.h \
+  /usr/include/machine/endian.h /usr/include/i386/endian.h \
+  /usr/include/sys/_endian.h /usr/include/libkern/_OSByteOrder.h \
+  /usr/include/libkern/i386/_OSByteOrder.h /usr/include/machine/_param.h \
+  /usr/include/i386/_param.h /usr/include/netinet6/in6.h \
+  /usr/include/unistd.h /usr/include/sys/unistd.h \
+  /usr/include/sys/select.h /usr/include/sys/_select.h \
+  /usr/include/stdlib.h /usr/include/Availability.h \
+  /usr/include/AvailabilityInternal.h /usr/include/sys/wait.h \
+  /usr/include/sys/resource.h /usr/include/alloca.h \
+  /usr/include/arpa/inet.h /usr/include/time.h /usr/include/_structs.h \
+  tasks.h /usr/include/sys/time.h config.h \
+  /usr/lib/gcc/i686-apple-darwin10/4.2.1/include/limits.h \
+  /usr/lib/gcc/i686-apple-darwin10/4.2.1/include/syslimits.h \
+  /usr/include/limits.h /usr/include/machine/limits.h \
+  /usr/include/i386/limits.h /usr/include/i386/_limits.h \
+  /usr/include/sys/syslimits.h execute.h db.h program.h structures.h \
+  my-stdio.h /usr/include/stdio.h version.h opcode.h options.h \
+  parse_cmd.h functions.h utils.h list.h my-in.h my-types.h log.h \
+  exceptions.h /usr/include/setjmp.h /usr/include/machine/setjmp.h \
+  /usr/include/i386/setjmp.h net_multi.h storage.h my-string.h \
+  /usr/include/string.h ref_count.h server.h network.h
+
+/usr/include/errno.h:
+
+/usr/include/sys/errno.h:
+
+/usr/include/sys/cdefs.h:
+
+/usr/include/signal.h:
+
+/usr/include/_types.h:
+
+/usr/include/sys/_types.h:
+
+/usr/include/machine/_types.h:
+
+/usr/include/i386/_types.h:
+
+/usr/include/sys/signal.h:
+
+/usr/include/sys/appleapiopts.h:
+
+/usr/include/machine/signal.h:
+
+/usr/include/i386/signal.h:
+
+/usr/include/i386/_structs.h:
+
+/usr/include/sys/_structs.h:
+
+/usr/include/machine/_structs.h:
+
+/usr/include/mach/i386/_structs.h:
+
+/usr/include/netdb.h:
+
+/usr/lib/gcc/i686-apple-darwin10/4.2.1/include/stdint.h:
+
+/usr/include/netinet/in.h:
+
+/usr/include/sys/socket.h:
+
+/usr/include/sys/types.h:
+
+/usr/include/machine/types.h:
+
+/usr/include/i386/types.h:
+
+/usr/include/i386/_types.h:
+
+/usr/include/machine/endian.h:
+
+/usr/include/i386/endian.h:
+
+/usr/include/sys/_endian.h:
+
+/usr/include/libkern/_OSByteOrder.h:
+
+/usr/include/libkern/i386/_OSByteOrder.h:
+
+/usr/include/machine/_param.h:
+
+/usr/include/i386/_param.h:
+
+/usr/include/netinet6/in6.h:
+
+/usr/include/unistd.h:
+
+/usr/include/sys/unistd.h:
+
+/usr/include/sys/select.h:
+
+/usr/include/sys/_select.h:
+
+/usr/include/stdlib.h:
+
+/usr/include/Availability.h:
+
+/usr/include/AvailabilityInternal.h:
+
+/usr/include/sys/wait.h:
+
+/usr/include/sys/resource.h:
+
+/usr/include/alloca.h:
+
+/usr/include/arpa/inet.h:
+
+/usr/include/time.h:
+
+/usr/include/_structs.h:
+
+tasks.h:
+
+/usr/include/sys/time.h:
+
+config.h:
+
+/usr/lib/gcc/i686-apple-darwin10/4.2.1/include/limits.h:
+
+/usr/lib/gcc/i686-apple-darwin10/4.2.1/include/syslimits.h:
+
+/usr/include/limits.h:
+
+/usr/include/machine/limits.h:
+
+/usr/include/i386/limits.h:
+
+/usr/include/i386/_limits.h:
+
+/usr/include/sys/syslimits.h:
+
+execute.h:
+
+db.h:
+
+program.h:
+
+structures.h:
+
+my-stdio.h:
+
+/usr/include/stdio.h:
+
+version.h:
+
+opcode.h:
+
+options.h:
+
+parse_cmd.h:
+
+functions.h:
+
+utils.h:
+
+list.h:
+
+my-in.h:
+
+my-types.h:
+
+log.h:
+
+exceptions.h:
+
+/usr/include/setjmp.h:
+
+/usr/include/machine/setjmp.h:
+
+/usr/include/i386/setjmp.h:
+
+net_multi.h:
+
+storage.h:
+
+my-string.h:
+
+/usr/include/string.h:
+
+ref_count.h:
+
+server.h:
+
+network.h:

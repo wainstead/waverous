@@ -1,1 +1,188 @@
-# dummy
+tasks.o tasks.o: tasks.c /usr/include/sys/time.h /usr/include/sys/cdefs.h \
+  /usr/include/sys/_types.h /usr/include/machine/_types.h \
+  /usr/include/i386/_types.h /usr/include/sys/_structs.h \
+  /usr/include/time.h /usr/include/_types.h /usr/include/_structs.h \
+  /usr/include/sys/_select.h /usr/include/math.h \
+  /usr/include/architecture/i386/math.h my-string.h config.h \
+  /usr/lib/gcc/i686-apple-darwin10/4.2.1/include/limits.h \
+  /usr/lib/gcc/i686-apple-darwin10/4.2.1/include/syslimits.h \
+  /usr/include/limits.h /usr/include/machine/limits.h \
+  /usr/include/i386/limits.h /usr/include/i386/_limits.h \
+  /usr/include/sys/syslimits.h /usr/include/string.h my-time.h db.h \
+  program.h structures.h my-stdio.h /usr/include/stdio.h version.h \
+  db_io.h decompile.h ast.h parser.h sym_table.h eval_env.h eval_vm.h \
+  execute.h opcode.h options.h parse_cmd.h exceptions.h \
+  /usr/include/setjmp.h /usr/include/machine/setjmp.h \
+  /usr/include/i386/setjmp.h functions.h list.h log.h match.h numbers.h \
+  random.h /usr/include/stdlib.h /usr/include/Availability.h \
+  /usr/include/AvailabilityInternal.h /usr/include/sys/wait.h \
+  /usr/include/sys/signal.h /usr/include/sys/appleapiopts.h \
+  /usr/include/machine/signal.h /usr/include/i386/signal.h \
+  /usr/include/i386/_structs.h /usr/include/machine/_structs.h \
+  /usr/include/mach/i386/_structs.h /usr/include/sys/resource.h \
+  /usr/include/machine/endian.h /usr/include/i386/endian.h \
+  /usr/include/sys/_endian.h /usr/include/libkern/_OSByteOrder.h \
+  /usr/include/libkern/i386/_OSByteOrder.h /usr/include/alloca.h \
+  /usr/include/machine/types.h /usr/include/i386/types.h \
+  /usr/include/i386/_types.h server.h /usr/include/sys/types.h network.h \
+  storage.h ref_count.h streams.h tasks.h utils.h verbs.h
+
+/usr/include/sys/time.h:
+
+/usr/include/sys/cdefs.h:
+
+/usr/include/sys/_types.h:
+
+/usr/include/machine/_types.h:
+
+/usr/include/i386/_types.h:
+
+/usr/include/sys/_structs.h:
+
+/usr/include/time.h:
+
+/usr/include/_types.h:
+
+/usr/include/_structs.h:
+
+/usr/include/sys/_select.h:
+
+/usr/include/math.h:
+
+/usr/include/architecture/i386/math.h:
+
+my-string.h:
+
+config.h:
+
+/usr/lib/gcc/i686-apple-darwin10/4.2.1/include/limits.h:
+
+/usr/lib/gcc/i686-apple-darwin10/4.2.1/include/syslimits.h:
+
+/usr/include/limits.h:
+
+/usr/include/machine/limits.h:
+
+/usr/include/i386/limits.h:
+
+/usr/include/i386/_limits.h:
+
+/usr/include/sys/syslimits.h:
+
+/usr/include/string.h:
+
+my-time.h:
+
+db.h:
+
+program.h:
+
+structures.h:
+
+my-stdio.h:
+
+/usr/include/stdio.h:
+
+version.h:
+
+db_io.h:
+
+decompile.h:
+
+ast.h:
+
+parser.h:
+
+sym_table.h:
+
+eval_env.h:
+
+eval_vm.h:
+
+execute.h:
+
+opcode.h:
+
+options.h:
+
+parse_cmd.h:
+
+exceptions.h:
+
+/usr/include/setjmp.h:
+
+/usr/include/machine/setjmp.h:
+
+/usr/include/i386/setjmp.h:
+
+functions.h:
+
+list.h:
+
+log.h:
+
+match.h:
+
+numbers.h:
+
+random.h:
+
+/usr/include/stdlib.h:
+
+/usr/include/Availability.h:
+
+/usr/include/AvailabilityInternal.h:
+
+/usr/include/sys/wait.h:
+
+/usr/include/sys/signal.h:
+
+/usr/include/sys/appleapiopts.h:
+
+/usr/include/machine/signal.h:
+
+/usr/include/i386/signal.h:
+
+/usr/include/i386/_structs.h:
+
+/usr/include/machine/_structs.h:
+
+/usr/include/mach/i386/_structs.h:
+
+/usr/include/sys/resource.h:
+
+/usr/include/machine/endian.h:
+
+/usr/include/i386/endian.h:
+
+/usr/include/sys/_endian.h:
+
+/usr/include/libkern/_OSByteOrder.h:
+
+/usr/include/libkern/i386/_OSByteOrder.h:
+
+/usr/include/alloca.h:
+
+/usr/include/machine/types.h:
+
+/usr/include/i386/types.h:
+
+/usr/include/i386/_types.h:
+
+server.h:
+
+/usr/include/sys/types.h:
+
+network.h:
+
+storage.h:
+
+ref_count.h:
+
+streams.h:
+
+tasks.h:
+
+utils.h:
+
+verbs.h:
