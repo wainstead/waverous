@@ -1,0 +1,94 @@
+eval_vm.o eval_vm.o: eval_vm.c config.h \
+  /usr/lib/gcc/i686-apple-darwin10/4.2.1/include/limits.h \
+  /usr/lib/gcc/i686-apple-darwin10/4.2.1/include/syslimits.h \
+  /usr/include/limits.h /usr/include/sys/cdefs.h \
+  /usr/include/machine/limits.h /usr/include/i386/limits.h \
+  /usr/include/i386/_limits.h /usr/include/sys/syslimits.h db_io.h \
+  program.h structures.h my-stdio.h /usr/include/stdio.h \
+  /usr/include/_types.h /usr/include/sys/_types.h \
+  /usr/include/machine/_types.h /usr/include/i386/_types.h version.h \
+  decompile.h ast.h parser.h sym_table.h eval_vm.h execute.h db.h \
+  opcode.h options.h parse_cmd.h log.h storage.h my-string.h \
+  /usr/include/string.h ref_count.h tasks.h /usr/include/sys/time.h \
+  /usr/include/sys/_structs.h /usr/include/time.h /usr/include/_structs.h \
+  /usr/include/sys/_select.h
+
+config.h:
+
+/usr/lib/gcc/i686-apple-darwin10/4.2.1/include/limits.h:
+
+/usr/lib/gcc/i686-apple-darwin10/4.2.1/include/syslimits.h:
+
+/usr/include/limits.h:
+
+/usr/include/sys/cdefs.h:
+
+/usr/include/machine/limits.h:
+
+/usr/include/i386/limits.h:
+
+/usr/include/i386/_limits.h:
+
+/usr/include/sys/syslimits.h:
+
+db_io.h:
+
+program.h:
+
+structures.h:
+
+my-stdio.h:
+
+/usr/include/stdio.h:
+
+/usr/include/_types.h:
+
+/usr/include/sys/_types.h:
+
+/usr/include/machine/_types.h:
+
+/usr/include/i386/_types.h:
+
+version.h:
+
+decompile.h:
+
+ast.h:
+
+parser.h:
+
+sym_table.h:
+
+eval_vm.h:
+
+execute.h:
+
+db.h:
+
+opcode.h:
+
+options.h:
+
+parse_cmd.h:
+
+log.h:
+
+storage.h:
+
+my-string.h:
+
+/usr/include/string.h:
+
+ref_count.h:
+
+tasks.h:
+
+/usr/include/sys/time.h:
+
+/usr/include/sys/_structs.h:
+
+/usr/include/time.h:
+
+/usr/include/_structs.h:
+
+/usr/include/sys/_select.h:

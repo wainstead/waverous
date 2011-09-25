@@ -1,0 +1,127 @@
+net_single.o net_single.o: net_single.c my-ctype.h config.h \
+  /usr/lib/gcc/i686-apple-darwin10/4.2.1/include/limits.h \
+  /usr/lib/gcc/i686-apple-darwin10/4.2.1/include/syslimits.h \
+  /usr/include/limits.h /usr/include/sys/cdefs.h \
+  /usr/include/machine/limits.h /usr/include/i386/limits.h \
+  /usr/include/i386/_limits.h /usr/include/sys/syslimits.h \
+  /usr/include/ctype.h /usr/include/runetype.h /usr/include/_types.h \
+  /usr/include/sys/_types.h /usr/include/machine/_types.h \
+  /usr/include/i386/_types.h my-fcntl.h /usr/include/fcntl.h \
+  /usr/include/sys/fcntl.h my-stdio.h /usr/include/stdio.h my-unistd.h \
+  /usr/include/unistd.h /usr/include/sys/unistd.h \
+  /usr/include/sys/select.h /usr/include/sys/appleapiopts.h \
+  /usr/include/sys/_structs.h /usr/include/sys/_select.h log.h \
+  structures.h network.h /usr/include/sys/time.h /usr/include/time.h \
+  /usr/include/_structs.h options.h server.h /usr/include/sys/types.h \
+  /usr/include/machine/types.h /usr/include/i386/types.h \
+  /usr/include/i386/_types.h /usr/include/machine/endian.h \
+  /usr/include/i386/endian.h /usr/include/sys/_endian.h \
+  /usr/include/libkern/_OSByteOrder.h \
+  /usr/include/libkern/i386/_OSByteOrder.h streams.h utils.h execute.h \
+  db.h program.h version.h opcode.h parse_cmd.h
+
+my-ctype.h:
+
+config.h:
+
+/usr/lib/gcc/i686-apple-darwin10/4.2.1/include/limits.h:
+
+/usr/lib/gcc/i686-apple-darwin10/4.2.1/include/syslimits.h:
+
+/usr/include/limits.h:
+
+/usr/include/sys/cdefs.h:
+
+/usr/include/machine/limits.h:
+
+/usr/include/i386/limits.h:
+
+/usr/include/i386/_limits.h:
+
+/usr/include/sys/syslimits.h:
+
+/usr/include/ctype.h:
+
+/usr/include/runetype.h:
+
+/usr/include/_types.h:
+
+/usr/include/sys/_types.h:
+
+/usr/include/machine/_types.h:
+
+/usr/include/i386/_types.h:
+
+my-fcntl.h:
+
+/usr/include/fcntl.h:
+
+/usr/include/sys/fcntl.h:
+
+my-stdio.h:
+
+/usr/include/stdio.h:
+
+my-unistd.h:
+
+/usr/include/unistd.h:
+
+/usr/include/sys/unistd.h:
+
+/usr/include/sys/select.h:
+
+/usr/include/sys/appleapiopts.h:
+
+/usr/include/sys/_structs.h:
+
+/usr/include/sys/_select.h:
+
+log.h:
+
+structures.h:
+
+network.h:
+
+/usr/include/sys/time.h:
+
+/usr/include/time.h:
+
+/usr/include/_structs.h:
+
+options.h:
+
+server.h:
+
+/usr/include/sys/types.h:
+
+/usr/include/machine/types.h:
+
+/usr/include/i386/types.h:
+
+/usr/include/i386/_types.h:
+
+/usr/include/machine/endian.h:
+
+/usr/include/i386/endian.h:
+
+/usr/include/sys/_endian.h:
+
+/usr/include/libkern/_OSByteOrder.h:
+
+/usr/include/libkern/i386/_OSByteOrder.h:
+
+streams.h:
+
+utils.h:
+
+execute.h:
+
+db.h:
+
+program.h:
+
+version.h:
+
+opcode.h:
+
+parse_cmd.h:

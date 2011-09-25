@@ -1,0 +1,65 @@
+net_mp_poll.o net_mp_poll.o: net_mp_poll.c /usr/include/errno.h \
+  /usr/include/sys/errno.h /usr/include/sys/cdefs.h my-poll.h config.h \
+  /usr/lib/gcc/i686-apple-darwin10/4.2.1/include/limits.h \
+  /usr/lib/gcc/i686-apple-darwin10/4.2.1/include/syslimits.h \
+  /usr/include/limits.h /usr/include/machine/limits.h \
+  /usr/include/i386/limits.h /usr/include/i386/_limits.h \
+  /usr/include/sys/syslimits.h /usr/include/poll.h \
+  /usr/include/sys/poll.h log.h my-stdio.h /usr/include/stdio.h \
+  /usr/include/_types.h /usr/include/sys/_types.h \
+  /usr/include/machine/_types.h /usr/include/i386/_types.h structures.h \
+  net_mplex.h storage.h my-string.h /usr/include/string.h ref_count.h
+
+/usr/include/errno.h:
+
+/usr/include/sys/errno.h:
+
+/usr/include/sys/cdefs.h:
+
+my-poll.h:
+
+config.h:
+
+/usr/lib/gcc/i686-apple-darwin10/4.2.1/include/limits.h:
+
+/usr/lib/gcc/i686-apple-darwin10/4.2.1/include/syslimits.h:
+
+/usr/include/limits.h:
+
+/usr/include/machine/limits.h:
+
+/usr/include/i386/limits.h:
+
+/usr/include/i386/_limits.h:
+
+/usr/include/sys/syslimits.h:
+
+/usr/include/poll.h:
+
+/usr/include/sys/poll.h:
+
+log.h:
+
+my-stdio.h:
+
+/usr/include/stdio.h:
+
+/usr/include/_types.h:
+
+/usr/include/sys/_types.h:
+
+/usr/include/machine/_types.h:
+
+/usr/include/i386/_types.h:
+
+structures.h:
+
+net_mplex.h:
+
+storage.h:
+
+my-string.h:
+
+/usr/include/string.h:
+
+ref_count.h:
