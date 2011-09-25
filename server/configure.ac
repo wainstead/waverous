@@ -107,12 +107,13 @@ AC_HEADER_CHECK(sys/socket.h, [
 	MOO_ADD_NET_CONFIG(NS_BSD/NP_LOCAL)
 	AC_PROGRAM_CHECK(have_telnet, telnet, yes, no)
         test x$have_telnet = xyes && MOO_ADD_NET_CONFIG(NS_BSD/NP_TCP)])
-AC_PROGRAM_EGREP(yes-there-are-FIFOs, [#include <sys/stat.h>
-#if defined(S_IFIFO) && !defined(NeXT) && \
-    (SELECT_WORKS_ON_FIFOS || POLL_WORKS_ON_FIFOS || FSTAT_WORKS_ON_FIFOS)
-	yes-there-are-FIFOs
-#endif
-], MOO_ADD_NET_CONFIG(NS_SYSV/NP_LOCAL))
+dnl AC_PROGRAM_EGREP(yes-there-are-FIFOs, [#include <sys/stat.h>
+dnl #if defined(S_IFIFO) && !defined(NeXT) && \
+dnl     (SELECT_WORKS_ON_FIFOS || POLL_WORKS_ON_FIFOS || FSTAT_WORKS_ON_FIFOS)
+dnl 	yes-there-are-FIFOs
+dnl #endif
+dnl ], MOO_ADD_NET_CONFIG(NS_SYSV/NP_LOCAL))
+MOO_ADD_NET_CONFIG(NS_SYSV/NP_LOCAL) dnl force this for now, since the tests were removed to satisfy automake. --sw
 AC_PROGRAM_EGREP(yes, [
 #if HAVE_TIUSER_H && HAVE_T_OPEN && HAVE_POLL
 yes
