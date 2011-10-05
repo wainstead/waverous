@@ -16,4 +16,12 @@ $(distdir).tar.gz: $(distdir)
 $(distdir):
 	svn export https://waverous.googlecode.com/svn/trunk $(distdir)
 
-.PHONY: all clean dist
+
+distcheck: $(distdir).tar.gz
+	gzip -cd $(distdir).tar.gz | tar xvf -
+	cd $(distdir) && $(MAKE) moo
+	cd $(distdir) && $(MAKE) clean
+	rm -rf $(distdir)
+	@echo "*** Package $(distdir).tar.gz is ready for distribution."
+
+.PHONY: all clean dist distcheck
