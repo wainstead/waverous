@@ -73,27 +73,3 @@ distclean: clean
 	rm -f ProgrammersManual.dvi* ProgrammersManual.p* ProgrammersManual.i*
 	rm -f ProgrammersManual.txt
 	rm -rf html
-
-# $Log: not supported by cvs2svn $
-# Revision 1.2  2004/06/02 08:20:26  wrog
-# changed .Z targets to .gz targets (no one uses compress anymore, right?)
-# txt target: fixed sed script to be able to deal with cross references
-# html target: updated to use subdir option and include link to common.css style-sheet
-# added pdf target; added distclean target
-#
-# Revision 1.1.1.2  2004/05/31 07:04:20  wrog
-# eostrom last version
-#
-# Revision 1.4  1996/07/09 20:35:41  pavel
-# Added short target names ('info', 'txt', 'ps', etc.) for all targets.
-# Fixed up makeinfo options to get proper results for all targets.
-# Added more automation to the HTML target, to push the results into the
-# html/ subdirectory.
-# Fixed up `make clean' to be more correct.
-#
-# Revision 1.3  1996/03/04  02:00:58  pavel
-# Add `make clean', which is run *after* `make all' to get rid of all of the
-# chaff that that latter command generates.
-#
-# Revision 1.2  1996/03/04  01:34:32  pavel
-# Made to work with newer versions of texi2html and texinfo.tex.
