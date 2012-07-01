@@ -21,7 +21,6 @@
 #include "my-string.h"
 
 #include "structures.h"
-#include "ref_count.h"
 
 typedef enum Memory_Type {
     M_AST_POOL, M_AST, M_PROGRAM, M_PVAL, M_NETWORK, M_STRING, M_VERBDEF,

@@ -27,7 +27,6 @@
 #include "log.h"
 #include "match.h"
 #include "numbers.h"
-#include "ref_count.h"
 #include "server.h"
 #include "storage.h"
 #include "streams.h"
