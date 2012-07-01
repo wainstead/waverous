@@ -22,6 +22,10 @@
 
 #include "structures.h"
 
+#define addref(X) (++((int *)(X))[-1])
+#define delref(X) (--((int *)(X))[-1])
+#define refcount(X) (((int *)(X))[-1])
+
 typedef enum Memory_Type {
     M_AST_POOL, M_AST, M_PROGRAM, M_PVAL, M_NETWORK, M_STRING, M_VERBDEF,
     M_LIST, M_PREP, M_PROPDEF, M_OBJECT_TABLE, M_OBJECT, M_FLOAT,
