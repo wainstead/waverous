@@ -111,7 +111,7 @@ others on the command line. Well, for that matter, all constants above
 the "do not edit below this line" should be either command line flags,
 configure options, or both. Most appear to be configure options.
 
---log-commands Keep a log of every command entered by players since the last checkpoing
+--log-commands Keep a log of every command entered by players since the last checkpoint
 #define LOG_COMMANDS
 ./configure:
 --with-command-logging
