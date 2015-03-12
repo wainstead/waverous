@@ -16,10 +16,6 @@ Future goals include:
 * IPv6 support
 * SQLite support (in the form of a MOO object programmers can subclass) 
 
-See also:
-
-    CompilingWaverous
-    HackingWaverous
-    DebuggingWaverous 
+See the wiki (in the right sidebar) on how to compile, debug, and hack on Waverous yourself.
 
 Elizabeth Hess has written a book about using LambdaMOO, Yib's Guide to MOOing. The complete text is available as a PDF from her site: www.yibco.com 
