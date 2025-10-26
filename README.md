@@ -9,7 +9,7 @@ Waverous LambdaMOO:
 * has conditional compilation via choices when you run ./configure (i.e. --without-fup --with-fileio --with-expat --with-forked-checkpoints)
 * Has an extensively updated set of automake and autoconf files
 
-## Recent Updates (October 2024)
+## Recent Updates (October 2025)
 
 The project has been modernized and is now fully functional on modern systems:
 
