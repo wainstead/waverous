@@ -9,6 +9,18 @@ Waverous LambdaMOO:
 * has conditional compilation via choices when you run ./configure (i.e. --without-fup --with-fileio --with-expat --with-forked-checkpoints)
 * Has an extensively updated set of automake and autoconf files
 
+## Directory Guides
+
+To help new contributors orient quickly, there are focused READMEs in key
+subdirectories:
+
+* [`manual/README.md`](manual/README.md): explains what documentation sources
+  are in `manual/`, why they matter, and how to generate output formats (text,
+  HTML, PDF, info).
+* [`server/README.md`](server/README.md): maps the server code layout by
+  subsystem and explains which tools are used for parsing, code generation,
+  configuration, and builds.
+
 ## Recent Updates (October 2025)
 
 The project has been modernized and is now fully functional on modern systems:
