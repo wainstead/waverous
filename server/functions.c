@@ -253,7 +253,7 @@ call_bi_func(unsigned n, Var arglist, Byte func_pc,
 		return make_error_pack(E_TYPE);
 	    }
 	}
-    } else if (func_pc == 2 && vdata == &call_bi_func) {
+    } else if (func_pc == 2 && vdata == reinterpret_cast<void *>(&call_bi_func)) {
 	/* This is a return from calling #0:bf_FUNCNAME(@ARGS); return what
 	 * it returned.  If it errored, what we do will be ignored.
 	 */

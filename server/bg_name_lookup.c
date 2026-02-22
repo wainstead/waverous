@@ -841,7 +841,7 @@ async_lookup_from_addr_child(int to_parent, int from_parent)
     alarm(req.timeout);
 
     answer =
-	gethostbyaddr((void *) &(req.u.address.s_addr),
+	gethostbyaddr((const char *) &(req.u.address.s_addr),
 		      sizeof(req.u.address.s_addr), AF_INET);
 
     alarm(0);

@@ -203,7 +203,7 @@ lookup(int to_intermediary, int from_intermediary)
 	    const char *host_name;
 	    int length;
 	    id = set_timer(req.timeout, timeout_proc, 0);
-	    e = gethostbyaddr((void *) &req.u.address.sin_addr,
+	    e = gethostbyaddr((const char *) &req.u.address.sin_addr,
 			      sizeof(req.u.address.sin_addr), AF_INET);
 	    cancel_timer(id);
 	    host_name = e ? e->h_name : "";
