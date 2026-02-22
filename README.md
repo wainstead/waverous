@@ -28,7 +28,10 @@ brew install autoconf automake expat gperf
 cd server
 export LDFLAGS="-L/opt/homebrew/opt/expat/lib"
 export CPPFLAGS="-I/opt/homebrew/opt/expat/include"
-./configure --with-expat --with-fileio --with-fup
+./configure --with-expat --with-fileio --with-fup \
+  --with-pattern-cache-size=20 \
+  --with-input-backspace=yes \
+  --with-ignore-prop-protected=yes
 make
 
 # Run the server

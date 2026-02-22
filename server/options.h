@@ -280,6 +280,19 @@ for details.
 
 #include "config.h"
 
+#ifdef CONFIG_PATTERN_CACHE_SIZE
+#  undef PATTERN_CACHE_SIZE
+#  define PATTERN_CACHE_SIZE CONFIG_PATTERN_CACHE_SIZE
+#endif
+
+#if defined(CONFIG_INPUT_APPLY_BACKSPACE) && !CONFIG_INPUT_APPLY_BACKSPACE
+#  undef INPUT_APPLY_BACKSPACE
+#endif
+
+#if defined(CONFIG_IGNORE_PROP_PROTECTED) && !CONFIG_IGNORE_PROP_PROTECTED
+#  undef IGNORE_PROP_PROTECTED
+#endif
+
 #if NETWORK_PROTOCOL != NP_SINGLE  &&  !defined(MPLEX_STYLE)
 #  if NETWORK_STYLE == NS_BSD
 #    if HAVE_SELECT
@@ -340,4 +353,3 @@ for details.
 #endif
 
 #endif				/* !Options_h */
-

@@ -196,6 +196,15 @@
 
 #undef USE_OWN_STRING_H
 
+/* Build-time option: size of the pattern match cache. */
+#undef CONFIG_PATTERN_CACHE_SIZE
+
+/* Build-time option: apply backspace/delete to input on non-binary connections. */
+#undef CONFIG_INPUT_APPLY_BACKSPACE
+
+/* Build-time option: ignore protection checks on built-in properties. */
+#undef CONFIG_IGNORE_PROP_PROTECTED
+
 /* On some systems, notably AIX, both <sys/ioctl.h> and <stropts.h> define the
  * internal macro `_IO' in compatible but different ways.  This means that no
  * program can #include both files without getting an error.  If this is so on

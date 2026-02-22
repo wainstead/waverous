@@ -325,6 +325,62 @@ else
    AC_MSG_NOTICE([No user commands will be logged in the event of a server panic])
 fi
 
+dnl Set pattern cache size (used by match()/rmatch())
+AC_ARG_WITH([pattern-cache-size],
+        [AS_HELP_STRING([--with-pattern-cache-size=NUM], [Set PATTERN_CACHE_SIZE @<:@default: 20@:>@])],
+        [pattern_cache_size=${withval}],
+        [pattern_cache_size=20])
+
+case "${pattern_cache_size}" in
+  ''|*[!0-9]*)
+    AC_MSG_ERROR([Invalid value for --with-pattern-cache-size: '${pattern_cache_size}' (must be a positive integer)])
+    ;;
+  0)
+    AC_MSG_ERROR([Invalid value for --with-pattern-cache-size: 0 (must be >= 1)])
+    ;;
+  *)
+    AC_DEFINE_UNQUOTED([CONFIG_PATTERN_CACHE_SIZE], [${pattern_cache_size}],
+      [Pattern cache size used by match()/rmatch()])
+    AC_MSG_NOTICE([Pattern cache size set to ${pattern_cache_size}])
+    ;;
+esac
+
+dnl Enable/disable INPUT_APPLY_BACKSPACE behavior
+AC_ARG_WITH([input-backspace],
+        [AS_HELP_STRING([--with-input-backspace], [Apply backspace/delete on textual input @<:@default: yes@:>@])],
+        [input_backspace=${withval}],
+        [input_backspace=yes])
+
+if test "x${input_backspace}" = xyes; then
+   AC_DEFINE([CONFIG_INPUT_APPLY_BACKSPACE], 1,
+     [Apply backspace/delete behavior to text input])
+   AC_MSG_NOTICE([Input backspace processing enabled])
+elif test "x${input_backspace}" = xno; then
+   AC_DEFINE([CONFIG_INPUT_APPLY_BACKSPACE], 0,
+     [Apply backspace/delete behavior to text input])
+   AC_MSG_NOTICE([Input backspace processing disabled])
+else
+   AC_MSG_ERROR([Invalid argument for input-backspace: '${input_backspace}' (valid options are: yes/no)])
+fi
+
+dnl Enable/disable IGNORE_PROP_PROTECTED optimization
+AC_ARG_WITH([ignore-prop-protected],
+        [AS_HELP_STRING([--with-ignore-prop-protected], [Skip built-in property protection checks @<:@default: yes@:>@])],
+        [ignore_prop_protected=${withval}],
+        [ignore_prop_protected=yes])
+
+if test "x${ignore_prop_protected}" = xyes; then
+   AC_DEFINE([CONFIG_IGNORE_PROP_PROTECTED], 1,
+     [Skip built-in property protection checks])
+   AC_MSG_NOTICE([Built-in property protection checks disabled])
+elif test "x${ignore_prop_protected}" = xno; then
+   AC_DEFINE([CONFIG_IGNORE_PROP_PROTECTED], 0,
+     [Skip built-in property protection checks])
+   AC_MSG_NOTICE([Built-in property protection checks enabled])
+else
+   AC_MSG_ERROR([Invalid argument for ignore-prop-protected: '${ignore_prop_protected}' (valid options are: yes/no)])
+fi
+
 
 dnl Enable/disable unforked checkpoints
 AC_ARG_WITH([forked-checkpoints],
