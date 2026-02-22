@@ -125,7 +125,7 @@ dbl_fmt(void)
     static char buffer[10];
 
     if (!fmt) {
-	sprintf(buffer, "%%.%dg", DBL_DIG);
+	snprintf(buffer, sizeof buffer, "%%.%dg", DBL_DIG);
 	fmt = buffer;
     }
     return fmt;
@@ -160,13 +160,14 @@ stream_printf(Stream * s, const char *fmt, ...)
 		case 'd':
 		    base = 10;
 		  finish_number:
-		    string = itoa(va_arg(args, int), base);
-		    break;
-		case 'g':
-		    sprintf(buffer, dbl_fmt(), va_arg(args, double));
-		    if (!strchr(buffer, '.') && !strchr(buffer, 'e'))
-			strcat(buffer, ".0");	/* make it look floating */
-		    string = buffer;
+			string = itoa(va_arg(args, int), base);
+			break;
+		    case 'g':
+			snprintf(buffer, sizeof buffer, dbl_fmt(),
+				 va_arg(args, double));
+			if (!strchr(buffer, '.') && !strchr(buffer, 'e'))
+			    strcat(buffer, ".0");	/* make it look floating */
+			string = buffer;
 		    break;
 		case '0':
 		    if (width == 0) {
@@ -234,4 +235,3 @@ stream_length(Stream * s)
 {
     return s->current;
 }
-

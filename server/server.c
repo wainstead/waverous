@@ -262,7 +262,7 @@ panic_signal(int sig)
 {
     char message[100];
 
-    sprintf(message, "Caught signal %d", sig);
+    snprintf(message, sizeof message, "Caught signal %d", sig);
     panic(message);
 }
 

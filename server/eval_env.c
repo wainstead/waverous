@@ -51,7 +51,7 @@ new_rt_env(unsigned size)
 void
 free_rt_env(Var * rt_env, unsigned size)
 {
-    register unsigned i;
+    unsigned i;
 
     for (i = 0; i < size; i++)
 	free_var(rt_env[i]);
@@ -122,4 +122,3 @@ set_rt_env_var(Var * env, int slot, Var v)
 {
     env[slot] = v;
 }
-

@@ -712,7 +712,7 @@ run(char raise, enum error resumption_error, Var * result)
     Bytecodes bc;
     Byte *bv, *error_bv;
     Var *rts;			/* next empty slot */
-    enum Opcode op;
+    unsigned op;
     Var error_var;
     enum outcome outcome;
 
@@ -789,7 +789,7 @@ do {    						    	\
     for (;;) {
       next_opcode:
 	error_bv = bv;
-	op = (Opcode) * bv++;
+		op = *bv++;
 
 	if (COUNT_TICK(op)) {
 	    if (--ticks_remaining <= 0) {
@@ -1689,7 +1689,7 @@ do {    						    	\
 
 	case OP_EXTENDED:
 	    {
-		register enum Extended_Opcode eop = (Extended_Opcode) * bv;
+		enum Extended_Opcode eop = (Extended_Opcode) * bv;
 		bv++;
 		if (COUNT_EOP_TICK(eop))
 		    ticks_remaining--;
@@ -2811,7 +2811,7 @@ reorder_rt_env(Var * old_rt_env, const char **old_names,
 void
 write_activ(activation a)
 {
-    register Var *v;
+    Var *v;
 
     dbio_printf("language version %u\n", a.prog->version);
     dbio_write_program(a.prog);

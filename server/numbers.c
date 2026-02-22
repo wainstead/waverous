@@ -675,8 +675,8 @@ bf_floatstr(Var arglist, Byte next, void *vdata, Objid progr)
 	prec = DBL_DIG + 4;
     else if (prec < 0)
 	return make_error_pack(E_INVARG);
-    sprintf(fmt, "%%.%d%c", prec, use_sci ? 'e' : 'f');
-    sprintf(output, fmt, d);
+    snprintf(fmt, sizeof fmt, "%%.%d%c", prec, use_sci ? 'e' : 'f');
+    snprintf(output, sizeof output, fmt, d);
 
     r.type = (var_type) TYPE_STR;
     r.v.str = str_dup(output);
@@ -720,4 +720,3 @@ register_numbers(void)
     register_function("floor", 1, 1, bf_floor, TYPE_FLOAT);
     register_function("trunc", 1, 1, bf_trunc, TYPE_FLOAT);
 }
-

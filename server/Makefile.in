@@ -23,7 +23,7 @@ INSTALL         = @INSTALL@
 INSTALL_DATA	= @INSTALL_DATA@
 
 YFLAGS = -d
-COMPILE.c = $(CC) $(CFLAGS) $(DEFS) $(CPPFLAGS) -c
+COMPILE.c = $(CC) $(CFLAGS) $(DEFS) $(CPPFLAGS) -x c++ -c
 
 CSRCS = ast.c code_gen.c db_file.c db_io.c db_objects.c			\
 	 db_properties.c db_verbs.c decompile.c disassemble.c		\
@@ -103,9 +103,12 @@ config.h: config.h.in config.status
 	@echo "[ $@ : $? ]"
 	./config.status
 
-parser.c y.tab.h: parser.y
+parser.c: parser.y
 	$(YACC) $(YFLAGS) parser.y
 	mv -f y.tab.c parser.c
+
+y.tab.h: parser.c
+	@test -f y.tab.h
 
 # The LambdaMOO server project originally shipped with a lightly
 # hacked version 2.1 of GNU gperf, renamed 'pgperf'; Pavel Curtis
@@ -124,6 +127,7 @@ keywords.c: keywords.gperf
 	gperf --language=C++ --ignore-case --readonly-tables --struct-type \
 		--omit-struct-type --key-positions=1,3,$$ keywords.gperf   \
 		| sed -e 's/#include <ctype.h>/#include "my-ctype.h"/'     \
+		      -e 's/register[[:space:]][[:space:]]*//g'            \
 		> keywords.c
 
 TAGS:

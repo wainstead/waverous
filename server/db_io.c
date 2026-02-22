@@ -356,7 +356,7 @@ dbio_write_float(double d)
     static char buffer[10];
 
     if (!fmt) {
-	sprintf(buffer, "%%.%dg\n", DBL_DIG + 4);
+	snprintf(buffer, sizeof buffer, "%%.%dg\n", DBL_DIG + 4);
 	fmt = buffer;
     }
     dbio_printf(fmt, d);
@@ -424,4 +424,3 @@ dbio_write_forked_program(Program * program, int f_index)
     unparse_program(program, receiver, 0, 1, 0, f_index);
     dbio_printf(".\n");
 }
-

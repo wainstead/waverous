@@ -812,8 +812,11 @@ decompile(Bytecodes bc, Byte * start, Byte * end, Stmt ** stmt_sink,
 		    else
 			s->s.exit = -1;
 		    READ_STACK();
-		    if (READ_LABEL() < (unsigned) (ptr - bc.vector))
-			s->kind = STMT_CONTINUE;
+		    {
+			unsigned label = READ_LABEL();
+			if (label < (unsigned) (ptr - bc.vector))
+			    s->kind = STMT_CONTINUE;
+		    }
 		    ADD_STMT((Stmt *) HOT_OP(s));
 		    break;
 		default:

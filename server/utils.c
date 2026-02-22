@@ -59,8 +59,8 @@ const char cmap[] =
 int
 mystrcasecmp(const char *ss, const char *tt)
 {
-    register const unsigned char *s = (const unsigned char *) ss;
-    register const unsigned char *t = (const unsigned char *) tt;
+    const unsigned char *s = (const unsigned char *) ss;
+    const unsigned char *t = (const unsigned char *) tt;
 
     if (s == t) {
 	return 0;
@@ -126,7 +126,7 @@ verbcasecmp(const char *verb, const char *word)
 unsigned
 str_hash(const char *s)
 {
-    register unsigned ans = 0;
+    unsigned ans = 0;
 
     while (*s) {
 	ans = (ans << 3) + (ans >> 28) + cmap[(unsigned char) *s++];
@@ -440,4 +440,3 @@ binary_to_raw_bytes(const char *binary, int *buflen)
     *buflen = stream_length(s);
     return reset_stream(s);
 }
-

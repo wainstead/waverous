@@ -359,9 +359,9 @@ lookup_name_from_addr(struct sockaddr_in *addr, unsigned timeout)
 	static char decimal[20];
 	unsigned32 a = ntohl(addr->sin_addr.s_addr);
 
-	sprintf(decimal, "%u.%u.%u.%u",
-		(unsigned) (a >> 24) & 0xff, (unsigned) (a >> 16) & 0xff,
-		(unsigned) (a >> 8) & 0xff, (unsigned) a & 0xff);
+	snprintf(decimal, sizeof decimal, "%u.%u.%u.%u",
+		 (unsigned) (a >> 24) & 0xff, (unsigned) (a >> 16) & 0xff,
+		 (unsigned) (a >> 8) & 0xff, (unsigned) a & 0xff);
 	return decimal;
     }
 }
@@ -394,4 +394,3 @@ lookup_addr_from_name(const char *name, unsigned timeout)
 }
 
 #endif				/* NETWORK_PROTOCOL == NP_TCP */
-

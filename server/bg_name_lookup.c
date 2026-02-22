@@ -801,7 +801,8 @@ async_lookup_from_name_child(int to_parent, int from_parent)
     /* Set the command line while we're doing our lookup */
     cmdline = (char *) malloc(50 + req.u.length);
     if (cmdline != NULL) {
-	sprintf(cmdline, "(MOO async name lookup: %s)", name);
+	snprintf(cmdline, 50 + req.u.length, "(MOO async name lookup: %s)",
+		 name);
 	set_server_cmdline(cmdline);
 	free(cmdline);
     }
@@ -834,8 +835,8 @@ async_lookup_from_addr_child(int to_parent, int from_parent)
     }
 
     /* Set the command line while we're doing our lookup */
-    sprintf(cmdline, "(MOO async name lookup: %s)",
-	    inet_ntoa(req.u.address));
+    snprintf(cmdline, sizeof cmdline, "(MOO async name lookup: %s)",
+	     inet_ntoa(req.u.address));
     set_server_cmdline(cmdline);
 
     alarm(req.timeout);

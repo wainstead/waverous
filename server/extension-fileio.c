@@ -430,7 +430,8 @@ bf_file_version(Var arglist, Byte next, void *vdata, Objid progr)
   char tmpbuffer[50];
   Var rv;
   
-  sprintf(tmpbuffer, "%s/%s", file_package_name, file_package_version);
+  snprintf(tmpbuffer, sizeof tmpbuffer, "%s/%s",
+           file_package_name, file_package_version);
   
   rv.type = TYPE_STR;
   rv.v.str = str_dup(tmpbuffer);

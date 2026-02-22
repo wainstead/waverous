@@ -74,7 +74,7 @@ mymalloc(unsigned size, Memory_Type type)
     offs = refcount_overhead(type);
     memptr = (char *) malloc(size + offs);
     if (!memptr) {
-	sprintf(msg, "memory allocation (size %u) failed!", size);
+	snprintf(msg, sizeof msg, "memory allocation (size %u) failed!", size);
 	panic(msg);
     }
     alloc_num[type]++;
@@ -127,7 +127,8 @@ myrealloc(void *ptr, unsigned size, Memory_Type type)
 
 	ptr = realloc((char *) ptr - offs, size + offs);
 	if (!ptr) {
-	    sprintf(msg, "memory re-allocation (size %u) failed!", size);
+	    snprintf(msg, sizeof msg, "memory re-allocation (size %u) failed!",
+		     size);
 	    panic(msg);
 	}
 
@@ -161,4 +162,3 @@ memory_usage(void)
     r = new_list(0);
     return r;
 }
-

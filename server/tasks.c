@@ -703,8 +703,8 @@ end_programming(tqueue * tq)
 
 	    program = parse_program(current_version, client, &s);
 
-	    sprintf(buf, "%d error(s).", s.nerrors);
-	    notify(player, buf);
+		    snprintf(buf, sizeof buf, "%d error(s).", s.nerrors);
+		    notify(player, buf);
 
 	    if (program) {
 		db_set_verb_program(h, program);
@@ -2527,4 +2527,3 @@ register_tasks(void)
     register_function("flush_input", 1, 2, bf_flush_input, TYPE_OBJ,
 		      TYPE_ANY);
 }
-

@@ -235,13 +235,13 @@ push_output(nhandle * h)
 	char buf[100];
 	int length;
 
-	sprintf(buf,
-		"%s>> Network buffer overflow: %u line%s of output to you %s been lost <<%s",
-		proto.eol_out_string,
-		h->output_lines_flushed,
-		h->output_lines_flushed == 1 ? "" : "s",
-		h->output_lines_flushed == 1 ? "has" : "have",
-		proto.eol_out_string);
+	snprintf(buf, sizeof buf,
+		 "%s>> Network buffer overflow: %u line%s of output to you %s been lost <<%s",
+		 proto.eol_out_string,
+		 h->output_lines_flushed,
+		 h->output_lines_flushed == 1 ? "" : "s",
+		 h->output_lines_flushed == 1 ? "has" : "have",
+		 proto.eol_out_string);
 	length = strlen(buf);
 	count = write(h->wfd, buf, length);
 	if (count == length)
@@ -733,4 +733,3 @@ network_shutdown(void)
     while (all_nlisteners)
 	close_nlistener(all_nlisteners);
 }
-

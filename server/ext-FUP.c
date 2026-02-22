@@ -89,7 +89,7 @@ void
 remove_special_characters(char *theStr)
 {
     const char *cp;
-    register char *cp2;
+    char *cp2;
     char buf[BUF_LEN];
     int currlen = 0;
 
@@ -141,7 +141,7 @@ build_dir_name(const char *thePathStr, char *theDirName, char spec)
 	return E_PERM;
     }
     strcpy(external_files, EXTERN_FILES_DIR);
-    sprintf(theDirName, "%s%s", external_files, localthePathStr);
+    snprintf(theDirName, BUF_LEN, "%s%s", external_files, localthePathStr);
 
     if (stat(theDirName, &st) != 0)
 	return E_INVARG;
@@ -204,8 +204,8 @@ build_file_name(const char *thePathStr, const char *theNameStr,
 	return E_PERM;
     }
     strcpy(external_files, EXTERN_FILES_DIR);
-    sprintf(theFileName, "%s%s/%s", external_files, localthePathStr,
-	    localtheNameStr);
+    snprintf(theFileName, BUF_LEN, "%s%s/%s", external_files, localthePathStr,
+	     localtheNameStr);
 
     if (stat(theFileName, &st) != 0)
 	return E_INVARG;
@@ -324,7 +324,7 @@ bf_filewrite(Var arglist, Byte next, void *vdata, Objid progr)
     ret.v.num = 1;
     theline.type = TYPE_STR;
 
-    sprintf(outfileName, "%s.%li", infileName, time(0));
+    snprintf(outfileName, sizeof outfileName, "%s.%li", infileName, time(0));
 
     if (arglist.v.list[0].v.num > 3)
 	start_line = arglist.v.list[4].v.num;
@@ -583,7 +583,7 @@ bf_filelist(Var arglist, Byte next, void *vdata, Objid progr)
 
     while ((dp = readdir(dirp)) != 0) {
 	if (strncmp(dp->d_name, ".", 1)) {
-	    sprintf(dirName, "%s/%s", rootDir, dp->d_name);
+	    snprintf(dirName, sizeof dirName, "%s/%s", rootDir, dp->d_name);
 	    if ((subdir = opendir(dirName))) {
 		closedir(subdir);
 		theline.v.str = str_dup(dp->d_name);
@@ -833,10 +833,11 @@ bf_filechmod(Var arglist, Byte next, void *vdata, Objid progr)
     }
 
     strcpy(external_files, EXTERN_FILES_DIR);
-    sprintf(theRequestedAction, "chmod %s %s%s/%s\n",
-	    localthePathStr,
-	    external_files,
-	    arglist.v.list[1].v.str, arglist.v.list[2].v.str);
+    snprintf(theRequestedAction, sizeof theRequestedAction,
+	     "chmod %s %s%s/%s\n",
+	     localthePathStr,
+	     external_files,
+	     arglist.v.list[1].v.str, arglist.v.list[2].v.str);
 
     if ((system(theRequestedAction)) == 0) {
 	return make_error_pack(E_INVARG);
@@ -859,7 +860,7 @@ bf_filechmod(Var arglist, Byte next, void *vdata, Objid progr)
 	r1 = mode / 8;
 	r1 = r1 - ((r1 / 8) * 8);
 	r2 = mode - ((mode / 8) * 8);
-	sprintf(filemode, "%ld%d%d", (long) mode / 64, r1, r2);
+	snprintf(filemode, sizeof filemode, "%ld%d%d", (long) mode / 64, r1, r2);
 	ret.v.str = str_dup(filemode);
     } else
 	ret.v.str = str_dup("????");
@@ -938,7 +939,7 @@ bf_fileinfo(Var arglist, Byte next, void *vdata, Objid progr)
 	r1 = mode / 8;
 	r1 = r1 - ((r1 / 8) * 8);
 	r2 = mode - ((mode / 8) * 8);
-	sprintf(filemode, "%ld%d%d", (long) mode / 64, r1, r2);
+	snprintf(filemode, sizeof filemode, "%ld%d%d", (long) mode / 64, r1, r2);
 	fmode.v.str = str_dup(filemode);
     }
 
@@ -1034,29 +1035,41 @@ bf_filerun(Var arglist, Byte next, void *vdata, Objid progr)
 
     numOfArgs = theArgs.v.list[0].v.num;
     strcpy(external_bin, EXTERN_BIN_DIR);
-    sprintf(theRequestedAction, "%s%s ", external_bin,
-	    theArgs.v.list[1].v.str);
+    snprintf(theRequestedAction, sizeof theRequestedAction, "%s%s ",
+	     external_bin, theArgs.v.list[1].v.str);
 
     if ((numOfArgs > 1) && (strlen(theArgs.v.list[2].v.str) != 0)) {
-	sprintf(theRequestedAction, "cat %s | %s%s",
-		theArgs.v.list[2].v.str,
-		external_bin, theArgs.v.list[1].v.str);
+	snprintf(theRequestedAction, sizeof theRequestedAction, "cat %s | %s%s",
+		 theArgs.v.list[2].v.str,
+		 external_bin, theArgs.v.list[1].v.str);
     } else {
-	sprintf(theRequestedAction, "%s%s ",
-		external_bin, theArgs.v.list[1].v.str);
+	snprintf(theRequestedAction, sizeof theRequestedAction, "%s%s ",
+		 external_bin, theArgs.v.list[1].v.str);
     }
 
     for (i = 4; i <= numOfArgs; i++) {
-	sprintf(theRequestedAction, "%s %s",
-		theRequestedAction, theArgs.v.list[i].v.str);
+	size_t used = strlen(theRequestedAction);
+	if (used < sizeof theRequestedAction) {
+	    snprintf(theRequestedAction + used, sizeof theRequestedAction - used,
+		     " %s", theArgs.v.list[i].v.str);
+	}
     }
 
     if ((numOfArgs > 2) && (strlen(theArgs.v.list[3].v.str))) {
-	sprintf(theRequestedAction, "%s > %s",
-		theRequestedAction, theArgs.v.list[3].v.str);
+	size_t used = strlen(theRequestedAction);
+	if (used < sizeof theRequestedAction) {
+	    snprintf(theRequestedAction + used, sizeof theRequestedAction - used,
+		     " > %s", theArgs.v.list[3].v.str);
+	}
     }
 
-    sprintf(theRequestedAction, "%s 2>&1", theRequestedAction);
+    {
+	size_t used = strlen(theRequestedAction);
+	if (used < sizeof theRequestedAction) {
+	    snprintf(theRequestedAction + used, sizeof theRequestedAction - used,
+		     " 2>&1");
+	}
+    }
     system(theRequestedAction);
 
     ret.type = TYPE_INT;
