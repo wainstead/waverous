@@ -43,7 +43,7 @@
  * end, never in the middle, and no entries should every be removed from this
  * list; the list indices are stored raw in the DB file.
  */
-static const char *prep_list[] = {
+const char *prep_list[] = {
     "with/using",
     "at/to",
     "in front of",

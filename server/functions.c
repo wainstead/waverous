@@ -166,7 +166,7 @@ register_function_with_read_write(const char *name, int minargs,
 
 /*** looking up functions -- by name or num ***/
 
-static const char *func_not_found_msg = "no such function";
+const char *func_not_found_msg = "no such function";
 
 const char *
 name_func_by_num(unsigned n)

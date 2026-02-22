@@ -188,7 +188,7 @@ static struct binop binop_table[] = {
     {EXPR_EXP, " ^ "},
 };
 
-static const char *binop_string[SizeOf_Expr_Kind];
+const char *binop_string[SizeOf_Expr_Kind];
 
 static int expr_tables_initialized = 0;
 

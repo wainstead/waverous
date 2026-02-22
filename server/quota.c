@@ -20,7 +20,7 @@
 #include "quota.h"
 #include "structures.h"
 
-static const char *quota_name = "ownership_quota";
+const char *quota_name = "ownership_quota";
 
 int
 decr_quota(Objid player)
