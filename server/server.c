@@ -1279,6 +1279,25 @@ read_active_connections(void)
     return 1;
 }
 
+static void
+print_usage(FILE *stream, const char *program)
+{
+    fprintf(stream, "Usage: %s [-e] [-l log-file] %s %s\n",
+            program, db_usage_string(), network_usage_string());
+    fprintf(stream, "\n");
+    fprintf(stream, "Required arguments:\n");
+    fprintf(stream, "  %s\n", db_usage_string());
+    if (strlen(network_usage_string()) > 0)
+        fprintf(stream, "  %s\n", network_usage_string());
+    fprintf(stream, "\n");
+    fprintf(stream, "Options:\n");
+    fprintf(stream, "  -e            Start in emergency wizard mode before accepting connections.\n");
+    fprintf(stream, "  -l log-file   Append server logs to log-file.\n");
+    fprintf(stream, "\n");
+    fprintf(stream, "Example:\n");
+    fprintf(stream, "  %s databases/Minimal.db output.db\n", program);
+}
+
 int
 main(int argc, char **argv)
 {
@@ -1327,8 +1346,7 @@ main(int argc, char **argv)
 
     if (!db_initialize(&argc, &argv)
 	|| !network_initialize(argc, argv, &desc)) {
-	fprintf(stderr, "Usage: %s [-e] [-l log-file] %s %s\n",
-		this_program, db_usage_string(), network_usage_string());
+	print_usage(stderr, this_program);
 	exit(1);
     }
 #if NETWORK_PROTOCOL != NP_SINGLE
