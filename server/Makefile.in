@@ -17,7 +17,7 @@ YACC	= @YACC@
 # for debugging you might prefer:
 # CFLAGS='-g -m32 -O0 -Wall'
 
-CFLAGS		= -m32 -O
+CFLAGS		= @CFLAGS@
 CPPFLAGS	= @CPPFLAGS@
 INSTALL         = @INSTALL@
 INSTALL_DATA	= @INSTALL_DATA@

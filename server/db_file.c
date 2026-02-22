@@ -736,6 +736,19 @@ db_initialize(int *pargc, char ***pargv)
 	return 0;
     }
     input_db = f;
+
+    {
+        FILE *dump_check = fopen(dump_db_name, "a");
+
+        if (!dump_check) {
+            fprintf(stderr, "Cannot open output database file for writing: %s\n",
+                    dump_db_name);
+            fclose(input_db);
+            return 0;
+        }
+        fclose(dump_check);
+    }
+
     dbpriv_build_prep_table();
 
     return 1;
