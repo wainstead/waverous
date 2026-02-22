@@ -1,329 +1,396 @@
+/* config.h.in.  Generated from configure.ac by autoheader.  */
 
-/******************************************************************************
-  Copyright (c) 1992, 1995, 1996 Xerox Corporation.  All rights reserved.
-  Portions of this code were written by Stephen White, aka ghond.
-  Use and copying of this software and preparation of derivative works based
-  upon this software are permitted.  Any distribution of this software or
-  derivative works must comply with all applicable United States export
-  control laws.  This software is made available AS IS, and Xerox Corporation
-  makes no warranty about the software, its performance or its conformity to
-  any specification.  Any person obtaining a copy of this software is requested
-  to send their name and post office or electronic mail address to:
-    Pavel Curtis
-    Xerox PARC
-    3333 Coyote Hill Rd.
-    Palo Alto, CA 94304
-    Pavel@Xerox.Com
- *****************************************************************************/
-
-/* If you're looking at this as `config.h.in', then this file is full of
- * `#undef' preprocessor directives.  The `configure' command, which generates
- * `config.h' from `config.h.in', replaces appropriate ones of those `#undef's
- * with `#define's, depending upon characteristics of the operating system,
- * and comments out all of the others.
- */
 
 #ifndef Config_H
 #define Config_H 1
 
-/* Some systems require that certain preprocessor symbols be defined in order
- * for certain pieces of the C library to be available.  If one of the
- * following is defined, then your system is one such.
- */
 
-#undef _ALL_SOURCE
-#undef _POSIX_SOURCE
-#undef _MINIX
-#undef _POSIX_1_SOURCE
-#undef _HPUX_SOURCE
-
-/* The following symbols describe whether or not certain functions are declared
- * in header files on your system and, if so, where.  If, on your system, the
- * functions `memcmp', `memcpy', etc. are not declared in <string.h>, but are
- * instead in <memory.h>, then NEED_MEMORY_H will be defined.  Similarly, if
- * `malloc', `free', etc. are not declared in <stdlib.h>, but are instead in
- * <malloc.h>, then NEED_MALLOC_H will be defined.  If your system has the file
- * </sys/bsdtypes.h>, then NEED_BSDTYPES_H will be defined.
- *
- * The various NDECL_* symbols are defined if the named function or variable is
- * not declared in its standard place, which is given in a comment after each
- * symbol.  In several of the cases below, the absence of a declaration for the
- * named function or variable is taken in the server code to imply the similar
- * absence of declarations for several other related functions or variables.
- */
-
-#undef NEED_MEMORY_H
-#undef NEED_MALLOC_H
-#undef NEED_BSDTYPES_H
-#undef NEED_SELECT_H
-
-#undef NDECL_TOLOWER		/* <ctype.h>      */
-#undef NDECL_FCNTL		/* <fcntl.h>      */
-#undef NDECL_HTONL		/* <netinet/in.h> */
-#undef NDECL_IN_ADDR_T		/* <netinet/in.h> */
-#undef NDECL_IOCTL		/* <sys/ioctl.h>  */
-#undef NDECL_POLL		/* <poll.h>	  */
-#undef NDECL_KILL		/* <signal.h>	  */
-#undef NDECL_SIGEMPTYSET	/* <signal.h>	  */
-#undef NDECL_SIGPROCMASK	/* <signal.h>	  */
-#undef NDECL_SIGRELSE		/* <signal.h>	  */
-#undef NDECL_ACCEPT		/* <sys/socket.h> */
-#undef NDECL_BIND		/* <sys/socket.h> */
-#undef NDECL_SHUTDOWN		/* <sys/socket.h> */
-#undef NDECL_FSTAT		/* <sys/stat.h>	  */
-#undef NDECL_FCLOSE		/* <stdio.h>	  */
-#undef NDECL_PERROR		/* <stdio.h>	  */
-#undef NDECL_REMOVE		/* <stdio.h>	  */
-#undef NDECL_VFPRINTF		/* <stdio.h>	  */
-#undef NDECL_RANDOM		/* <stdlib.h>	  */
-#undef NDECL_SRANDOM		/* <stdlib.h>	  */
-#undef NDECL_STRTOD		/* <stdlib.h>	  */
-#undef NDECL_STRTOL		/* <stdlib.h>	  */
-#undef NDECL_STRTOUL		/* <stdlib.h>	  */
-#undef NDECL_MEMCPY		/* <string.h>	  */
-#undef NDECL_MEMSET		/* <string.h>	  */
-#undef NDECL_STRERROR		/* <string.h>	  */
-#undef NDECL_GETITIMER		/* <sys/time.h>	  */
-#undef NDECL_SETITIMER		/* <sys/time.h>	  */
-#undef NDECL_SELECT		/* <sys/time.h>	  */
-#undef NDECL_STRFTIME		/* <time.h>	  */
-#undef NDECL_TIME		/* <time.h>	  */
-#undef NDECL_TZNAME		/* <time.h>	  */
-#undef NDECL_T_OPEN		/* <tiuser.h>	  */
-#undef NDECL_T_ERRLIST		/* <tiuser.h>	  */
-#undef NDECL_FORK		/* <unistd.h>	  */
-#undef NDECL_WAITPID		/* <sys/wait.h>	  */
-
-/* Some header files are only present on certain kinds of UNIXes (e.g., BSD,
- * System V, or POSIX).  The following symbols are defined only if the named
- * header file exists on your system.
- */
-
-#undef HAVE_MACHINE_ENDIAN_H
-#undef HAVE_STDLIB_H
-#undef HAVE_SYS_CDEFS_H
-#undef HAVE_UNISTD_H
-
-/* Some POSIX-standard typedefs are not present in some systems.  The following
- * symbols are defined as aliases for their usual definitions if they are not
- * defined on your system.
- */
-
-#undef pid_t
-#undef mode_t
-#undef size_t
-
-/* To implement the LambdaMOO built-in function `ctime()', which converts a
- * number of seconds since the POSIX `epoch' into a human-readable time/date
- * string, the server code needs to be able to find out the name of the local
- * time zone.  This information is available in an obscure way from the ANSI
- * standard function `strftime()', but many systems still don't implement it.
- * The server has code to cope with this case, though, if your system maintains
- * the time-zone name in one of two common places.  Appropriate ones of the
- * following symbols will be defined to tell the server how to get time-zone
- * information on your system.
- */
-
-#undef HAVE_STRFTIME
-#undef TM_IN_SYS_TIME
-#undef HAVE_TM_ZONE
-#undef HAVE_TZNAME
-
-/* Some sites have installed GCC improperly or incompletely, thereby requiring
- * the server to be compiled with the `-traditional' switch.  That disables the
- * `const', `volatile' or `signed' keywords, which we need.  Thus, for GCC, we
- * do these little substitutions to always refer to its `hidden' names for
- * these keywords.
- */
-
-#if defined(__GNUC__) && !HAVE_SYS_CDEFS_H
-#  define const __const__
-#  define volatile __volatile__
-#  define signed __signed__
-#endif
-
-/* Certain functions used by the server are `optional', in the sense that the
- * server can provide its own definition if necessary.  In some cases, there
- * are a number of common ways to do the same thing, differing by system type
- * (e.g., BSD, System V, or POSIX).  The following symbols are defined if your
- * system provides the named functions.
- */
-
-#undef HAVE_CRYPT
-#undef HAVE_MATHERR
-#undef HAVE_MKFIFO
-#undef HAVE_REMOVE
-#undef HAVE_RENAME
-#undef HAVE_SELECT
-#undef HAVE_POLL
-#undef HAVE_STRERROR
-#undef HAVE_STRTOUL
-#undef HAVE_RANDOM
-#undef HAVE_LRAND48
-#undef HAVE_WAITPID
-#undef HAVE_WAIT2
-#undef HAVE_WAIT3
-#undef HAVE_SIGEMPTYSET
-#undef HAVE_SIGPROCMASK
-#undef HAVE_SIGSETMASK
-#undef HAVE_SIGRELSE
-
-/* It used to be very much the fashion in UNIX programming to make use of
- * certain standard header files depend on the programmer having #include'd
- * other standard header files first.  This is obviously losing and, amazingly,
- * is also losing favor, replaced by the notion that every header file should
- * #include whatever other headers it requires, and that all headers should
- * take steps to ensure that they are not #include'd more than once if that
- * would be bad.  The following symbols are defined if the named header files
- * fail to adhere to the new style; the server code makes up for them by doing
- * its own #include of the usual prerequisite.
- */
-
-#undef ARPA_INET_H_NEEDS_HELP
-#undef SIGNAL_H_NEEDS_HELP
-#undef SYS_SOCKET_H_NEEDS_HELP
-#undef SYS_STAT_H_NEEDS_HELP
-#undef TIME_H_NEEDS_HELP
-
-/* Version 2 of the GNU C compiler includes `built-in' declarations for a
- * number of standard functions from the ANSI header file <string.h>.
- * Unfortunately, some systems declare these functions differently (and
- * non-standardly) in their native header files, generating a warning about the
- * conflict from GCC.  If this is the case on your system, the following symbol
- * will be defined, indicating that the server code should avoid your system's
- * <string.h> file, using its own version instead.
- */
-
-#undef USE_OWN_STRING_H
-
-/* Build-time option: size of the pattern match cache. */
-#undef CONFIG_PATTERN_CACHE_SIZE
-
-/* Build-time option: apply backspace/delete to input on non-binary connections. */
-#undef CONFIG_INPUT_APPLY_BACKSPACE
-
-/* Build-time option: ignore protection checks on built-in properties. */
+/* Skip built-in property protection checks */
 #undef CONFIG_IGNORE_PROP_PROTECTED
 
-/* On some systems, notably AIX, both <sys/ioctl.h> and <stropts.h> define the
- * internal macro `_IO' in compatible but different ways.  This means that no
- * program can #include both files without getting an error.  If this is so on
- * your machine, then the following symbol will be defined and the server code
- * will carefully #undef _IO between inclusions of the two files.
- */
+/* Apply backspace/delete behavior to text input */
+#undef CONFIG_INPUT_APPLY_BACKSPACE
 
-#undef UNDEF_IO_IN_STROPTS_H
+/* Pattern cache size used by match()/rmatch() */
+#undef CONFIG_PATTERN_CACHE_SIZE
 
-/* The NS_SYSV/NP_LOCAL networking configuration of the server makes use of an
- * operating system feature called `FIFO's for communication with clients of
- * the MOO.  In order to do this, the server needs some way to tell whether or
- * not there's something ready to be read on a given FIFO at any given time.
- * The BSD function `select()' usually works if it's available, but the System
- * V equivalent, `poll()', sometimes does and sometimes doesn't, depending on
- * the system.  The POSIX definers, of course, took the coward's way out and
- * didn't define any such function at all.  On many systems, however, you can
- * use the `fstat()' function to determine the number of bytes of data in a
- * FIFO; this allows the use of a somewhat crocky but workable substitute for
- * either `poll()' or `select()'.  The following symbols are defined if the
- * given function works to perform the necessary operation on FIFOs on your
- * system.
- */
+/* Define to 1 if using 'alloca.c'. */
+#undef C_ALLOCA
 
+/* Define to 1 if fstat reports FIFO buffered data size. */
 #undef FSTAT_WORKS_ON_FIFOS
+
+/* Define to 1 if you have the 'alarm' function. */
+#undef HAVE_ALARM
+
+/* Define to 1 if you have 'alloca', as a function or macro. */
+#undef HAVE_ALLOCA
+
+/* Define to 1 if <alloca.h> works. */
+#undef HAVE_ALLOCA_H
+
+/* Define to 1 if you have the <arpa/inet.h> header file. */
+#undef HAVE_ARPA_INET_H
+
+/* Define to 1 if you have the 'bzero' function. */
+#undef HAVE_BZERO
+
+/* Define to 1 if you have the declaration of 'tzname', and to 0 if you don't.
+   */
+#undef HAVE_DECL_TZNAME
+
+/* Define to 1 if you have the <expat.h> header file. */
+#undef HAVE_EXPAT_H
+
+/* Define to 1 if you have the <fcntl.h> header file. */
+#undef HAVE_FCNTL_H
+
+/* Define to 1 if you have the <float.h> header file. */
+#undef HAVE_FLOAT_H
+
+/* Define to 1 if you have the 'floor' function. */
+#undef HAVE_FLOOR
+
+/* Define to 1 if you have the 'fork' function. */
+#undef HAVE_FORK
+
+/* Define to 1 if you have the 'gethostbyaddr' function. */
+#undef HAVE_GETHOSTBYADDR
+
+/* Define to 1 if you have the 'gethostbyname' function. */
+#undef HAVE_GETHOSTBYNAME
+
+/* Define to 1 if you have the 'getpagesize' function. */
+#undef HAVE_GETPAGESIZE
+
+/* Define to 1 if you have the 'gettimeofday' function. */
+#undef HAVE_GETTIMEOFDAY
+
+/* Define to 1 if you have the 'inet_ntoa' function. */
+#undef HAVE_INET_NTOA
+
+/* Define to 1 if you have the <inttypes.h> header file. */
+#undef HAVE_INTTYPES_H
+
+/* Define to 1 if you have the <limits.h> header file. */
+#undef HAVE_LIMITS_H
+
+/* Define to 1 if you have the 'lrand48' function. */
+#undef HAVE_LRAND48
+
+/* Define to 1 if you have the <machine/endian.h> header file. */
+#undef HAVE_MACHINE_ENDIAN_H
+
+/* Define to 1 if your system has a GNU libc compatible 'malloc' function, and
+   to 0 otherwise. */
+#undef HAVE_MALLOC
+
+/* Define to 1 if you have the <malloc.h> header file. */
+#undef HAVE_MALLOC_H
+
+/* Define to 1 if you have the 'matherr' function. */
+#undef HAVE_MATHERR
+
+/* Define to 1 if you have the 'memmove' function. */
+#undef HAVE_MEMMOVE
+
+/* Define to 1 if you have the <memory.h> header file. */
+#undef HAVE_MEMORY_H
+
+/* Define to 1 if you have the 'memset' function. */
+#undef HAVE_MEMSET
+
+/* Define to 1 if you have the 'mkdir' function. */
+#undef HAVE_MKDIR
+
+/* Define to 1 if you have the 'mkfifo' function. */
+#undef HAVE_MKFIFO
+
+/* Define to 1 if you have the 'modf' function. */
+#undef HAVE_MODF
+
+/* Define to 1 if you have the <netdb.h> header file. */
+#undef HAVE_NETDB_H
+
+/* Define to 1 if you have the <netinet/in.h> header file. */
+#undef HAVE_NETINET_IN_H
+
+/* Define to 1 if you have the <openssl/err.h> header file. */
+#undef HAVE_OPENSSL_ERR_H
+
+/* Define to 1 if you have the <openssl/ssl.h> header file. */
+#undef HAVE_OPENSSL_SSL_H
+
+/* Define to 1 if you have the 'poll' function. */
+#undef HAVE_POLL
+
+/* Define to 1 if you have the 'pow' function. */
+#undef HAVE_POW
+
+/* Define to 1 if you have the 'random' function. */
+#undef HAVE_RANDOM
+
+/* Define to 1 if your system has a GNU libc compatible 'realloc' function,
+   and to 0 otherwise. */
+#undef HAVE_REALLOC
+
+/* Define to 1 if you have the 'remove' function. */
+#undef HAVE_REMOVE
+
+/* Define to 1 if you have the 'rename' function. */
+#undef HAVE_RENAME
+
+/* Define to 1 if you have the 're_comp' function. */
+#undef HAVE_RE_COMP
+
+/* Define to 1 if you have the 'rmdir' function. */
+#undef HAVE_RMDIR
+
+/* Define to 1 if you have the 'select' function. */
+#undef HAVE_SELECT
+
+/* Define to 1 if you have the 'sigprocmask' function. */
+#undef HAVE_SIGPROCMASK
+
+/* Define to 1 if you have the 'sigrelse' function. */
+#undef HAVE_SIGRELSE
+
+/* Define to 1 if you have the 'sigsetmask' function. */
+#undef HAVE_SIGSETMASK
+
+/* Define to 1 if you have the 'socket' function. */
+#undef HAVE_SOCKET
+
+/* Define to 1 if stdbool.h conforms to C99. */
+#undef HAVE_STDBOOL_H
+
+/* Define to 1 if you have the <stdint.h> header file. */
+#undef HAVE_STDINT_H
+
+/* Define to 1 if you have the <stdio.h> header file. */
+#undef HAVE_STDIO_H
+
+/* Define to 1 if you have the <stdlib.h> header file. */
+#undef HAVE_STDLIB_H
+
+/* Define to 1 if you have the 'strchr' function. */
+#undef HAVE_STRCHR
+
+/* Define to 1 if you have the 'strcspn' function. */
+#undef HAVE_STRCSPN
+
+/* Define to 1 if you have the 'strerror' function. */
+#undef HAVE_STRERROR
+
+/* Define to 1 if you have the 'strftime' function. */
+#undef HAVE_STRFTIME
+
+/* Define to 1 if you have the <strings.h> header file. */
+#undef HAVE_STRINGS_H
+
+/* Define to 1 if you have the <string.h> header file. */
+#undef HAVE_STRING_H
+
+/* Define to 1 if you have the 'strrchr' function. */
+#undef HAVE_STRRCHR
+
+/* Define to 1 if you have the 'strstr' function. */
+#undef HAVE_STRSTR
+
+/* Define to 1 if you have the 'strtol' function. */
+#undef HAVE_STRTOL
+
+/* Define to 1 if you have the 'strtoul' function. */
+#undef HAVE_STRTOUL
+
+/* Define to 1 if 'tm_zone' is a member of 'struct tm'. */
+#undef HAVE_STRUCT_TM_TM_ZONE
+
+/* Define to 1 if you have the <sys/cdefs.h> header file. */
+#undef HAVE_SYS_CDEFS_H
+
+/* Define to 1 if you have the <sys/ioctl.h> header file. */
+#undef HAVE_SYS_IOCTL_H
+
+/* Define to 1 if you have the <sys/param.h> header file. */
+#undef HAVE_SYS_PARAM_H
+
+/* Define to 1 if you have the <sys/socket.h> header file. */
+#undef HAVE_SYS_SOCKET_H
+
+/* Define to 1 if you have the <sys/stat.h> header file. */
+#undef HAVE_SYS_STAT_H
+
+/* Define to 1 if you have the <sys/time.h> header file. */
+#undef HAVE_SYS_TIME_H
+
+/* Define to 1 if you have the <sys/types.h> header file. */
+#undef HAVE_SYS_TYPES_H
+
+/* Define to 1 if you have the <tiuser.h> header file. */
+#undef HAVE_TIUSER_H
+
+/* Define to 1 if your 'struct tm' has 'tm_zone'. Deprecated, use
+   'HAVE_STRUCT_TM_TM_ZONE' instead. */
+#undef HAVE_TM_ZONE
+
+/* Define to 1 if you don't have 'tm_zone' but do have the external array
+   'tzname'. */
+#undef HAVE_TZNAME
+
+/* Define to 1 if you have the <unistd.h> header file. */
+#undef HAVE_UNISTD_H
+
+/* Define to 1 if you have the 'vfork' function. */
+#undef HAVE_VFORK
+
+/* Define to 1 if you have the <vfork.h> header file. */
+#undef HAVE_VFORK_H
+
+/* Define to 1 if you have the 'wait2' function. */
+#undef HAVE_WAIT2
+
+/* Define to 1 if you have the 'wait3' function. */
+#undef HAVE_WAIT3
+
+/* Define to 1 if waitpid() is available. */
+#undef HAVE_WAITPID
+
+/* Define to 1 if 'fork' works. */
+#undef HAVE_WORKING_FORK
+
+/* Define to 1 if 'vfork' works. */
+#undef HAVE_WORKING_VFORK
+
+/* Define to 1 if the system has the type '_Bool'. */
+#undef HAVE__BOOL
+
+/* All user commands will be logged since the last database checkpoint if the
+   server panics */
+#undef LOG_COMMANDS
+
+/* Define to 1 if <sys/bsdtypes.h> is available. */
+#undef NEED_BSDTYPES_H
+
+/* Define to 1 if <memory.h> is available. */
+#undef NEED_MEMORY_H
+
+/* Define to 1 if <sys/select.h> is available. */
+#undef NEED_SELECT_H
+
+/* Outbound network connections are enabled by default (disable with -O at
+   runtime) */
+#undef OUTBOUND_NETWORK
+
+/* Define to the address where bug reports for this package should be sent. */
+#undef PACKAGE_BUGREPORT
+
+/* Define to the full name of this package. */
+#undef PACKAGE_NAME
+
+/* Define to the full name and version of this package. */
+#undef PACKAGE_STRING
+
+/* Define to the one symbol short name of this package. */
+#undef PACKAGE_TARNAME
+
+/* Define to the home page for this package. */
+#undef PACKAGE_URL
+
+/* Define to the version of this package. */
+#undef PACKAGE_VERSION
+
+/* Define to 1 if poll() works with FIFOs. */
 #undef POLL_WORKS_ON_FIFOS
-#undef SELECT_WORKS_ON_FIFOS
 
-/* The POSIX standard specifies a nice, simple, reliable method for performing
- * non-blocking I/O, and a lot of systems actually implement it.  Some systems,
- * though (notably Ultrix 4.1), misleadingly define the preprocessor symbols
- * that might make you *think* that they've implemented it, but really they
- * don't.  This symbol is defined if POSIX-style non-blocking actually works on
- * your system.
- */
-
+/* Define to 1 if POSIX non-blocking I/O behaves as expected. */
 #undef POSIX_NONBLOCKING_WORKS
 
-/* The following code figures out how to express a 32-bit integer type on your
- * machine.
- */
+/* Define to 1 if select() works with FIFOs. */
+#undef SELECT_WORKS_ON_FIFOS
 
+/* If using the C implementation of alloca, define if you know the
+   direction of stack growth for your system; otherwise it will be
+   automatically deduced at runtime.
+	STACK_DIRECTION > 0 => grows toward higher addresses
+	STACK_DIRECTION < 0 => grows toward lower addresses
+	STACK_DIRECTION = 0 => direction of growth unknown */
+#undef STACK_DIRECTION
+
+/* Define to 1 if all of the C89 standard headers exist (not just the ones
+   required in a freestanding environment). This macro is provided for
+   backward compatibility; new code need not use it. */
+#undef STDC_HEADERS
+
+/* Define to 1 if your <sys/time.h> declares 'struct tm'. */
+#undef TM_IN_SYS_TIME
+
+/* Define to 1 if _IO must be undefined between ioctl/stropts includes. */
+#undef UNDEF_IO_IN_STROPTS_H
+
+/* The server will not fork() when doing a database checkpoint */
+#undef UNFORKED_CHECKPOINTS
+
+/* The ext-FUP external file manipulation included */
+#undef USE_EXT_FUP
+
+/* File I/O external file manipulation included */
+#undef USE_FILEIO
+
+/* Using openssl for Secure Sockets Layer */
+#undef USE_OPENSSL
+
+/* Define to 1 if system string.h conflicts with compiler built-ins. */
+#undef USE_OWN_STRING_H
+
+/* Define to '__inline__' or '__inline' if that's what the C compiler
+   calls it, or to nothing if 'inline' is not supported under any name.  */
+#ifndef __cplusplus
+#undef inline
+#endif
+
+/* Define to rpl_malloc if the replacement function should be used. */
+#undef malloc
+
+/* Define to 'int' if <sys/types.h> does not define. */
+#undef mode_t
+
+/* Define as a signed integer type capable of holding a process identifier. */
+#undef pid_t
+
+/* Define to rpl_realloc if the replacement function should be used. */
+#undef realloc
+
+/* Define as 'unsigned int' if <stddef.h> doesn't define. */
+#undef size_t
+
+/* Define as 'int' if <sys/types.h> doesn't define. */
+#undef ssize_t
+
+/* Define as 'fork' if 'vfork' does not work. */
+#undef vfork
+
+
+/* The following code figures out how to express a 32-bit integer type on
+ * this machine.
+ */
 #include <limits.h>
 
 #if INT_MAX == 2147483647
-   typedef int		int32;
-   typedef unsigned	unsigned32;
-#  ifndef INT32_MAX
-#  define INT32_MAX	INT_MAX
-#  endif
+typedef int int32;
+typedef unsigned unsigned32;
+# ifndef INT32_MAX
+#  define INT32_MAX INT_MAX
+# endif
 #else
-#  if LONG_MAX == 2147483647
-     typedef long int		int32;
-     typedef unsigned long	unsigned32;
-#    define INT32_MAX		LONG_MAX
-#  else
-#    error I cannot figure out how to express a 32-bit integer on your machine.
-#  endif
+# if LONG_MAX == 2147483647
+typedef long int int32;
+typedef unsigned long unsigned32;
+#  define INT32_MAX LONG_MAX
+# else
+#  error I cannot figure out how to express a 32-bit integer on this machine.
+# endif
 #endif
-
-/* ext-FUP is an external package for manipulating files (one of two
- * such packages, in fact).
- */
-#undef USE_EXT_FUP
-
-/* File I/O is the other package for manipulating files. */
-#undef USE_FILEIO
-
-/* Expat is the XML parsing library by James Clark. */
-#undef HAVE_EXPAT_H
-
-/* OpenSSL */
-#undef USE_OPENSSL
-
-/******************************************************************************
- * The server is prepared to keep a log of every command entered by players
- * since the last checkpoint.  The log is flushed whenever a checkpoint is
- * successfully begun and is dumped into the server log when and if the server
- * panics.  Define LOG_COMMANDS to enable this logging.
- */
-#undef LOG_COMMANDS
-
-/******************************************************************************
- * The server normally forks a separate process to make database checkpoints;
- * the original process continues to service user commands as usual while the
- * new process writes out the contents of its copy of memory to a disk file.
- * This checkpointing process can take quite a while, depending on how big your
- * database is, so it's usually quite convenient that the server can continue
- * to be responsive while this is taking place.  On some systems, however,
- * there may not be enough memory to support two simultaneously running server
- * processes.  Define UNFORKED_CHECKPOINTS to disable server forking for
- * checkpoints.
- */
-#undef UNFORKED_CHECKPOINTS
 
 #endif /* !Config_H */
 
-/******************************************************************************
- * The built-in MOO function open_network_connection(), when enabled,
- * allows (only) wizard-owned MOO code to make outbound network connections
- * from the server.  When disabled, it raises E_PERM whenever called.
- *
- * The +O and -O command line options can explicitly enable and disable this
- * function.  If neither option is supplied, the definition given to
- * OUTBOUND_NETWORK here determines the default behavior
- * (use 0 to disable by default, 1 or blank to enable by default).
- * 
- * If OUTBOUND_NETWORK is not defined at all,
- * open_network_connection() is permanently disabled and +O is ignored.
- *
- * *** THINK VERY HARD BEFORE ENABLING THIS FUNCTION ***
- * In some contexts, this could represent a serious breach of security.  
- *
- * Note: OUTBOUND_NETWORK may not be defined if NETWORK_PROTOCOL is either
- *	 NP_SINGLE or NP_LOCAL.
- */
-
-/* possible values:                                     */
-/* 0: disabled by default, +O enables at runtime        */
-/* 1: enabled by default, -O disables at runtime        */
-/* undef: outbound network connections are not possible */
-#undef OUTBOUND_NETWORK

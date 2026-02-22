@@ -316,13 +316,13 @@ child_completed_signal(int sig)
     do {
 	pid = wait3((int *) &status, WNOHANG, 0);
 	CHECKPID;
-    } while (pid > 0)
+    } while (pid > 0);
 #else
 #if HAVE_WAIT2
     do {
 	pid = wait2((int *) &status, WNOHANG);
 	CHECKPID;
-    } while (pid > 0)
+    } while (pid > 0);
 #else
     pid = wait((int *) &status);
     CHECKPID;

@@ -19,6 +19,34 @@ AC_PREREQ([2.61])
 AC_INIT([Waverous LambdaMOO], [0.2], [wainstead@gmail.com], [waverous-lambdamoo], [http://code.google.com/p/waverous/])
 AC_CONFIG_SRCDIR([functions.c])
 AC_CONFIG_HEADERS([config.h])
+AH_TOP([
+#ifndef Config_H
+#define Config_H 1
+])
+AH_BOTTOM([
+/* The following code figures out how to express a 32-bit integer type on
+ * this machine.
+ */
+#include <limits.h>
+
+#if INT_MAX == 2147483647
+typedef int int32;
+typedef unsigned unsigned32;
+# ifndef INT32_MAX
+#  define INT32_MAX INT_MAX
+# endif
+#else
+# if LONG_MAX == 2147483647
+typedef long int int32;
+typedef unsigned long unsigned32;
+#  define INT32_MAX LONG_MAX
+# else
+#  error I cannot figure out how to express a 32-bit integer on this machine.
+# endif
+#endif
+
+#endif /* !Config_H */
+])
 
 AC_LANG([C++])
 
@@ -29,7 +57,6 @@ dnl ***************************************************************************
 AC_PROG_YACC
 AC_PROG_CXX
 AC_PROG_INSTALL
-AC_GCC_TRADITIONAL
 AC_EGREP_CPP(yes, [
 #if __GNUC__==2
   yes
@@ -37,29 +64,35 @@ AC_EGREP_CPP(yes, [
 ], [CC="$CC -Wall -Wwrite-strings"])
 test -n "$GCC" && CC="$CC -g"
 AC_PROG_CPP
-AC_AIX
-AC_ISC_POSIX
-AC_MINIX
-AC_SCO_INTL
-AC_PROG_CC_STDC
+AC_PROG_CC
 CPP=""
-AC_HEADER_CHECK(sys/bsdtypes.h, AC_DEFINE(NEED_BSDTYPES_H))
-AC_HEADER_CHECK(sys/select.h, AC_DEFINE(NEED_SELECT_H))
-AC_HEADER_CHECK(memory.h, AC_DEFINE(NEED_MEMORY_H))
-AC_PID_T
-AC_MODE_T
-AC_SIZE_T
+AC_CHECK_HEADER([sys/bsdtypes.h],
+  [AC_DEFINE([NEED_BSDTYPES_H], [1], [Define to 1 if <sys/bsdtypes.h> is available.])])
+AC_CHECK_HEADER([sys/select.h],
+  [AC_DEFINE([NEED_SELECT_H], [1], [Define to 1 if <sys/select.h> is available.])])
+AC_CHECK_HEADER([memory.h],
+  [AC_DEFINE([NEED_MEMORY_H], [1], [Define to 1 if <memory.h> is available.])])
+AC_TYPE_PID_T
+AC_TYPE_MODE_T
+AC_TYPE_SIZE_T
 AC_STRUCT_TM
-AC_TIMEZONE
+AC_STRUCT_TIMEZONE
 
 MOO_HAVE_FUNC_LIBS(sqrt, -lm /lib/libm.a "-static -lm")
 MOO_HAVE_FUNC_LIBS(mkfifo waitpid sigemptyset, -lposix /lib/libposix.a)
 MOO_HAVE_FUNC_LIBS(accept, "-lsocket -lnsl" -lsocket -linet)
 MOO_HAVE_FUNC_LIBS(t_open, -lnsl -lnsl_s)
 MOO_HAVE_FUNC_LIBS(crypt, -lcrypt -lcrypt_d)
-AC_HAVE_HEADERS(unistd.h sys/cdefs.h stdlib.h tiuser.h machine/endian.h)
-AC_HAVE_FUNCS(remove rename poll select strerror strftime strtoul matherr)
-AC_HAVE_FUNCS(random lrand48 wait3 wait2 sigsetmask sigprocmask sigrelse)
+AC_CHECK_HEADERS([unistd.h sys/cdefs.h stdlib.h tiuser.h machine/endian.h])
+AC_CHECK_FUNCS([remove rename poll select strerror strftime strtoul matherr])
+AC_CHECK_FUNCS([random lrand48 wait3 wait2 sigsetmask sigprocmask sigrelse])
+AC_LINK_IFELSE(
+  [AC_LANG_PROGRAM(
+    [[#include <sys/types.h>
+#include <sys/wait.h>]],
+    [[waitpid(-1, (int *) 0, 0);]])],
+  [AC_DEFINE([HAVE_WAITPID], [1], [Define to 1 if waitpid() is available.])],
+  [])
 MOO_NDECL_FUNCS(ctype.h, tolower)
 MOO_NDECL_FUNCS(fcntl.h, fcntl)
 MOO_NDECL_FUNCS(netinet/in.h, htonl)
@@ -109,23 +142,24 @@ echo "
 " > conftest.c
 $CC $DEFS conftest.c -o conftest $LIBS > conftest.out 2>&1
 if grep "conflicting types for built-in function" conftest.out >/dev/null; then
-  AC_DEFINE(USE_OWN_STRING_H)
+  AC_DEFINE([USE_OWN_STRING_H], [1], [Define to 1 if system string.h conflicts with compiler built-ins.])
 fi
 rm -f conftest*
 
 dnl ***************************************************************************
 echo "checking for incompatibility between <sys/ioctl.h> and <stropts.h>"
-AC_TEST_CPP([
+AC_PREPROC_IFELSE([AC_LANG_SOURCE([[
 #include <sys/ioctl.h>
 #include <stropts.h>
-], , AC_DEFINE(UNDEF_IO_IN_STROPTS_H))
+]])], [], [AC_DEFINE([UNDEF_IO_IN_STROPTS_H], [1], [Define to 1 if _IO must be undefined between ioctl/stropts includes.])])
 
 dnl ***************************************************************************
 echo "checking whether or not fstat() can tell how much data is in a FIFO"
-AC_TEST_PROGRAM([#include <sys/types.h>
+AC_RUN_IFELSE([AC_LANG_SOURCE([[
+#include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-main()
+int main(void)
 {
 #ifdef NeXT
 /* The NeXT claims to have FIFOs, but using them panics the kernel... */
@@ -142,11 +176,12 @@ main()
   unlink("/tmp/conftest-fifo");
   exit(result);
 }
-], AC_DEFINE(FSTAT_WORKS_ON_FIFOS))
+]])], [AC_DEFINE([FSTAT_WORKS_ON_FIFOS], [1], [Define to 1 if fstat reports FIFO buffered data size.])], [])
 
 dnl ***************************************************************************
 echo "checking whether or not select() can be used on FIFOs"
-AC_TEST_PROGRAM([#include <sys/types.h>
+AC_RUN_IFELSE([AC_LANG_SOURCE([[
+#include <sys/types.h>
 #include <sys/time.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -178,15 +213,16 @@ main()
   unlink("/tmp/conftest-fifo");
   exit(result);
 }
-], AC_DEFINE(SELECT_WORKS_ON_FIFOS))
+]])], [AC_DEFINE([SELECT_WORKS_ON_FIFOS], [1], [Define to 1 if select() works with FIFOs.])], [])
 
 dnl ***************************************************************************
 echo "checking whether or not poll() can be used on FIFOs"
-AC_TEST_PROGRAM([#include <sys/types.h>
+AC_RUN_IFELSE([AC_LANG_SOURCE([[
+#include <sys/types.h>
 #include <poll.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-main()
+int main(void)
 {
   int	rfd, wfd, result; struct pollfd fds[1];
   unlink("/tmp/conftest-fifo");
@@ -199,16 +235,17 @@ main()
   unlink("/tmp/conftest-fifo");
   exit(result);
 }
-], AC_DEFINE(POLL_WORKS_ON_FIFOS))
+]])], [AC_DEFINE([POLL_WORKS_ON_FIFOS], [1], [Define to 1 if poll() works with FIFOs.])], [])
 
 dnl ***************************************************************************
 echo checking whether POSIX-style non-blocking I/O works
-AC_TEST_PROGRAM([#include <sys/types.h>
+AC_RUN_IFELSE([AC_LANG_SOURCE([[
+#include <sys/types.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
-handler(int sig) { }
-main ()
+void handler(int sig) { (void)sig; }
+int main (void)
 { /* Testing a POSIX feature, so assume FIFOs */
 #ifdef NeXT
 /* The NeXT claims to have FIFOs, but using them panics the kernel... */
@@ -227,7 +264,7 @@ main ()
   unlink("/tmp/conftest-fifo");
   exit(result);
 }
-], AC_DEFINE(POSIX_NONBLOCKING_WORKS))
+]])], [AC_DEFINE([POSIX_NONBLOCKING_WORKS], [1], [Define to 1 if POSIX non-blocking I/O behaves as expected.])], [])
 
 dnl ***************************************************************************
 echo checking which MOO networking configurations are likely to work...
@@ -235,17 +272,17 @@ define(MOO_ADD_NET_CONFIG,[
     NETWORK_CONFIGURATIONS="$NETWORK_CONFIGURATIONS $1"])
 NETWORK_CONFIGURATIONS="NP_SINGLE"
 
-AC_HEADER_CHECK(sys/socket.h, [
+AC_CHECK_HEADER([sys/socket.h], [
 	MOO_ADD_NET_CONFIG(NS_BSD/NP_LOCAL)
-	AC_PROGRAM_CHECK(have_telnet, telnet, yes, no)
+	AC_CHECK_PROG([have_telnet], [telnet], [yes], [no])
         test x$have_telnet = xyes && MOO_ADD_NET_CONFIG(NS_BSD/NP_TCP)])
-AC_PROGRAM_EGREP(yes-there-are-FIFOs, [#include <sys/stat.h>
+AC_EGREP_CPP([yes-there-are-FIFOs], [#include <sys/stat.h>
 #if defined(S_IFIFO) && !defined(NeXT) && \
     (SELECT_WORKS_ON_FIFOS || POLL_WORKS_ON_FIFOS || FSTAT_WORKS_ON_FIFOS)
 	yes-there-are-FIFOs
 #endif
 ], MOO_ADD_NET_CONFIG(NS_SYSV/NP_LOCAL))
-AC_PROGRAM_EGREP(yes, [
+AC_EGREP_CPP([yes], [
 #if HAVE_TIUSER_H && HAVE_T_OPEN && HAVE_POLL
 yes
 #endif
@@ -461,7 +498,6 @@ AC_FUNC_FORK
 AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 AC_FUNC_STRTOD
-AC_FUNC_WAIT3
 AC_HEADER_STDBOOL
 
 AC_PROG_LN_S
@@ -477,7 +513,8 @@ echo "|   $NETWORK_CONFIGURATIONS"
 echo "----------------------------------------------------------------------"
 
 
-AC_OUTPUT(Makefile)
+AC_CONFIG_FILES([Makefile])
+AC_OUTPUT
 
 
 # Local Variables:
