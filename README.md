@@ -18,21 +18,32 @@ The project has been modernized and is now fully functional on modern systems:
 * **Cross-Platform**: Successfully tested on macOS ARM64 and Linux
 * **Ready for Development**: Clean compilation with modern toolchain
 
+### February 2026
+
+* **Autotools Modernized Again**: Updated legacy `configure.ac`/`acinclude.m4` macros for current autoconf behavior and regenerated autotools outputs.
+* **Compatibility Preserved**: Restored required legacy config header behavior (`int32`/`unsigned32` typedef block and guards) so existing server code still builds cleanly.
+* **Build Verified with Latest Brew Tools**: Confirmed successful `autoreconf`, `configure`, and `make` using Homebrew toolchain (`autoconf 2.72`, `automake 1.18.1`, `bison 3.8.2`, `libtool 2.5.4`).
+* **Pushed Upstream**: Changes are committed and pushed on `master` (`2fe1a64`).
+
 ### Build Instructions
 
 ```bash
 # Install dependencies (macOS with Homebrew)
-brew install autoconf automake expat gperf
+brew install autoconf automake bison libtool expat gperf
 
-# Configure and build
+# Prefer Homebrew bison/libtool over macOS defaults
+export PATH="/opt/homebrew/opt/bison/bin:/opt/homebrew/opt/libtool/libexec/gnubin:$PATH"
+
+# Regenerate autotools files, then configure and build
 cd server
+autoreconf -fi
 export LDFLAGS="-L/opt/homebrew/opt/expat/lib"
 export CPPFLAGS="-I/opt/homebrew/opt/expat/include"
 ./configure --with-expat --with-fileio --with-fup \
   --with-pattern-cache-size=20 \
   --with-input-backspace=yes \
   --with-ignore-prop-protected=yes
-make
+make -j4
 
 # Run the server
 ./moo databases/Minimal.db output.db
