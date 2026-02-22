@@ -63,7 +63,7 @@ make -j4
 
 ## Waverous changes were incorporated into Stunt.io
 
-In 2013 I duplicated the C++ porting work I did for Waverous for [Todd Sundsted's clone of the LambdaMOO server](https://github.com/toddsundsted/stunt). At that point I stopped work on this project.
+In 2013 I duplicated the C++ porting work I did for Waverous for [Todd Sundsted's clone of the LambdaMOO server](https://github.com/toddsundsted/stunt). At that point I stopped work on this project, but as of late 2025 have been applying agentic development to refresh the project.
 
 ## Future Development Goals
 
