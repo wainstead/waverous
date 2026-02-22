@@ -55,7 +55,7 @@ do {				\
 				\
     *stmt_sink = temp;		\
     stmt_sink = &(temp->next);	\
-    stmt_start = ptr - bc.vector;\
+    stmt_start = (unsigned) (ptr - bc.vector);\
 } while (0);
 
 #define ADD_ARM(arm)		\
@@ -134,7 +134,7 @@ decompile(Bytecodes bc, Byte * start, Byte * end, Stmt ** stmt_sink,
      ***/
 
     Byte *ptr = start;
-    unsigned stmt_start = start - bc.vector;
+    unsigned stmt_start = (unsigned) (start - bc.vector);
     unsigned jump_len = bc.numbytes_label + 1;
     Stmt *s;
     Expr *e;
@@ -216,12 +216,12 @@ decompile(Bytecodes bc, Byte * start, Byte * end, Stmt ** stmt_sink,
 		HOT_BOTTOM(jump_hot, arm);
 		if (bc.vector + done != end)
 		    panic("ELSEIF jumps to wrong place in DECOMPILE!");
-		stmt_start = ptr - bc.vector;
+		    stmt_start = (unsigned) (ptr - bc.vector);
 	    }
 	    break;
-	case OP_FOR_LIST:
-	    {
-		unsigned top = (ptr - 1) - bc.vector;
+		case OP_FOR_LIST:
+		    {
+			unsigned top = (unsigned) ((ptr - 1) - bc.vector);
 		int id = READ_ID();
 		unsigned done = READ_LABEL();
 		Expr *one = pop_expr();
@@ -245,9 +245,9 @@ decompile(Bytecodes bc, Byte * start, Byte * end, Stmt ** stmt_sink,
 		ADD_STMT((Stmt *) HOT_OP2(one, list, s));
 	    }
 	    break;
-	case OP_FOR_RANGE:
-	    {
-		unsigned top = (ptr - 1) - bc.vector;
+		case OP_FOR_RANGE:
+		    {
+			unsigned top = (unsigned) ((ptr - 1) - bc.vector);
 		int id = READ_ID();
 		unsigned done = READ_LABEL();
 		Expr *to = pop_expr();
@@ -741,7 +741,7 @@ decompile(Bytecodes bc, Byte * start, Byte * end, Stmt ** stmt_sink,
 			    Byte *stop;
 			    int jump_hot = 0;
 
-			    if (ex->label != ptr - bc.vector)
+			    if (ex->label != (unsigned) (ptr - bc.vector))
 				panic
 				    ("Not at start of handler in DECOMPILE!");
 			    op_hot = (ptr == hot_byte);
@@ -767,7 +767,7 @@ decompile(Bytecodes bc, Byte * start, Byte * end, Stmt ** stmt_sink,
 				      "DECOMPILE!");
 			    HOT_BOTTOM(jump_hot, ex);
 			}
-			if (ptr - bc.vector != done)
+			if ((unsigned) (ptr - bc.vector) != done)
 			    panic
 				("EXCEPTS end in wrong place in DECOMPILE!");
 			ADD_STMT(s);
@@ -785,7 +785,7 @@ decompile(Bytecodes bc, Byte * start, Byte * end, Stmt ** stmt_sink,
 			HOT_POS(ptr++ == hot_byte, s, ENDBODY);
 			if (*ptr++ != EOP_END_FINALLY)
 			    panic("Missing END_FINALLY in DECOMPILE!");
-			if (ptr - bc.vector != label)
+			if ((unsigned) (ptr - bc.vector) != (unsigned) label)
 			    panic("FINALLY handler in wrong place in "
 				  "DECOMPILE!");
 			DECOMPILE(bc, ptr, end, &(s->s.finally.handler),
@@ -812,7 +812,7 @@ decompile(Bytecodes bc, Byte * start, Byte * end, Stmt ** stmt_sink,
 		    else
 			s->s.exit = -1;
 		    READ_STACK();
-		    if (READ_LABEL() < ptr - bc.vector)
+		    if (READ_LABEL() < (unsigned) (ptr - bc.vector))
 			s->kind = STMT_CONTINUE;
 		    ADD_STMT((Stmt *) HOT_OP(s));
 		    break;

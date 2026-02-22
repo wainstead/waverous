@@ -750,8 +750,8 @@ do {  								\
 
 #define STORE_STATE_VARIABLES()			\
 do {						\
-    RUN_ACTIV.pc = bv - bc.vector;		\
-    RUN_ACTIV.error_pc = error_bv - bc.vector;	\
+    RUN_ACTIV.pc = (unsigned) (bv - bc.vector);	\
+    RUN_ACTIV.error_pc = (unsigned) (error_bv - bc.vector);	\
     RUN_ACTIV.top_rt_stack = rts;		\
 } while (0)
 
@@ -1193,11 +1193,12 @@ do {    						    	\
 		    ans = do_add(lhs, rhs);
 		else if (lhs.type == TYPE_STR && rhs.type == TYPE_STR) {
 		    char *str;
-		    int llen = memo_strlen(lhs.v.str);
+			    int llen = (int) memo_strlen(lhs.v.str);
 
-		    str =
-			(char *) mymalloc(llen + memo_strlen(rhs.v.str) +
-					  1, M_STRING);
+			    str =
+				(char *) mymalloc((unsigned)
+						  ((size_t) llen + memo_strlen(rhs.v.str) + 1),
+						  M_STRING);
 		    strcpy(str, lhs.v.str);
 		    strcpy(str + llen, rhs.v.str);
 		    ans.type = (var_type) TYPE_STR;
@@ -1334,9 +1335,9 @@ do {    						    	\
 		    free_var(from);
 		    PUSH_ERROR(E_TYPE);
 		} else {
-		    int len =
-			(base.type == TYPE_STR ? memo_strlen(base.v.str)
-			 : base.v.list[0].v.num);
+			    int len =
+				(base.type == TYPE_STR ? (int) memo_strlen(base.v.str)
+				 : base.v.list[0].v.num);
 		    if (from.v.num <= to.v.num
 			&& (from.v.num <= 0 || from.v.num > len
 			    || to.v.num <= 0 || to.v.num > len)) {
@@ -1714,7 +1715,7 @@ do {    						    	\
 			    free_var(value);
 			    PUSH_ERROR(E_TYPE);
 			} else if (rangeset_check(base.type == TYPE_STR
-						  ? memo_strlen(base.v.str)
+						  ? (int) memo_strlen(base.v.str)
 						  : base.v.list[0].v.num,
 						  from.v.num, to.v.num)) {
 			    free_var(base);
@@ -1739,7 +1740,7 @@ do {    						    	\
 			v.type = TYPE_INT;
 			item = RUN_ACTIV.base_rt_stack[i];
 			if (item.type == TYPE_STR) {
-			    v.v.num = memo_strlen(item.v.str);
+			    v.v.num = (int32) memo_strlen(item.v.str);
 			    PUSH(v);
 			} else if (item.type == TYPE_LIST) {
 			    v.v.num = item.v.list[0].v.num;
@@ -2481,7 +2482,7 @@ bf_call_function_read(void)
     struct cf_state *s = (cf_state *) alloc_data(sizeof(struct cf_state));
     const char *line = dbio_read_string();
     const char *hdr = "bf_call_function data: fname = ";
-    int hlen = strlen(hdr);
+	    int hlen = (int) strlen(hdr);
 
     if (!strncmp(line, hdr, hlen)) {
 	line += hlen;
@@ -2933,5 +2934,3 @@ read_activ(activation * a, int which_vector)
     }
     return 1;
 }
-
-
