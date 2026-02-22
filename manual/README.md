@@ -38,6 +38,13 @@ make clean     # remove temporary build files
 
 The default target (`make`) attempts to build all configured output formats.
 
+To build everything in one pass:
+
+```bash
+cd manual
+make
+```
+
 ## Tooling Required
 
 - Texinfo tools (`makeinfo`, `texi2pdf`, `texindex`)
@@ -45,5 +52,20 @@ The default target (`make`) attempts to build all configured output formats.
 - TeX tools (`tex`, `dvips`) for DVI/PS/PDF paths
 - Standard UNIX utilities (`sed`, `cp`, `gzip`)
 
-If some tools are missing, run only the targets you need (for example, `make
-txt` and `make info` are often the easiest minimal path).
+On macOS with Homebrew, this setup works:
+
+```bash
+brew install texinfo texi2html texlive
+```
+
+This provides all commands needed by `manual/Makefile`, including PDF
+generation.
+
+## Build Notes
+
+- `make txt` can emit benign warnings like `document without nodes` due to the
+  intermediate `ProgrammersManual.tex-no-info` transformation.
+- `make html` may warn about legacy Texinfo syntax in the historical source
+  files; it still produces usable HTML output.
+- If you only need text docs, `make info` and `make txt` are the fastest
+  targets.
